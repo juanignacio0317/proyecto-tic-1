@@ -43,7 +43,7 @@ export default function Navbar() {
           />
 
           <nav className="relative container py-3 d-flex align-items-center justify-content-between font-brand">
-            {/* Logo -> vuelve a la landing usando Router */}
+
             <Link
                 to="/"
                 className={
