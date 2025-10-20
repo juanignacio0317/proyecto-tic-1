@@ -1,7 +1,18 @@
-import React from 'react'
+
 import BurgerSVG from '../assets/hero-burger.svg?url'
+import React, { useEffect } from 'react'
 
 export default function HeroSection() {
+  useEffect(() => {
+    if (window.AOS) {
+      window.AOS.init({
+        duration: 1000,
+        easing: 'ease-out',
+        once: true,
+        offset: 100,
+      })
+    }
+  }, [])
   return (
       <section
           id="inicio"
@@ -13,10 +24,11 @@ export default function HeroSection() {
 
             {/* Texto principal */}
             <div className="col-lg-6">
-              <h1 className="display-5 fw-bold leading-tight mb-3">
+              <h1 className="display-5 fw-bold leading-tight mb-3 " data-aos="fade-right" data-aos-delay="0">
                 Diseñá tu pizza o hamburguesa perfecta
               </h1>
-              <p className="fs-5 opacity-95 mb-4">
+              <p className="fs-5 opacity-95 mb-4" data-aos="fade-up"
+                 data-aos-delay="0">
                 Elegí tamaño, ingredientes y salsas. En minutos, tu creación única está en camino.
               </p>
 
