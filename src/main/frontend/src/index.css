@@ -1,0 +1,61 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Transicion cuando baja el menu */
+.smooth-transition {
+  transition: background-color 250ms ease, box-shadow 250ms ease, color 200ms ease;
+}
+
+/* Imagenes destacadas*/
+.split-panel {
+  border-radius: 1.25rem;
+  padding: 2rem;
+  background: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,.06);
+  height: 100%;
+}
+
+.callout-link {
+  text-decoration: none;
+  font-weight: 600;
+}
+
+
+.btn:focus, .btn:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 .25rem rgba(0,0,0,.1);
+}
+
+/* mas informacion */
+.callout-link {
+  text-decoration: none;
+  font-weight: 600;
+  color: #1B7F79;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.callout-link::after {
+  margin-left: 6px;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.callout-link:hover {
+  color: #0E4D49;
+  text-shadow: 0 0 6px rgba(27, 127, 121, 0.3);
+}
+
+.callout-link:hover::after {
+  transform: translateX(4px);
+}
+
+:root {
+  --bs-body-bg: #EAF7F6 !important;
+}
+
