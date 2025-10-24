@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import Login from './components/Login.jsx'
 import Register from './components/Register.jsx'
-import PersonalizaPage from './components/PersonalizaPage.jsx'
+// import PersonalizaPage from './components/PersonalizaPage.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 
@@ -14,7 +14,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 <Route path="/" element={<App />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/personaliza" element={<PersonalizaPage />} />
+                {/*<Route path="/personaliza" element={<PersonalizaPage />} />*/}
 
             </Routes>
         </BrowserRouter>
