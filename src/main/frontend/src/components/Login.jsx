@@ -7,17 +7,27 @@ export default function LoginPage() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!email || !password) {
-            setError("Completá todos los campos.");
+        if (!email){
+            setError("Ingrese un email válido.");
             return;
-        }
+        }else if (!password)
+            setError("Ingrese una contraseña válida.");
+        return;
         setError("");
 
     };
 
     return (
         <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1D7B74] to-[#1B7F79] px-3">
-            <div className="bg-[#FDF8E7] rounded-3xl shadow-lg w-full max-w-md p-6 sm:p-8">
+            <button
+                onClick={() => navigate("/")}
+                className="absolute top-6 right-6 flex items-center gap-2 text-[#FDF8E7] border border-[#FDF8E7]/60 rounded-full px-4 py-2 backdrop-blur-sm bg-white/10 hover:bg-white/20 transition-all duration-300 shadow-sm"
+            >
+
+                <span className="hidden sm:inline font-medium">Volver al inicio</span>
+                <i className="bi bi-arrow-right-circle"></i>
+            </button>
+            <div className="bg-[#FDF8E7] rounded-2xl shadow-lg w-full max-w-md p-6 sm:p-8">
                 {/* Brand */}
                 <div className="text-center mb-6">
                     <h1 className="font-brand text-3xl font-bold text-[#1B7F79]">
@@ -69,14 +79,14 @@ export default function LoginPage() {
                         type="submit"
                         className="btn w-100 rounded-3 py-2 fw-semibold text-[#FDF8E7] bg-[#1D7B74] hover:bg-[#1B7F79] transition-colors duration-200"
                     >
-                        Iniciar sesión 🍕
+                        Iniciar sesión
                     </button>
                 </form>
 
                 {/* Links */}
                 <div className="text-center mt-4">
                     <a
-                        href="#registro"
+                        href="/register"
                         className="text-[#1B7F79] text-sm text-decoration-none hover:opacity-80 fw-medium"
                     >
                         ¿No tenés cuenta? Registrate
