@@ -44,7 +44,7 @@ export default function PersonalizaPage() {
             { id: 'mostaza', nombre: 'Mostaza', precio: 5, color: '#FFD700' },
             { id: 'mayonesa', nombre: 'Mayonesa', precio: 5, color: '#FFFACD' },
             { id: 'bbq', nombre: 'Salsa BBQ', precio: 10, color: '#8B4513' },
-            { id: 'ranch', nombre: 'Salsa Ranch', precio: 10, color: '#F5F5DC' },
+            { id: 'ranch', nombre: 'Salsa Alioli', precio: 10, color: '#F5F5DC' },
             { id: 'picante', nombre: 'Salsa Picante', precio: 10, color: '#FF4500' }
         ]
     };

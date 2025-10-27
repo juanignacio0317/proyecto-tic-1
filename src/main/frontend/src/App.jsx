@@ -3,7 +3,7 @@ import Navbar from './components/Navbar.jsx'
 import HeroSection from './components/HeroSection.jsx'
 import ProductosDestacados from './components/ProductosDestacados.jsx'
 import FeaturesSection from "./components/FeaturesSection.jsx"
-
+import Footer from "./components/Footer.jsx"
 export default function App(){
     return (
         <main>
@@ -11,6 +11,7 @@ export default function App(){
             <HeroSection />
             <FeaturesSection />
             <ProductosDestacados />
+            <Footer/>
         </main>
     )
 }

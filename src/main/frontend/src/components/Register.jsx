@@ -117,7 +117,7 @@ export default function Register() {
                         type="submit"
                         className="btn w-100 rounded-3 py-2 fw-semibold text-[#FDF8E7] bg-[#1D7B74] hover:bg-[#1B7F79] transition-colors duration-200"
                     >
-                        Crear cuenta ✨
+                        Crear cuenta
                     </button>
                 </form>
 
