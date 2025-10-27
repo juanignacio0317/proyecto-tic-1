@@ -7,27 +7,26 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "payment_methods")
-public class PaymentMethod {
+@Table(name = "addresses")
+public class Address {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String cardHolderName;
+    private String street;
 
     @Column(nullable = false)
-    private String cardNumber;
+    private String number;
 
     @Column(nullable = false)
-    private String expirationDate;
+    private String city;
 
     @Column(nullable = false)
-    private String cvv;
+    private String zipCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 }
-

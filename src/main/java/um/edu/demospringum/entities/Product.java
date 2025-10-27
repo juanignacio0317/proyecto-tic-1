@@ -15,5 +15,13 @@ import java.io.Serializable;
 public abstract class Product implements Serializable {
 
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
+    private long id;
+
+
+    private String type;
+
 }
 
