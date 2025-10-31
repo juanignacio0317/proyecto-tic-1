@@ -3,7 +3,7 @@ package um.edu.demospringum.entities.Products;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import um.edu.demospringum.entities.Creations;
+import um.edu.demospringum.entities.Creation;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@Table(name = "Product")
+@Table(name = "product")
 
 public abstract class Product implements Serializable {
 
@@ -26,8 +26,8 @@ public abstract class Product implements Serializable {
     @Column(nullable = false)
     private double precio;
 
-    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Creations> creationss;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Creation> creations;
 
 }
 

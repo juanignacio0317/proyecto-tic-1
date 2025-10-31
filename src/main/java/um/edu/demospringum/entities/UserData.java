@@ -1,18 +1,20 @@
 package um.edu.demospringum.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
 
+@Data
 @Getter
 @Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@Table(name = "User")
+@Table(name = "user_data")
 
-public abstract class User implements Serializable {
+public class UserData implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;

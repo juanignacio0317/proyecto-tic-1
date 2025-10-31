@@ -11,15 +11,16 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "Client")
-public class Client extends User implements Serializable {
+@Table(name = "client")
+public class Client extends UserData implements Serializable {
 
 
     private String addresses;              //uso tad?
 
-    @OneToMany(mappedBy = "Client", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Creations> creations;
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Creation> creations;
 
-    private List<Order> orders;
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ClientOrder> orders;
 
 }

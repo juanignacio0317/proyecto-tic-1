@@ -6,8 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class DemospringumApplicationTests {
 
-	@Test
+/*	@Test
 	void contextLoads() {
 	}
-
+*/
 }

@@ -6,7 +6,7 @@ import um.edu.demospringum.entities.PizzaIngr.Sauce;
 import um.edu.demospringum.entities.PizzaIngr.Size;
 
 @Entity
-@Table(name = "Pizza")
+@Table(name = "pizza")
 public class Pizza extends Product {
 
     @ManyToOne

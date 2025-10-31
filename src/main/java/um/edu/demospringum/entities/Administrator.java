@@ -11,9 +11,9 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Entity
-@Table(name = "Admin")
+@Table(name = "administrator")
 
-public class Administrator extends User implements Serializable {
+public class Administrator extends UserData implements Serializable {
 
     @Column(nullable = false)
     private String role = "ADMIN";

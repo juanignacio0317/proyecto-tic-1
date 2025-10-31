@@ -6,7 +6,7 @@ import um.edu.demospringum.entities.Products.Burger;
 import java.util.List;
 
 @Entity
-@Table(name = "Bread")
+@Table(name = "bread")
 
 public class Bread {
 

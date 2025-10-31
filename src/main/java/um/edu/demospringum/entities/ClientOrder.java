@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "pedidos")
-public class Order {
+@Table(name = "client_order")
+public class ClientOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,11 +18,11 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "creationId", nullable = false)
-    private Creations creation;
+    private Creation creation;
 
     @Column(nullable = false)
     private LocalDateTime fechaPedido;
 
     @Column(nullable = false)
-    private String estado;                    //creo entidad estado?
+    private String estado;
 }

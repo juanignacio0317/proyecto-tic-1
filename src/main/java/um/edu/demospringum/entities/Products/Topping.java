@@ -1,19 +1,18 @@
 package um.edu.demospringum.entities.Products;
 
-
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Dressings")
+@Table(name = "topping")
 
-public class Dressings {
+public class Topping {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int dressingId;
+    private int toppingId;
 
     @Column(nullable = false)
-    private String typeDressing;
+    private String typeTopping;
 
 
 }

@@ -1,19 +1,16 @@
 package um.edu.demospringum.entities;
 
 import jakarta.persistence.*;
-import um.edu.demospringum.entities.PizzaIngr.Dough;
-import um.edu.demospringum.entities.PizzaIngr.Sauce;
-import um.edu.demospringum.entities.PizzaIngr.Size;
-import um.edu.demospringum.entities.Products.Dressings;
+import um.edu.demospringum.entities.Products.Dressing;
 import um.edu.demospringum.entities.Products.Product;
-import um.edu.demospringum.entities.Products.Toppings;
+import um.edu.demospringum.entities.Products.Topping;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "Creations")
-public class Creations {
+@Table(name = "creation")
+public class Creation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +22,7 @@ public class Creations {
 
     @ManyToOne
     @JoinColumn(name = "productId")
-    private Product productSize;
+    private Product product;
 
     @ManyToMany
     @JoinTable(
@@ -33,7 +30,7 @@ public class Creations {
             joinColumns = @JoinColumn(name = "creation_id"),
             inverseJoinColumns = @JoinColumn(name = "topping_id")
     )
-    private List<Toppings> toppings = new ArrayList<>();
+    private List<Topping> toppings = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -41,12 +38,13 @@ public class Creations {
             joinColumns = @JoinColumn(name = "creation_id"),
             inverseJoinColumns = @JoinColumn(name = "dressing_id")
     )
-    private List<Dressings> dressings = new ArrayList<>();
+    private List<Dressing> dressings = new ArrayList<>();
 
     @Column(nullable = false)
     private boolean favourite;
 
-    private List<Order> orders;
+    @OneToMany
+    private List<ClientOrder> orders;
 
 
 }

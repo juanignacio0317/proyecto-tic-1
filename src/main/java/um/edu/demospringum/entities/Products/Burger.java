@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import um.edu.demospringum.entities.Burgingr.Bread;
 
 @Entity
-@Table(name = "Burger")
+@Table(name = "burger")
 public class Burger extends Product {
 
 
