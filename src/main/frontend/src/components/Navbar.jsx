@@ -12,7 +12,7 @@ export default function Navbar() {
 
   const items = [
     { label: "Inicio", href: "#inicio" },
-    { label: "Creaciones", href: "#creaciones" },
+    { label: "Creaciones", href: "/personaliza" },
     { label: "Inicio de sesión", to: "/login", isRoute: true },
     { label: "Carrito", href: "#carrito" },
   ];

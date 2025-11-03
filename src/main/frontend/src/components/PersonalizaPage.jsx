@@ -29,14 +29,14 @@ export default function PersonalizaPage() {
             { id: 'cheddar', nombre: 'Queso Cheddar', precio: 30, color: '#FFA500' },
             { id: 'americano', nombre: 'Queso Americano', precio: 25, color: '#FFD700' },
             { id: 'suizo', nombre: 'Queso Suizo', precio: 35, color: '#F5DEB3' },
-            { id: 'azul', nombre: 'Queso Azul', precio: 40, color: '#E6E6FA' }
+            { id: 'muzzarella', nombre: 'Queso Azul', precio: 40, color: '#E6E6FA' }
         ],
         toppings: [
             { id: 'lechuga', nombre: 'Lechuga', precio: 10, color: '#90EE90' },
             { id: 'tomate', nombre: 'Tomate', precio: 10, color: '#FF6347' },
             { id: 'cebolla', nombre: 'Cebolla', precio: 10, color: '#F5F5DC' },
             { id: 'pepinillos', nombre: 'Pepinillos', precio: 15, color: '#8FBC8F' },
-            { id: 'jalapeños', nombre: 'Jalapeños', precio: 15, color: '#228B22' },
+            { id: 'acelga', nombre: 'Jalapeños', precio: 15, color: '#228B22' },
             { id: 'aguacate', nombre: 'Aguacate', precio: 25, color: '#7CFC00' }
         ],
         salsas: [
