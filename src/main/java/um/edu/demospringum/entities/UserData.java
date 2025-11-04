@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Getter
@@ -30,4 +31,8 @@ public class UserData implements Serializable {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private String role = "USER"; // Nuevo campo para roles
 }
+

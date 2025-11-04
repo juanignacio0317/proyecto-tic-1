@@ -1,4 +1,9 @@
 package um.edu.demospringum.repositories;
 
-public interface ClientRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import um.edu.demospringum.entities.Client;
+import java.util.Optional;
+
+public interface ClientRepository extends JpaRepository<Client, Long> {
+    Optional<Client> findByEmail(String email);
 }

@@ -54,6 +54,12 @@
 .callout-link:hover::after {
   transform: translateX(4px);
 }
+.feature-card {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.feature-card:hover {
+  transform: translateY(-2px); box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.06);
+}
 
 :root {
   --bs-body-bg: #EAF7F6 !important;

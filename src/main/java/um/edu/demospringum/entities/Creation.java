@@ -1,6 +1,7 @@
 package um.edu.demospringum.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import um.edu.demospringum.entities.Products.Dressing;
 import um.edu.demospringum.entities.Products.Product;
 import um.edu.demospringum.entities.Products.Topping;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Data
 @Table(name = "creation")
 public class Creation {
 
@@ -45,6 +47,8 @@ public class Creation {
 
     @OneToMany
     private List<ClientOrder> orders;
+
+
 
 
 }
