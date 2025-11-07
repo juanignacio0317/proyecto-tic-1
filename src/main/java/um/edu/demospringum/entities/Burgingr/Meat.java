@@ -1,26 +1,22 @@
 package um.edu.demospringum.entities.Burgingr;
 
 import jakarta.persistence.*;
-import um.edu.demospringum.entities.Products.Burger;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.List;
-
+@Getter
+@Setter
 @Entity
 @Table(name = "meat")
-
 public class Meat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int meatId;
+    private Long meatId;
 
     @Column(nullable = false)
-    private String typeMeat;
+    private String name;
 
     @Column(nullable = false)
-    private int meatQuantity;
-
-    @OneToMany
-    private List<Burger> burgers;
-
+    private double price;
 }

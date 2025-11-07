@@ -1,15 +1,16 @@
 package um.edu.demospringum.entities.Products;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import um.edu.demospringum.entities.Burgingr.Bread;
+import um.edu.demospringum.entities.Burgingr.Meat;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "burger")
 public class Burger extends Product {
-
 
     @ManyToOne
     @JoinColumn(name = "breadId")
@@ -17,6 +18,5 @@ public class Burger extends Product {
 
     @ManyToOne
     @JoinColumn(name = "meatId")
-    private Bread burgermeat;
-
-    }
+    private Meat burgerMeat;
+}

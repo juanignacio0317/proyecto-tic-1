@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { burgerService } from '../services/burgerService';
+import { authService } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 export default function PersonalizaPage() {
+    const navigate = useNavigate();
     const [carrito, setCarrito] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     // Estado para la construcción de la hamburguesa
     const [burger, setBurger] = useState({
@@ -12,40 +17,40 @@ export default function PersonalizaPage() {
         salsas: []
     });
 
-    // Opciones disponibles
+    // Opciones disponibles (mantenemos las opciones del frontend para la UI)
     const opciones = {
         panes: [
-            { id: 'clasico', nombre: 'Pan Clásico', precio: 50, color: '#D4A574' },
-            { id: 'integral', nombre: 'Pan Integral', precio: 60, color: '#8B6F47' },
-            { id: 'sesamo', nombre: 'Pan con Sésamo', precio: 55, color: '#C19A6B' },
-            { id: 'brioche', nombre: 'Pan Brioche', precio: 70, color: '#E5C29F' }
+            { id: '76', nombre: 'Pan Clásico', precio: 50, color: '#D4A574' },
+            { id: '77', nombre: 'Pan Integral', precio: 60, color: '#8B6F47' },
+            { id: '78', nombre: 'Pan con Sésamo', precio: 55, color: '#C19A6B' },
+            { id: '79', nombre: 'Pan Brioche', precio: 70, color: '#E5C29F' }
         ],
         carnes: [
-            { id: 'res', nombre: 'Carne de Res', precio: 120, color: '#8B4513' },
-            { id: 'pollo', nombre: 'Pechuga de Pollo', precio: 100, color: '#D2B48C' },
-            { id: 'cerdo', nombre: 'Carne de Cerdo', precio: 110, color: '#A0522D' },
+            { id: '37', nombre: 'Carne de Res', precio: 120, color: '#8B4513' },
+            { id: '38', nombre: 'Pechuga de Pollo', precio: 100, color: '#D2B48C' },
+            { id: '39', nombre: 'Carne de Cerdo', precio: 110, color: '#A0522D' },
         ],
         quesos: [
-            { id: 'cheddar', nombre: 'Queso Cheddar', precio: 30, color: '#FFA500' },
-            { id: 'americano', nombre: 'Queso Americano', precio: 25, color: '#FFD700' },
-            { id: 'suizo', nombre: 'Queso Suizo', precio: 35, color: '#F5DEB3' },
-            { id: 'azul', nombre: 'Queso Azul', precio: 40, color: '#E6E6FA' }
+            { id: '127', nombre: 'Queso Cheddar', precio: 30, color: '#FFA500' },
+            { id: '128', nombre: 'Queso Americano', precio: 25, color: '#FFD700' },
+            { id: '129', nombre: 'Queso Suizo', precio: 35, color: '#F5DEB3' },
+            { id: '130', nombre: 'Queso Azul', precio: 40, color: '#E6E6FA' }
         ],
         toppings: [
-            { id: 'lechuga', nombre: 'Lechuga', precio: 10, color: '#90EE90' },
-            { id: 'tomate', nombre: 'Tomate', precio: 10, color: '#FF6347' },
-            { id: 'cebolla', nombre: 'Cebolla', precio: 10, color: '#F5F5DC' },
-            { id: 'pepinillos', nombre: 'Pepinillos', precio: 15, color: '#8FBC8F' },
-            { id: 'jalapeños', nombre: 'Jalapeños', precio: 15, color: '#228B22' },
-            { id: 'aguacate', nombre: 'Aguacate', precio: 25, color: '#7CFC00' }
+            { id: '121', nombre: 'Lechuga', precio: 10, color: '#90EE90' },
+            { id: '122', nombre: 'Tomate', precio: 10, color: '#FF6347' },
+            { id: '123', nombre: 'Cebolla', precio: 10, color: '#F5F5DC' },
+            { id: '124', nombre: 'Pepinillos', precio: 15, color: '#8FBC8F' },
+            { id: '125', nombre: 'Jalapeños', precio: 15, color: '#228B22' },
+            { id: '126', nombre: 'Aguacate', precio: 25, color: '#7CFC00' }
         ],
         salsas: [
-            { id: 'ketchup', nombre: 'Ketchup', precio: 5, color: '#DC143C' },
-            { id: 'mostaza', nombre: 'Mostaza', precio: 5, color: '#FFD700' },
-            { id: 'mayonesa', nombre: 'Mayonesa', precio: 5, color: '#FFFACD' },
-            { id: 'bbq', nombre: 'Salsa BBQ', precio: 10, color: '#8B4513' },
-            { id: 'ranch', nombre: 'Salsa Alioli', precio: 10, color: '#F5F5DC' },
-            { id: 'picante', nombre: 'Salsa Picante', precio: 10, color: '#FF4500' }
+            { id: '13', nombre: 'Ketchup', precio: 5, color: '#DC143C' },
+            { id: '14', nombre: 'Mostaza', precio: 5, color: '#FFD700' },
+            { id: '15', nombre: 'Mayonesa', precio: 5, color: '#FFFACD' },
+            { id: '16', nombre: 'Salsa BBQ', precio: 10, color: '#8B4513' },
+            { id: '17', nombre: 'Salsa Alioli', precio: 10, color: '#F5F5DC' },
+            { id: '18', nombre: 'Salsa Picante', precio: 10, color: '#FF4500' }
         ]
     };
 
@@ -63,20 +68,62 @@ export default function PersonalizaPage() {
         return total;
     };
 
-    const agregarAlCarrito = () => {
+    const agregarAlCarrito = async () => {
         if (!burger.pan || !burger.carne) {
             alert('Debes seleccionar al menos un pan y una carne');
             return;
         }
-        setCarrito([...carrito, { ...burger, precio: calcularPrecio(), id: Date.now() }]);
-        setBurger({
-            pan: null,
-            carne: null,
-            queso: null,
-            toppings: [],
-            salsas: []
-        });
-        alert('¡Hamburguesa agregada al carrito!');
+
+        // Verificar autenticación
+        if (!authService.isAuthenticated()) {
+            const confirmLogin = window.confirm(
+                'Debes iniciar sesión para guardar tu creación. ¿Deseas ir al login?'
+            );
+            if (confirmLogin) {
+                navigate('/login');
+            }
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // Preparar toppings (incluye queso y vegetales)
+            const toppingIds = [...burger.toppings];
+            if (burger.queso) {
+                toppingIds.push(burger.queso);
+            }
+
+            // Preparar datos para enviar al backend
+            const burgerData = {
+                breadId: parseInt(burger.pan),
+                meatId: parseInt(burger.carne),
+                toppingIds: toppingIds.map(id => parseInt(id)),
+                dressingIds: burger.salsas.map(id => parseInt(id))
+            };
+
+            console.log('Enviando hamburguesa:', burgerData);
+
+            // Enviar al backend
+            const response = await burgerService.createBurger(burgerData);
+
+            // Limpiar el formulario
+            setBurger({
+                pan: null,
+                carne: null,
+                queso: null,
+                toppings: [],
+                salsas: []
+            });
+
+            alert(`¡Hamburguesa guardada exitosamente! 🍔\nPrecio total: $${response.price}`);
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al guardar la hamburguesa: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const toggleItem = (categoria, id) => {
@@ -110,7 +157,7 @@ export default function PersonalizaPage() {
                                 </h3>
                                 <div className="row g-3">
                                     {opciones.panes.map(pan => (
-                                        <div key={pan.id} className="col-5 col-md-3">
+                                        <div key={pan.id} className="col-6 col-md-3">
                                             <button
                                                 onClick={() => toggleItem('pan', pan.id)}
                                                 className={`w-100 p-3 rounded-3 border-2 transition-all ${
@@ -122,6 +169,7 @@ export default function PersonalizaPage() {
                                                     borderStyle: 'solid',
                                                     borderColor: burger.pan === pan.id ? '#1B7F79' : '#dee2e6'
                                                 }}
+                                                disabled={loading}
                                             >
                                                 <div
                                                     className="w-100 rounded-2 mb-2"
@@ -159,6 +207,7 @@ export default function PersonalizaPage() {
                                                     borderStyle: 'solid',
                                                     borderColor: burger.carne === carne.id ? '#1B7F79' : '#dee2e6'
                                                 }}
+                                                disabled={loading}
                                             >
                                                 <div
                                                     className="w-100 rounded-2 mb-2"
@@ -196,6 +245,7 @@ export default function PersonalizaPage() {
                                                     borderStyle: 'solid',
                                                     borderColor: burger.queso === queso.id ? '#1B7F79' : '#dee2e6'
                                                 }}
+                                                disabled={loading}
                                             >
                                                 <div
                                                     className="w-100 rounded-2 mb-2"
@@ -233,6 +283,7 @@ export default function PersonalizaPage() {
                                                     borderStyle: 'solid',
                                                     borderColor: burger.toppings.includes(vegetal.id) ? '#1B7F79' : '#dee2e6'
                                                 }}
+                                                disabled={loading}
                                             >
                                                 <div
                                                     className="w-100 rounded-2 mb-2"
@@ -270,6 +321,7 @@ export default function PersonalizaPage() {
                                                     borderStyle: 'solid',
                                                     borderColor: burger.salsas.includes(salsa.id) ? '#1B7F79' : '#dee2e6'
                                                 }}
+                                                disabled={loading}
                                             >
                                                 <div
                                                     className="w-100 rounded-2 mb-2"
@@ -406,14 +458,23 @@ export default function PersonalizaPage() {
 
                             <button
                                 onClick={agregarAlCarrito}
+                                disabled={loading}
                                 className="btn btn-lg w-100 fw-bold shadow"
                                 style={{
-                                    backgroundColor: '#F2C94C',
+                                    backgroundColor: loading ? '#ccc' : '#F2C94C',
                                     color: '#1B7F79',
-                                    border: 'none'
+                                    border: 'none',
+                                    cursor: loading ? 'not-allowed' : 'pointer'
                                 }}
                             >
-                                Agregar al Carrito
+                                {loading ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Guardando...
+                                    </>
+                                ) : (
+                                    'Agregar al Carrito'
+                                )}
                             </button>
                         </div>
                     </div>

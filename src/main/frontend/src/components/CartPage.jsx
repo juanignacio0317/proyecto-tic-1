@@ -6,7 +6,6 @@ export default function CartPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // 👇 Leer el token JWT guardado en localStorage (al hacer login)
         const token = localStorage.getItem("token");
         if (!token) {
             alert("Debes iniciar sesión para ver tu carrito.");

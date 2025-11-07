@@ -24,15 +24,20 @@ public class CreationController {
     private ClientRepository clientRepository;
 
     @GetMapping("/my")
-    public ResponseEntity<List<Creation>> getMyCreations(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> getMyCreations(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body("Usuario no autenticado");
         }
 
-        Client client = clientRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+        try {
+            Client client = clientRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-        List<Creation> creations = creationRepository.findByClient(client);
-        return ResponseEntity.ok(creations);
+            List<Creation> creations = creationRepository.findByClient(client);
+            return ResponseEntity.ok(creations);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body("Error al obtener creaciones: " + e.getMessage());
+        }
     }
 }

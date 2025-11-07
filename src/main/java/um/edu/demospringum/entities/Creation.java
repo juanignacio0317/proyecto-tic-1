@@ -6,6 +6,7 @@ import um.edu.demospringum.entities.Products.Dressing;
 import um.edu.demospringum.entities.Products.Product;
 import um.edu.demospringum.entities.Products.Topping;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class Creation {
     @JoinColumn(name = "clientId")
     private Client client;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "productId")
     private Product product;
 
@@ -43,12 +44,11 @@ public class Creation {
     private List<Dressing> dressings = new ArrayList<>();
 
     @Column(nullable = false)
-    private boolean favourite;
+    private LocalDateTime fechaCreacion;
 
-    @OneToMany
+    @Column(nullable = false)
+    private boolean favourite = false;
+
+    @OneToMany(mappedBy = "creation")
     private List<ClientOrder> orders;
-
-
-
-
 }

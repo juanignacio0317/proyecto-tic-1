@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { authService } from "../services/authService"; // Ajusta la ruta según tu estructura
 
 export default function Navbar() {
   const [atTop, setAtTop] = useState(true);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY < 10);
@@ -10,10 +14,25 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Cargar usuario al montar y cuando cambie la ubicación
+  useEffect(() => {
+    const currentUser = authService.getCurrentUser();
+    setUser(currentUser);
+  }, [location]);
+
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    navigate("/");
+  };
+
   const items = [
     { label: "Inicio", href: "#inicio" },
     { label: "Creaciones", href: "#creaciones" },
-    { label: "Inicio de sesión", to: "/login", isRoute: true },
+    // Condicional: si hay usuario, mostrar su nombre; si no, "Inicio de sesión"
+    user
+        ? { label: `Hola, ${user.name}`, isUser: true }
+        : { label: "Inicio de sesión", to: "/login", isRoute: true },
     { label: "Carrito", href: "#carrito" },
   ];
 
@@ -56,10 +75,24 @@ export default function Navbar() {
             </Link>
 
             {/* Links */}
-            <ul className="list-unstyled d-flex gap-4 m-0">
-              {items.map((item) => (
-                  <li key={item.label}>
-                    {item.isRoute ? (
+            <ul className="list-unstyled d-flex gap-4 m-0 align-items-center">
+              {items.map((item, index) => (
+                  <li key={index}>
+                    {item.isUser ? (
+                        <div className="d-flex align-items-center gap-3">
+      <span className={linkBase}>
+        {item.label}
+      </span>
+                          <button
+                              onClick={handleLogout}
+                              className={`${linkBase} border-0 bg-transparent p-0`}
+                              style={{ cursor: 'pointer' }}
+                              title="Cerrar sesión"
+                          >
+                            <i className="bi bi-box-arrow-right"></i>
+                          </button>
+                        </div>
+                    ) : item.isRoute ? (
                         <NavLink
                             to={item.to}
                             className={({ isActive }) =>
