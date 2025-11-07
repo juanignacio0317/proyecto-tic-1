@@ -1,14 +1,14 @@
 
 import BurgerSVG from '../assets/hero-burger.svg?url'
 import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom' // ← Agregar esto
+import { Link } from 'react-router-dom'
 
 export default function HeroSection() {
   useEffect(() => {
     if (window.AOS) {
       window.AOS.init({
         duration: 1000,
-        easing: 'ease-out',
+        easing: 'ease-out', //api para las animaciones
         once: true,
         offset: 100,
       })
@@ -31,7 +31,7 @@ export default function HeroSection() {
 
               <div className="d-flex gap-3">
                 <Link
-                    to="/personaliza"  // ← Cambiar href por to
+                    to="/personaliza"
                     className="btn fw-semibold btn-lg text-[#1B7F79] border-0 shadow-sm"
                     style={{
                       backgroundColor: '#F2C94C',

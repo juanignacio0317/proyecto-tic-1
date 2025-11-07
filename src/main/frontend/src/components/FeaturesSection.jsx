@@ -12,10 +12,15 @@ export default function FeaturesSection() {
         <section className="pt-20 pb-72 bg-gradient-to-r from-[#1D7B74] via-[#1F8B83] to-[#2FA29A] text-center text-white">
             <div className="container mx-auto px-4">
                 {/* Slogan integrado */}
-                <p className="text-3xl md:text-4xl font-semibold mb-14 drop-shadow-sm">
-                    La pizza y la burger que imaginás,{' '}
-                    <span className="font-bold text-[#FFF6DB]">ahora existe</span>.
+                <p
+                    className="display-5 fw-bold mb-4 text-[#FDF8E7]"
+                >
+                    La pizza y la burger que imaginás,{" "}
+                    <span className="fw-bolder text-[#FFF6DB]">¡ahora existe!</span>
                 </p>
+
+
+
 
                 {/* Features */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto">
