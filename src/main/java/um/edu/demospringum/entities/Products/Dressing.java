@@ -3,6 +3,8 @@ package um.edu.demospringum.entities.Products;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "dressing")
 
@@ -14,6 +16,9 @@ public class Dressing {
 
     @Column(nullable = false)
     private String typeDressing;
+
+    @Column(nullable = false, scale = 2)
+    private BigDecimal dressingPrice;
 
 
 }

@@ -24,6 +24,7 @@ public class Creation {
     @JoinColumn(name = "productId")
     private Product product;
 
+
     @ManyToMany
     @JoinTable(
             name = "creation_toppings",
@@ -39,6 +40,7 @@ public class Creation {
             inverseJoinColumns = @JoinColumn(name = "dressing_id")
     )
     private List<Dressing> dressings = new ArrayList<>();
+
 
     @Column(nullable = false)
     private boolean favourite;

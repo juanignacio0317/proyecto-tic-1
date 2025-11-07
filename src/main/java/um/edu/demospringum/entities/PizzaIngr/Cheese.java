@@ -11,39 +11,40 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "size")
+@Table(name = "dough")
 
-
-@Getter
 @Setter
-public class Size implements Serializable, Ingredient {
+@Getter
+public class Cheese implements Serializable, Ingredient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int sizeId;
+    private int cheeseId;
 
     @Column(nullable = false)
-    private String typeSize;
+    private String typeCheese;
 
     @Column(nullable = false)
-    private boolean sizeAvailability;
+    private boolean cheeseAvailability;
 
     @Column(nullable = false, scale = 2)
-    private BigDecimal sizePrice;
+    private BigDecimal cheesePrice;
 
     @OneToMany
     private List<Pizza> pizzas;
 
 
-    public String getType(){
-        return typeSize;
+    public String getType() {
+        return typeCheese;
     }
 
-    public boolean getAvailability(){
-        return sizeAvailability;
+    public boolean getAvailability() {
+        return cheeseAvailability;
     }
 
-    public BigDecimal getPrice(){
-        return sizePrice;
+    public BigDecimal getPrice() {
+        return cheesePrice;
     }
+
+
 }
