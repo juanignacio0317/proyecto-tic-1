@@ -6,7 +6,7 @@ import um.edu.demospringum.entities.UserData;
 import um.edu.demospringum.repositories.UserDataRepository;
 
 @RestController
-@RequestMapping("users")
+@RequestMapping("/users")
 public class UserController {
 
     private UserDataRepository userDataRepository;
@@ -17,13 +17,17 @@ public class UserController {
 
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public void createUser(@RequestBody UserData user){
         System.out.println(user.getName() + user.getSurname() + user.getPassword() + user.getEmail());
 
         userDataRepository.save(user);
     }
 
+    @DeleteMapping("/remove/{idUsuario}")
+    public void removeUser(@PathVariable long idUsuario){
+        userDataRepository.findById()
+    }
     //@GetMapping
 
 
