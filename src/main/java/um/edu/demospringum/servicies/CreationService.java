@@ -76,10 +76,12 @@ public class CreationService {
         Optional<Pizza> optionalPizza = pizzaRepository.findByDoughAndSauceAndSizeAndCheese(optionalDough.get(), optionalSauce.get(), optionalSize.get(), optionalCheese.get());
 
         if (optionalPizza.isEmpty()){
-            Product newProduct = new  {
+            Product newProduct = new Product() {
+            };{
             }
         }
 
+        return newPizza;
     }
 
 
