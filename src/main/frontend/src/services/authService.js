@@ -2,66 +2,132 @@
 const API_URL = 'http://localhost:8080/api/auth';
 
 export const authService = {
-    async register(name, surname, email, password) {
-        const response = await fetch(`${API_URL}/register`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: name,
-                surname: surname, // Puedes dejarlo vacío o pedirlo en el form
-                email: email,
-                password: password
-            }),
-        });
+    async register(userData) {
+        try {
+            console.log('📤 Enviando datos de registro:', {
+                name: userData.name,
+                surname: userData.surname,
+                email: userData.email,
+                phone: userData.phone,
+                address: userData.address,
+                paymentMethod: {
+                    cardHolderName: userData.paymentMethod.cardHolderName,
+                    cardBrand: userData.paymentMethod.cardBrand,
+                    cardNumber: userData.paymentMethod.cardNumber.slice(-4) // Solo últimos 4 dígitos
+                }
+            });
 
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error);
+            const response = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: userData.name,
+                    surname: userData.surname,
+                    phone: userData.phone,
+                    address: userData.address,
+                    email: userData.email,
+                    password: userData.password,
+                    paymentMethod: {
+                        cardHolderName: userData.paymentMethod.cardHolderName,
+                        cardNumber: userData.paymentMethod.cardNumber,
+                        cardBrand: userData.paymentMethod.cardBrand,
+                        expirationDate: userData.paymentMethod.expirationDate,
+                        cvv: userData.paymentMethod.cvv
+                    }
+                }),
+            });
+
+            console.log('📥 Status de respuesta:', response.status);
+            console.log('📥 Headers:', Object.fromEntries(response.headers.entries()));
+
+            // Leer el body UNA SOLA VEZ
+            const contentType = response.headers.get("content-type");
+            let data;
+
+            if (contentType && contentType.includes("application/json")) {
+                data = await response.json();
+                console.log('📥 Respuesta JSON:', data);
+            } else {
+                data = await response.text();
+                console.log('📥 Respuesta texto:', data);
+            }
+
+            // Si la respuesta no es OK, lanzar error
+            if (!response.ok) {
+                const errorMessage = typeof data === 'string' ? data : (data.message || data.error || JSON.stringify(data));
+                console.error('❌ Error del servidor:', errorMessage);
+                throw new Error(errorMessage);
+            }
+
+            // Si todo está OK, guardar token
+            console.log('✅ Registro exitoso');
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify({
+                    email: data.email,
+                    name: data.name,
+                    surname: data.surname
+                }));
+            }
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Error en register:', error);
+            console.error('❌ Stack:', error.stack);
+            throw error;
         }
-
-        const data = await response.json();
-
-        // Guardar token y datos del usuario
-        if (data.token) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify({
-                email: data.email,
-                name: data.name,
-                surname: data.surname
-            }));
-        }
-
-        return data;
     },
 
     async login(email, password) {
-        const response = await fetch(`${API_URL}/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-        });
+        try {
+            console.log('📤 Intentando login:', email);
 
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error);
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            console.log('📥 Status de respuesta:', response.status);
+
+            const contentType = response.headers.get("content-type");
+            let data;
+
+            if (contentType && contentType.includes("application/json")) {
+                data = await response.json();
+                console.log('📥 Respuesta JSON:', data);
+            } else {
+                data = await response.text();
+                console.log('📥 Respuesta texto:', data);
+            }
+
+            if (!response.ok) {
+                const errorMessage = typeof data === 'string' ? data : (data.message || data.error || 'Credenciales inválidas');
+                console.error('❌ Error del servidor:', errorMessage);
+                throw new Error(errorMessage);
+            }
+
+            console.log('✅ Login exitoso');
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify({
+                    email: data.email,
+                    name: data.name,
+                    surname: data.surname
+                }));
+            }
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Error en login:', error);
+            throw error;
         }
-
-        const data = await response.json();
-
-        if (data.token) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify({
-                email: data.email,
-                name: data.name,
-                surname: data.surname
-            }));
-        }
-
-        return data;
     },
 
     logout() {
@@ -83,7 +149,6 @@ export const authService = {
     }
 };
 
-// Para hacer peticiones autenticadas a otros endpoints
 export const authFetch = async (url, options = {}) => {
     const token = authService.getToken();
 

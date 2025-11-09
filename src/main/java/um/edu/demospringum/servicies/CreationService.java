@@ -68,10 +68,10 @@ public class CreationService {
         //creo la nueva pizza
 
         Pizza newPizza = new Pizza();
-        newPizza.setPizzaDough(optionalDough.get());
-        newPizza.setPizzaSauce(optionalSauce.get());
-        newPizza.setPizzaSize(optionalSize.get());
-        newPizza.setPizzaCheese(optionalCheese.get());
+        newPizza.setDough(optionalDough.get());
+        newPizza.setSauce(optionalSauce.get());
+        newPizza.setSize(optionalSize.get());
+        newPizza.setCheese(optionalCheese.get());
 
         Optional<Pizza> optionalPizza = pizzaRepository.findByDoughAndSauceAndSizeAndCheese(optionalDough.get(), optionalSauce.get(), optionalSize.get(), optionalCheese.get());
 

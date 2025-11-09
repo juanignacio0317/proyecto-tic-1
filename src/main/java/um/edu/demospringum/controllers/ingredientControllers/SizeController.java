@@ -4,7 +4,7 @@ package um.edu.demospringum.controllers.ingredientControllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import um.edu.demospringum.dtos.IngredientsDto;
+import um.edu.demospringum.dto.IngredientsDto;
 import um.edu.demospringum.entities.PizzaIngr.Size;
 import um.edu.demospringum.exceptions.ExistingIngredient;
 import um.edu.demospringum.exceptions.IngredientNotFound;

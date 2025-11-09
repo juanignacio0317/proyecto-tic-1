@@ -1,8 +1,14 @@
 package um.edu.demospringum.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Data
+@Getter
+@Setter
 @Table(name = "payment_method")
 
 public class PaymentMethod {
@@ -19,6 +25,10 @@ public class PaymentMethod {
 
     @Column(nullable = false)
     private String expirationDate;
+
+    @Column(nullable = false)
+    private String cardBrand;
+
 
     @Column(nullable = false)
     private String cvv;

@@ -7,14 +7,18 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional; // ← IMPORTANTE
 import org.springframework.web.bind.annotation.*;
 import um.edu.demospringum.dto.AuthResponse;
 import um.edu.demospringum.dto.LoginRequest;
 import um.edu.demospringum.dto.RegisterRequest;
 import um.edu.demospringum.entities.Client;
+import um.edu.demospringum.entities.PaymentMethod;
 import um.edu.demospringum.entities.UserData;
 import um.edu.demospringum.repositories.UserDataRepository;
 import um.edu.demospringum.security.JwtUtil;
+
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,30 +38,65 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/register")
+    @Transactional // ← AGREGADO
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (userDataRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().body("El email ya está registrado");
+        try {
+            // Validaciones
+            if (userDataRepository.existsByEmail(request.getEmail())) {
+                return ResponseEntity.badRequest().body("El email ya está registrado");
+            }
+
+            if (request.getPaymentMethod() == null) {
+                return ResponseEntity.badRequest().body("Debes agregar un método de pago");
+            }
+
+            // Crear cliente
+            Client client = new Client();
+            client.setName(request.getName());
+            client.setSurname(request.getSurname());
+            client.setPhone(request.getPhone());
+            client.setAddress(request.getAddress());
+            client.setEmail(request.getEmail());
+            client.setPassword(passwordEncoder.encode(request.getPassword()));
+            client.setRole("USER");
+
+            // Inicializar la lista de payment methods ANTES de guardar
+            client.setPaymentMethods(new ArrayList<>());
+
+            // Crear método de pago
+            PaymentMethod pm = new PaymentMethod();
+            pm.setCardHolderName(request.getPaymentMethod().getCardHolderName());
+
+            String cardNumber = request.getPaymentMethod().getCardNumber().replaceAll("\\s+", "");
+            pm.setCardNumber(cardNumber);
+
+            pm.setCvv(request.getPaymentMethod().getCvv());
+            pm.setCardBrand(request.getPaymentMethod().getCardBrand());
+            pm.setExpirationDate(request.getPaymentMethod().getExpirationDate());
+
+            // Establecer la relación bidireccional
+            pm.setClient(client); // ← PaymentMethod apunta al Cliente
+            client.getPaymentMethods().add(pm); // ← Cliente tiene el PaymentMethod
+
+            // Guardar UNA SOLA VEZ (cascade se encarga del resto)
+            client = userDataRepository.save(client);
+
+            // Generar token
+            String token = jwtUtil.generateToken(client.getEmail());
+
+            return ResponseEntity.ok(new AuthResponse(
+                    token,
+                    client.getEmail(),
+                    client.getName(),
+                    client.getSurname()
+            ));
+
+        } catch (Exception e) {
+            // Log del error para debugging
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear la cuenta: " + e.getMessage());
         }
-
-
-        Client client = new Client();
-        client.setName(request.getName());
-        client.setSurname(request.getSurname());
-        client.setEmail(request.getEmail());
-        client.setPassword(passwordEncoder.encode(request.getPassword()));
-        client.setRole("USER");
-
-
-        userDataRepository.save(client);
-
-        String token = jwtUtil.generateToken(client.getEmail());
-
-        return ResponseEntity.ok(new AuthResponse(
-                token,
-                client.getEmail(),
-                client.getName(),
-                client.getSurname()
-        ));
     }
 
     @PostMapping("/login")
@@ -85,6 +124,10 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Credenciales inválidas");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error en el login: " + e.getMessage());
         }
     }
 }

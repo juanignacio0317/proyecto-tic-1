@@ -1,4 +1,4 @@
-package um.edu.demospringum.dtos;
+package um.edu.demospringum.dto;
 
 import lombok.Getter;
 import lombok.Setter;

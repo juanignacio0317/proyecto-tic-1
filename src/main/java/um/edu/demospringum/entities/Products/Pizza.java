@@ -18,19 +18,19 @@ public class Pizza extends Product {
 
     @ManyToOne
     @JoinColumn(name = "doughId")
-    private Dough pizzaDough;
+    private Dough dough;
 
     @ManyToOne
     @JoinColumn(name = "sizeId")
-    private Size pizzaSize;
+    private Size size;
 
     @ManyToOne
     @JoinColumn(name = "sauceId")
-    private Sauce pizzaSauce;
+    private Sauce sauce;
 
     @ManyToOne
     @JoinColumn(name = "cheeseId")
-    private Cheese pizzaCheese;
+    private Cheese cheese;
 
 
 }

@@ -1,6 +1,5 @@
 package um.edu.demospringum.entities;
 
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,9 +12,11 @@ import java.util.List;
 @Entity
 @Table(name = "client")
 public class Client extends UserData implements Serializable {
+    @Column(name = "phone")
+    private String phone;
 
-
-    private String addresses;              //uso tad?
+    @Column(name = "address")  // ← Cambio aquí
+    private String address;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Creation> creations;
@@ -23,4 +24,6 @@ public class Client extends UserData implements Serializable {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClientOrder> orders;
 
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PaymentMethod> paymentMethods;
 }

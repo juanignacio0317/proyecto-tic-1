@@ -29,5 +29,5 @@ public class ClientOrder {
     private LocalDateTime fechaPedido;
 
     @Column(nullable = false)
-    private String estado;
+    private String status;
 }

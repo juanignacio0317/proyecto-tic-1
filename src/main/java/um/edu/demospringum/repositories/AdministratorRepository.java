@@ -1,4 +1,13 @@
 package um.edu.demospringum.repositories;
 
-public interface AdministratorRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import um.edu.demospringum.entities.Administrator;
+
+import java.util.Optional;
+
+public interface AdministratorRepository extends JpaRepository<Administrator, Long> {
+    // Métodos personalizados opcionales:
+    Optional<Administrator> findByEmail(String email);
+    boolean existsByEmail(String email);
 }
