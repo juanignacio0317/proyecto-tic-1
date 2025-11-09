@@ -7,7 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional; // ← IMPORTANTE
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import um.edu.demospringum.dto.AuthResponse;
 import um.edu.demospringum.dto.LoginRequest;
@@ -38,7 +38,7 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/register")
-    @Transactional // ← AGREGADO
+    @Transactional
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             // Validaciones
@@ -75,8 +75,8 @@ public class AuthController {
             pm.setExpirationDate(request.getPaymentMethod().getExpirationDate());
 
             // Establecer la relación bidireccional
-            pm.setClient(client); // ← PaymentMethod apunta al Cliente
-            client.getPaymentMethods().add(pm); // ← Cliente tiene el PaymentMethod
+            pm.setClient(client);
+            client.getPaymentMethods().add(pm);
 
             // Guardar UNA SOLA VEZ (cascade se encarga del resto)
             client = userDataRepository.save(client);
@@ -88,11 +88,11 @@ public class AuthController {
                     token,
                     client.getEmail(),
                     client.getName(),
-                    client.getSurname()
+                    client.getSurname(),
+                    client.getRole() // AGREGADO
             ));
 
         } catch (Exception e) {
-            // Log del error para debugging
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al crear la cuenta: " + e.getMessage());
@@ -118,7 +118,8 @@ public class AuthController {
                     token,
                     userData.getEmail(),
                     userData.getName(),
-                    userData.getSurname()
+                    userData.getSurname(),
+                    userData.getRole() // AGREGADO
             ));
 
         } catch (BadCredentialsException e) {

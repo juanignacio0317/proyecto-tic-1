@@ -13,7 +13,7 @@ export const authService = {
                 paymentMethod: {
                     cardHolderName: userData.paymentMethod.cardHolderName,
                     cardBrand: userData.paymentMethod.cardBrand,
-                    cardNumber: userData.paymentMethod.cardNumber.slice(-4) // Solo últimos 4 dígitos
+                    cardNumber: userData.paymentMethod.cardNumber.slice(-4)
                 }
             });
 
@@ -42,7 +42,6 @@ export const authService = {
             console.log('📥 Status de respuesta:', response.status);
             console.log('📥 Headers:', Object.fromEntries(response.headers.entries()));
 
-            // Leer el body UNA SOLA VEZ
             const contentType = response.headers.get("content-type");
             let data;
 
@@ -54,21 +53,20 @@ export const authService = {
                 console.log('📥 Respuesta texto:', data);
             }
 
-            // Si la respuesta no es OK, lanzar error
             if (!response.ok) {
                 const errorMessage = typeof data === 'string' ? data : (data.message || data.error || JSON.stringify(data));
                 console.error('❌ Error del servidor:', errorMessage);
                 throw new Error(errorMessage);
             }
 
-            // Si todo está OK, guardar token
             console.log('✅ Registro exitoso');
             if (data.token) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify({
                     email: data.email,
                     name: data.name,
-                    surname: data.surname
+                    surname: data.surname,
+                    role: data.role || 'USER' // AGREGADO
                 }));
             }
 
@@ -118,7 +116,8 @@ export const authService = {
                 localStorage.setItem('user', JSON.stringify({
                     email: data.email,
                     name: data.name,
-                    surname: data.surname
+                    surname: data.surname,
+                    role: data.role || 'USER' // AGREGADO
                 }));
             }
 
@@ -146,6 +145,12 @@ export const authService = {
 
     isAuthenticated() {
         return !!this.getToken();
+    },
+
+    // NUEVO: Verificar si el usuario es admin
+    isAdmin() {
+        const user = this.getCurrentUser();
+        return user && user.role === 'ADMIN';
     }
 };
 

@@ -1,49 +1,46 @@
 package um.edu.demospringum.entities.Burgingr;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import um.edu.demospringum.entities.Products.Burger;
 import um.edu.demospringum.servicies.Ingredient;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
+@Data
 @Getter
 @Setter
 @Entity
 @Table(name = "bread")
-
-public class Bread implements Serializable, Ingredient {
+public class Bread implements Ingredient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int breadId;
+    private Integer breadId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String typeBread;
 
     @Column(nullable = false)
-    private boolean breadAvailability;
+    private boolean breadAvailability = true;
 
-    @Column(nullable = false, scale = 2)
+    @Column(nullable = false)
     private BigDecimal breadPrice;
 
-
-    @OneToMany
-    private List<Burger> burgers;
-
-    public String getType(){
+    // Implementación de la interfaz Ingredient
+    @Override
+    public String getType() {
         return typeBread;
     }
 
-    public boolean getAvailability(){
+    @Override
+    public boolean getAvailability() {
         return breadAvailability;
     }
 
-    public BigDecimal getPrice(){
+    @Override
+    public BigDecimal getPrice() {
         return breadPrice;
     }
-
 }

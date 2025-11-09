@@ -26,19 +26,31 @@ export default function Navbar() {
     navigate("/");
   };
 
+  // Construir items dinámicamente
   const items = [
     { label: "Inicio", href: "#inicio" },
     { label: "Creaciones", href: "#creaciones" },
+    // NUEVO: Mostrar "Administración" solo si el usuario es ADMIN
+    ...(authService.isAdmin()
+            ? [{ label: "🛠️ Administración", to: "/admin", isRoute: true, isAdmin: true }]
+            : []
+    ),
     // Condicional: si hay usuario, mostrar su nombre; si no, "Inicio de sesión"
     user
         ? { label: `Hola, ${user.name}`, isUser: true }
         : { label: "Inicio de sesión", to: "/login", isRoute: true },
-    { label: "Carrito", href: "#carrito" },
+    { label: "Carrito", to: "/carrito", isRoute: true },
   ];
 
   const linkBase =
       "transition-colors duration-300 fw-medium " +
       (atTop ? "text-[#FDF8E7]" : "text-[#1B7F79]");
+
+  // Estilo especial para el link de admin (opcional - lo hace destacar)
+  const adminLinkStyle = (isActive) =>
+      linkBase +
+      (isActive ? " underline underline-offset-4" : "") +
+      " fw-bold"; // Hace el link de admin más bold
 
   return (
       <header
@@ -80,9 +92,9 @@ export default function Navbar() {
                   <li key={index}>
                     {item.isUser ? (
                         <div className="d-flex align-items-center gap-3">
-      <span className={linkBase}>
-        {item.label}
-      </span>
+                          <span className={linkBase}>
+                            {item.label}
+                          </span>
                           <button
                               onClick={handleLogout}
                               className={`${linkBase} border-0 bg-transparent p-0`}
@@ -96,8 +108,10 @@ export default function Navbar() {
                         <NavLink
                             to={item.to}
                             className={({ isActive }) =>
-                                linkBase +
-                                (isActive ? " underline underline-offset-4" : "")
+                                // Usar estilo especial si es link de admin
+                                item.isAdmin
+                                    ? adminLinkStyle(isActive)
+                                    : linkBase + (isActive ? " underline underline-offset-4" : "")
                             }
                         >
                           {item.label}

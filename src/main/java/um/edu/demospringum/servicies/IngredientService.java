@@ -9,9 +9,14 @@ import um.edu.demospringum.entities.PizzaIngr.Cheese;
 import um.edu.demospringum.entities.PizzaIngr.Dough;
 import um.edu.demospringum.entities.PizzaIngr.Sauce;
 import um.edu.demospringum.entities.PizzaIngr.Size;
+import um.edu.demospringum.entities.Products.Topping;
+import um.edu.demospringum.entities.Products.Dressing;
 import um.edu.demospringum.exceptions.ExistingIngredient;
 import um.edu.demospringum.exceptions.IngredientNotFound;
 import um.edu.demospringum.repositories.ingredientesRepo.*;
+import um.edu.demospringum.repositories.ToppingRepository;
+import um.edu.demospringum.repositories.DressingRepository;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,71 +26,110 @@ public class IngredientService {
 
     @Autowired
     private BreadRepository breadRepository;
+
+    @Autowired
     private MeatRepository meatRepository;
+
+    @Autowired
     private DoughRepository doughRepository;
+
+    @Autowired
     private SauceRepository sauceRepository;
+
+    @Autowired
     private SizeRepository sizeRepository;
+
+    @Autowired
     private CheeseRepository cheeseRepository;
 
+    @Autowired
+    private ToppingRepository toppingRepository;
 
-    public IngredientService(BreadRepository breadRepository, MeatRepository meatRepository, DoughRepository doughRepository, SauceRepository sauceRepository, SizeRepository sizeRepository, CheeseRepository cheeseRepository){
+    @Autowired
+    private DressingRepository dressingRepository;
+
+    public IngredientService(
+            BreadRepository breadRepository,
+            MeatRepository meatRepository,
+            DoughRepository doughRepository,
+            SauceRepository sauceRepository,
+            SizeRepository sizeRepository,
+            CheeseRepository cheeseRepository,
+            ToppingRepository toppingRepository,
+            DressingRepository dressingRepository) {
         this.breadRepository = breadRepository;
         this.meatRepository = meatRepository;
         this.doughRepository = doughRepository;
         this.sauceRepository = sauceRepository;
         this.sizeRepository = sizeRepository;
         this.cheeseRepository = cheeseRepository;
-
+        this.toppingRepository = toppingRepository;
+        this.dressingRepository = dressingRepository;
     }
-
 
     private <T extends Ingredient> List<IngredientsDto> listMapToDto(List<T> ingredients) {
         List<IngredientsDto> ingredientAvailability = new ArrayList<>();
         for (int ingredient = 0; ingredient < ingredients.size(); ingredient++){
-            ingredientAvailability.add(new IngredientsDto(ingredients.get(ingredient).getType(), ingredients.get(ingredient).getAvailability(), ingredients.get(ingredient).getPrice()));
+            ingredientAvailability.add(new IngredientsDto(
+                    ingredients.get(ingredient).getType(),
+                    ingredients.get(ingredient).getAvailability(),
+                    ingredients.get(ingredient).getPrice()
+            ));
         }
         return ingredientAvailability;
     }
 
-    public List<IngredientsDto> listBreads() {return listMapToDto(breadRepository.findAll()); }
+    // ==================== LIST METHODS ====================
 
-    public List<IngredientsDto> listMeats (){
+    public List<IngredientsDto> listBreads() {
+        return listMapToDto(breadRepository.findAll());
+    }
+
+    public List<IngredientsDto> listMeats() {
         return listMapToDto(meatRepository.findAll());
     }
 
-    public List<IngredientsDto> listDoughs (){
+    public List<IngredientsDto> listDoughs() {
         return listMapToDto(doughRepository.findAll());
     }
 
-    public List<IngredientsDto>listSauces (){
+    public List<IngredientsDto> listSauces() {
         return listMapToDto(sauceRepository.findAll());
     }
 
-    public List<IngredientsDto> listSizes (){
+    public List<IngredientsDto> listSizes() {
         return listMapToDto(sizeRepository.findAll());
     }
 
-    public List<IngredientsDto> listCheeses (){
+    public List<IngredientsDto> listCheeses() {
         return listMapToDto(cheeseRepository.findAll());
     }
 
+    public List<IngredientsDto> listToppings() {
+        return listMapToDto(toppingRepository.findAll());
+    }
 
+    public List<IngredientsDto> listDressings() {
+        return listMapToDto(dressingRepository.findAll());
+    }
 
+    // ==================== ADD METHODS ====================
 
-
-    private <T extends Ingredient> IngredientsDto addMapToDto(String newIngredient, boolean available, BigDecimal price, List<T> ingredients) throws  ExistingIngredient{
+    private <T extends Ingredient> IngredientsDto addMapToDto(
+            String newIngredient,
+            boolean available,
+            BigDecimal price,
+            List<T> ingredients) throws ExistingIngredient {
         for (int ingredient = 0; ingredient < ingredients.size(); ingredient++){
             if (ingredients.get(ingredient).getType().equalsIgnoreCase(newIngredient)){
                 throw new ExistingIngredient("This ingredient already exists");
             }
         }
-
         return new IngredientsDto(newIngredient, available, price);
     }
 
-    public Bread addBread (String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient{
-        IngredientsDto breadDto = addMapToDto(newIngredient, available, price,  breadRepository.findAll());
-
+    public Bread addBread(String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient {
+        IngredientsDto breadDto = addMapToDto(newIngredient, available, price, breadRepository.findAll());
         Bread newBread = new Bread();
         newBread.setTypeBread(breadDto.getType());
         newBread.setBreadAvailability(breadDto.isAvailable());
@@ -93,20 +137,17 @@ public class IngredientService {
         return breadRepository.save(newBread);
     }
 
-    public Meat addMeat (String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient{
+    public Meat addMeat(String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient {
         IngredientsDto meatDto = addMapToDto(newIngredient, available, price, meatRepository.findAll());
-
         Meat newMeat = new Meat();
         newMeat.setTypeMeat(meatDto.getType());
         newMeat.setMeatAvailability(meatDto.isAvailable());
         newMeat.setMeatPrice(meatDto.getPrice());
         return meatRepository.save(newMeat);
-
     }
 
-    public Dough addDough (String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient{
+    public Dough addDough(String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient {
         IngredientsDto doughDto = addMapToDto(newIngredient, available, price, doughRepository.findAll());
-
         Dough newDough = new Dough();
         newDough.setTypeDough(doughDto.getType());
         newDough.setDoughAvailability(doughDto.isAvailable());
@@ -114,9 +155,8 @@ public class IngredientService {
         return doughRepository.save(newDough);
     }
 
-    public Sauce addSauce (String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient{
+    public Sauce addSauce(String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient {
         IngredientsDto sauceDto = addMapToDto(newIngredient, available, price, sauceRepository.findAll());
-
         Sauce newSauce = new Sauce();
         newSauce.setTypeSauce(sauceDto.getType());
         newSauce.setSauceAvailability(sauceDto.isAvailable());
@@ -124,9 +164,8 @@ public class IngredientService {
         return sauceRepository.save(newSauce);
     }
 
-    public Size addSize (String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient{
+    public Size addSize(String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient {
         IngredientsDto sizeDto = addMapToDto(newIngredient, available, price, sizeRepository.findAll());
-
         Size newSize = new Size();
         newSize.setTypeSize(sizeDto.getType());
         newSize.setSizeAvailability(sizeDto.isAvailable());
@@ -134,24 +173,39 @@ public class IngredientService {
         return sizeRepository.save(newSize);
     }
 
-    public Cheese addCheese (String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient{
-        IngredientsDto sizeDto = addMapToDto(newIngredient, available, price, cheeseRepository.findAll());
-
+    public Cheese addCheese(String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient {
+        IngredientsDto cheeseDto = addMapToDto(newIngredient, available, price, cheeseRepository.findAll());
         Cheese newCheese = new Cheese();
-        newCheese.setTypeCheese(sizeDto.getType());
-        newCheese.setCheeseAvailability(sizeDto.isAvailable());
-        newCheese.setCheesePrice(sizeDto.getPrice());
+        newCheese.setTypeCheese(cheeseDto.getType());
+        newCheese.setCheeseAvailability(cheeseDto.isAvailable());
+        newCheese.setCheesePrice(cheeseDto.getPrice());
         return cheeseRepository.save(newCheese);
     }
 
+    public Topping addTopping(String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient {
+        IngredientsDto toppingDto = addMapToDto(newIngredient, available, price, toppingRepository.findAll());
+        Topping newTopping = new Topping();
+        newTopping.setTypeTopping(toppingDto.getType());
+        newTopping.setToppingAvailability(toppingDto.isAvailable());
+        newTopping.setToppingPrice(toppingDto.getPrice());
+        return toppingRepository.save(newTopping);
+    }
 
+    public Dressing addDressing(String newIngredient, boolean available, BigDecimal price) throws ExistingIngredient {
+        IngredientsDto dressingDto = addMapToDto(newIngredient, available, price, dressingRepository.findAll());
+        Dressing newDressing = new Dressing();
+        newDressing.setTypeDressing(dressingDto.getType());
+        newDressing.setDressingAvailability(dressingDto.isAvailable());
+        newDressing.setDressingPrice(dressingDto.getPrice());
+        return dressingRepository.save(newDressing);
+    }
 
+    // ==================== UPDATE AVAILABILITY METHODS ====================
 
-    public void updateAvailabilityBread (String breadToUpdate, boolean availability) throws IngredientNotFound{
+    public void updateAvailabilityBread(String breadToUpdate, boolean availability) throws IngredientNotFound {
         List<Bread> breads = breadRepository.findAll();
         boolean breadFound = false;
-
-        for (int bread = 0; bread < breads.size(); bread ++){
+        for (int bread = 0; bread < breads.size(); bread++){
             if (breads.get(bread).getTypeBread().equalsIgnoreCase(breadToUpdate)){
                 Bread breadInRepo = breads.get(bread);
                 breadInRepo.setBreadAvailability(availability);
@@ -160,17 +214,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (breadFound == false){
+        if (!breadFound){
             throw new IngredientNotFound("Type of bread was not found");
         }
     }
 
-    public void updateAvailabilityMeat (String meatToUpdate, boolean availability) throws IngredientNotFound{
+    public void updateAvailabilityMeat(String meatToUpdate, boolean availability) throws IngredientNotFound {
         List<Meat> meats = meatRepository.findAll();
         boolean meatFound = false;
-
-        for (int meat = 0; meat < meats.size(); meat ++){
+        for (int meat = 0; meat < meats.size(); meat++){
             if (meats.get(meat).getTypeMeat().equalsIgnoreCase(meatToUpdate)){
                 Meat meatInRepo = meats.get(meat);
                 meatInRepo.setMeatAvailability(availability);
@@ -179,17 +231,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (meatFound == false){
+        if (!meatFound){
             throw new IngredientNotFound("Type of meat was not found");
         }
     }
 
-    public void updateAvailabilityDough (String doughToUpdate, boolean availability) throws IngredientNotFound{
+    public void updateAvailabilityDough(String doughToUpdate, boolean availability) throws IngredientNotFound {
         List<Dough> doughs = doughRepository.findAll();
         boolean doughFound = false;
-
-        for (int dough = 0; dough < doughs.size(); dough ++){
+        for (int dough = 0; dough < doughs.size(); dough++){
             if (doughs.get(dough).getTypeDough().equalsIgnoreCase(doughToUpdate)){
                 Dough doughInRepo = doughs.get(dough);
                 doughInRepo.setDoughAvailability(availability);
@@ -198,17 +248,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (doughFound == false){
+        if (!doughFound){
             throw new IngredientNotFound("Type of dough was not found");
         }
     }
 
-    public void updateAvailabilitySauce (String sauceToUpdate, boolean availability) throws IngredientNotFound{
+    public void updateAvailabilitySauce(String sauceToUpdate, boolean availability) throws IngredientNotFound {
         List<Sauce> sauces = sauceRepository.findAll();
         boolean sauceFound = false;
-
-        for (int sauce = 0; sauce < sauces.size(); sauce ++){
+        for (int sauce = 0; sauce < sauces.size(); sauce++){
             if (sauces.get(sauce).getTypeSauce().equalsIgnoreCase(sauceToUpdate)){
                 Sauce sauceInRepo = sauces.get(sauce);
                 sauceInRepo.setSauceAvailability(availability);
@@ -217,17 +265,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (sauceFound == false){
+        if (!sauceFound){
             throw new IngredientNotFound("Type of sauce was not found");
         }
     }
 
-    public void updateAvailabilitySize (String sizeToUpdate, boolean availability) throws IngredientNotFound{
+    public void updateAvailabilitySize(String sizeToUpdate, boolean availability) throws IngredientNotFound {
         List<Size> sizes = sizeRepository.findAll();
         boolean sizeFound = false;
-
-        for (int size = 0; size < sizes.size(); size ++){
+        for (int size = 0; size < sizes.size(); size++){
             if (sizes.get(size).getTypeSize().equalsIgnoreCase(sizeToUpdate)){
                 Size sizeInRepo = sizes.get(size);
                 sizeInRepo.setSizeAvailability(availability);
@@ -236,17 +282,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (sizeFound == false){
+        if (!sizeFound){
             throw new IngredientNotFound("Size specified was not found");
         }
     }
 
-    public void updateAvailabilityCheese (String cheeseToUpdate, boolean availability) throws IngredientNotFound{
+    public void updateAvailabilityCheese(String cheeseToUpdate, boolean availability) throws IngredientNotFound {
         List<Cheese> cheeses = cheeseRepository.findAll();
         boolean cheeseFound = false;
-
-        for (int cheese = 0; cheese < cheeses.size(); cheese ++){
+        for (int cheese = 0; cheese < cheeses.size(); cheese++){
             if (cheeses.get(cheese).getTypeCheese().equalsIgnoreCase(cheeseToUpdate)){
                 Cheese cheeseInRepo = cheeses.get(cheese);
                 cheeseInRepo.setCheeseAvailability(availability);
@@ -255,19 +299,49 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (cheeseFound == false){
+        if (!cheeseFound){
             throw new IngredientNotFound("Type of cheese was not found");
         }
     }
 
+    public void updateAvailabilityTopping(String toppingToUpdate, boolean availability) throws IngredientNotFound {
+        List<Topping> toppings = toppingRepository.findAll();
+        boolean toppingFound = false;
+        for (Topping topping : toppings){
+            if (topping.getTypeTopping().equalsIgnoreCase(toppingToUpdate)){
+                topping.setToppingAvailability(availability);
+                toppingRepository.save(topping);
+                toppingFound = true;
+                break;
+            }
+        }
+        if (!toppingFound){
+            throw new IngredientNotFound("Type of topping was not found");
+        }
+    }
 
+    public void updateAvailabilityDressing(String dressingToUpdate, boolean availability) throws IngredientNotFound {
+        List<Dressing> dressings = dressingRepository.findAll();
+        boolean dressingFound = false;
+        for (Dressing dressing : dressings){
+            if (dressing.getTypeDressing().equalsIgnoreCase(dressingToUpdate)){
+                dressing.setDressingAvailability(availability);
+                dressingRepository.save(dressing);
+                dressingFound = true;
+                break;
+            }
+        }
+        if (!dressingFound){
+            throw new IngredientNotFound("Type of dressing was not found");
+        }
+    }
 
-    public void updatePriceBread (String breadToUpdate, BigDecimal price) throws IngredientNotFound{
+    // ==================== UPDATE PRICE METHODS ====================
+
+    public void updatePriceBread(String breadToUpdate, BigDecimal price) throws IngredientNotFound {
         List<Bread> breads = breadRepository.findAll();
         boolean breadFound = false;
-
-        for (int bread = 0; bread < breads.size(); bread ++){
+        for (int bread = 0; bread < breads.size(); bread++){
             if (breads.get(bread).getTypeBread().equalsIgnoreCase(breadToUpdate)){
                 Bread breadInRepo = breads.get(bread);
                 breadInRepo.setBreadPrice(price);
@@ -276,17 +350,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (breadFound == false){
+        if (!breadFound){
             throw new IngredientNotFound("Type of bread was not found");
         }
     }
 
-    public void updatePriceMeat (String meatToUpdate, BigDecimal price) throws IngredientNotFound{
+    public void updatePriceMeat(String meatToUpdate, BigDecimal price) throws IngredientNotFound {
         List<Meat> meats = meatRepository.findAll();
         boolean meatFound = false;
-
-        for (int meat = 0; meat < meats.size(); meat ++){
+        for (int meat = 0; meat < meats.size(); meat++){
             if (meats.get(meat).getTypeMeat().equalsIgnoreCase(meatToUpdate)){
                 Meat meatInRepo = meats.get(meat);
                 meatInRepo.setMeatPrice(price);
@@ -295,17 +367,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (meatFound == false){
+        if (!meatFound){
             throw new IngredientNotFound("Type of meat was not found");
         }
     }
 
-    public void updatePriceDough (String doughToUpdate, BigDecimal price) throws IngredientNotFound{
+    public void updatePriceDough(String doughToUpdate, BigDecimal price) throws IngredientNotFound {
         List<Dough> doughs = doughRepository.findAll();
         boolean doughFound = false;
-
-        for (int dough = 0; dough < doughs.size(); dough ++){
+        for (int dough = 0; dough < doughs.size(); dough++){
             if (doughs.get(dough).getTypeDough().equalsIgnoreCase(doughToUpdate)){
                 Dough doughInRepo = doughs.get(dough);
                 doughInRepo.setDoughPrice(price);
@@ -314,17 +384,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (doughFound == false){
+        if (!doughFound){
             throw new IngredientNotFound("Type of dough was not found");
         }
     }
 
-    public void updatePriceSauce (String sauceToUpdate, BigDecimal price) throws IngredientNotFound{
+    public void updatePriceSauce(String sauceToUpdate, BigDecimal price) throws IngredientNotFound {
         List<Sauce> sauces = sauceRepository.findAll();
         boolean sauceFound = false;
-
-        for (int sauce= 0; sauce < sauces.size(); sauce ++){
+        for (int sauce = 0; sauce < sauces.size(); sauce++){
             if (sauces.get(sauce).getTypeSauce().equalsIgnoreCase(sauceToUpdate)){
                 Sauce sauceInRepo = sauces.get(sauce);
                 sauceInRepo.setSaucePrice(price);
@@ -333,17 +401,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (sauceFound == false){
+        if (!sauceFound){
             throw new IngredientNotFound("Type of sauce was not found");
         }
     }
 
-    public void updatePriceSize (String sizeToUpdate, BigDecimal price) throws IngredientNotFound{
+    public void updatePriceSize(String sizeToUpdate, BigDecimal price) throws IngredientNotFound {
         List<Size> sizes = sizeRepository.findAll();
         boolean sizeFound = false;
-
-        for (int size = 0; size < sizes.size(); size ++){
+        for (int size = 0; size < sizes.size(); size++){
             if (sizes.get(size).getTypeSize().equalsIgnoreCase(sizeToUpdate)){
                 Size sizeInRepo = sizes.get(size);
                 sizeInRepo.setSizePrice(price);
@@ -352,17 +418,15 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (sizeFound == false){
+        if (!sizeFound){
             throw new IngredientNotFound("Size specified was not found");
         }
     }
 
-    public void updatePriceCheese (String cheeseToUpdate, BigDecimal price) throws IngredientNotFound{
+    public void updatePriceCheese(String cheeseToUpdate, BigDecimal price) throws IngredientNotFound {
         List<Cheese> cheeses = cheeseRepository.findAll();
         boolean cheeseFound = false;
-
-        for (int cheese = 0; cheese < cheeses.size(); cheese ++){
+        for (int cheese = 0; cheese < cheeses.size(); cheese++){
             if (cheeses.get(cheese).getTypeCheese().equalsIgnoreCase(cheeseToUpdate)){
                 Cheese cheeseInRepo = cheeses.get(cheese);
                 cheeseInRepo.setCheesePrice(price);
@@ -371,10 +435,40 @@ public class IngredientService {
                 break;
             }
         }
-
-        if (cheeseFound == false){
+        if (!cheeseFound){
             throw new IngredientNotFound("Type of cheese was not found");
         }
     }
 
+    public void updatePriceTopping(String toppingToUpdate, BigDecimal price) throws IngredientNotFound {
+        List<Topping> toppings = toppingRepository.findAll();
+        boolean toppingFound = false;
+        for (Topping topping : toppings){
+            if (topping.getTypeTopping().equalsIgnoreCase(toppingToUpdate)){
+                topping.setToppingPrice(price);
+                toppingRepository.save(topping);
+                toppingFound = true;
+                break;
+            }
+        }
+        if (!toppingFound){
+            throw new IngredientNotFound("Type of topping was not found");
+        }
+    }
+
+    public void updatePriceDressing(String dressingToUpdate, BigDecimal price) throws IngredientNotFound {
+        List<Dressing> dressings = dressingRepository.findAll();
+        boolean dressingFound = false;
+        for (Dressing dressing : dressings){
+            if (dressing.getTypeDressing().equalsIgnoreCase(dressingToUpdate)){
+                dressing.setDressingPrice(price);
+                dressingRepository.save(dressing);
+                dressingFound = true;
+                break;
+            }
+        }
+        if (!dressingFound){
+            throw new IngredientNotFound("Type of dressing was not found");
+        }
+    }
 }
