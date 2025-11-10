@@ -1,4 +1,4 @@
-package um.edu.demospringum.repositories;
+package um.edu.demospringum.repositories.productsRepo;
 
 import um.edu.demospringum.entities.PizzaIngr.Cheese;
 import um.edu.demospringum.entities.PizzaIngr.Dough;
