@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import um.edu.demospringum.dto.BurgerCreationRequest;
 import um.edu.demospringum.entities.Client;
 import um.edu.demospringum.entities.Creation;
 import um.edu.demospringum.entities.Products.Burger;

@@ -54,7 +54,7 @@ public class ProductService {
     private <T extends Ingredient> IngredientsDto addMapToDto(String newIngredient, boolean available, BigDecimal price, List<T> ingredients) throws ExistingIngredient {
         for (int ingredient = 0; ingredient < ingredients.size(); ingredient++){
             if (ingredients.get(ingredient).getType().equalsIgnoreCase(newIngredient)){
-                throw new ExistingIngredient("This beverage already exists");
+                throw new ExistingIngredient("This product already exists");
             }
         }
 

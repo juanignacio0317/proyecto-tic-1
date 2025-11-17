@@ -33,6 +33,10 @@ public class ClientOrder {
     @Column(nullable = false)
     private String orderStatus;
 
+    @Column
+    private String orderAddress;
+
+
     @ManyToOne
     @JoinColumn(name = "beverageId")
     private Beverage beverage;

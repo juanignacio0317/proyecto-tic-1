@@ -3,6 +3,7 @@ package um.edu.demospringum.servicies;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import um.edu.demospringum.entities.ClientOrder;
 import um.edu.demospringum.repositories.ClientOrderRepository;
 import um.edu.demospringum.repositories.CreationRepository;
 import um.edu.demospringum.repositories.ingredientesRepo.CheeseRepository;
@@ -13,6 +14,7 @@ import um.edu.demospringum.repositories.productsRepo.PizzaRepository;
 import um.edu.demospringum.repositories.productsRepo.ProductRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ProductsDataService {
@@ -40,8 +42,10 @@ public class ProductsDataService {
         this.cheeseRepository = cheeseRepository;
     }
 
-
-    private void listClientOrders(){}
+    //funcion que devuelve todos los pedidos
+    private List<ClientOrder> listClientOrders(){
+        return clientOrderRepository.findAll();
+    }
 
     private void listClientOrdersBetweenDates(LocalDateTime startDate, LocalDateTime endDate){
 

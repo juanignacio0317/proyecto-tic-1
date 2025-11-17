@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import um.edu.demospringum.entities.Burgingr.Bread;
 import um.edu.demospringum.entities.Burgingr.Meat;
+import um.edu.demospringum.entities.PizzaIngr.Cheese;
 
 @Getter
 @Setter
@@ -19,4 +20,8 @@ public class Burger extends Product {
     @ManyToOne
     @JoinColumn(name = "meatId")
     private Meat burgerMeat;
+
+    @ManyToOne
+    @JoinColumn(name = "cheeseId")
+    private Cheese burgerCheese;
 }
