@@ -15,7 +15,7 @@ public class Client extends UserData implements Serializable {
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "address")  // ← Cambio aquí
+    @Column(name = "address")
     private String address;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)

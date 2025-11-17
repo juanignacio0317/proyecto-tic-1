@@ -32,7 +32,7 @@ export default function Navbar() {
     { label: "Creaciones", href: "#creaciones" },
     // NUEVO: Mostrar "Administración" solo si el usuario es ADMIN
     ...(authService.isAdmin()
-            ? [{ label: "🛠️ Administración", to: "/admin", isRoute: true, isAdmin: true }]
+            ? [{ label: "Administración", to: "/admin", isRoute: true, isAdmin: true }]
             : []
     ),
     // Condicional: si hay usuario, mostrar su nombre; si no, "Inicio de sesión"
@@ -49,8 +49,7 @@ export default function Navbar() {
   // Estilo especial para el link de admin (opcional - lo hace destacar)
   const adminLinkStyle = (isActive) =>
       linkBase +
-      (isActive ? " underline underline-offset-4" : "") +
-      " fw-bold"; // Hace el link de admin más bold
+      (isActive ? " underline underline-offset-4" : "");
 
   return (
       <header

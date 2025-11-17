@@ -41,8 +41,8 @@ export default function PersonalizaPage() {
             { id: '122', nombre: 'Tomate', precio: 10, color: '#FF6347' },
             { id: '123', nombre: 'Cebolla', precio: 10, color: '#F5F5DC' },
             { id: '124', nombre: 'Pepinillos', precio: 15, color: '#8FBC8F' },
-            { id: '125', nombre: 'Jalapeños', precio: 15, color: '#228B22' },
-            { id: '126', nombre: 'Aguacate', precio: 25, color: '#7CFC00' }
+            { id: '125', nombre: 'Morron verde', precio: 15, color: '#228B22' },
+            { id: '126', nombre: 'Palta', precio: 25, color: '#7CFC00' }
         ],
         salsas: [
             { id: '13', nombre: 'Ketchup', precio: 5, color: '#DC143C' },
