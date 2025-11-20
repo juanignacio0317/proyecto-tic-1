@@ -20,8 +20,11 @@ public class ProductService {
 
     @Autowired
     private BeverageRepository beverageRepository;
+    @Autowired
     private SideOrderRepository sideOrderRepository;
+    @Autowired
     private ToppingRepository toppingRepository;
+    @Autowired
     private DressingRepository dressingRepository;
 
 

@@ -14,5 +14,5 @@ public interface CreationRepository extends JpaRepository<Creation, Long> {
 
     Optional<Creation> findByUserIdAndPizza(Long userId, Pizza pizza);
     Optional<Creation> findByUserIdAndBurger(Long userId, Burger burger);
-
+    List<Creation> findByClientAndFavouriteTrue(Client client);
 }

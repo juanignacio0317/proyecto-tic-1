@@ -1,6 +1,7 @@
 package um.edu.demospringum.servicies;
 
 import jakarta.transaction.Transactional;
+import org.hibernate.query.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import um.edu.demospringum.dtos.BurgerCreationRequest;
@@ -17,15 +18,15 @@ import um.edu.demospringum.entities.PizzaIngr.Size;
 import um.edu.demospringum.entities.Products.*;
 import um.edu.demospringum.exceptions.ClientNotFound;
 import um.edu.demospringum.exceptions.IngredientNotFound;
+import um.edu.demospringum.exceptions.OrderNotFound;
 import um.edu.demospringum.repositories.ClientOrderRepository;
 import um.edu.demospringum.repositories.ClientRepository;
 import um.edu.demospringum.repositories.CreationRepository;
 import um.edu.demospringum.repositories.productsRepo.*;
 import um.edu.demospringum.repositories.ingredientesRepo.*;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CreationService {
@@ -44,21 +45,26 @@ public class CreationService {
     private SizeRepository sizeRepository;
     @Autowired
     private CheeseRepository cheeseRepository;
-    private PizzaRepository pizzaRepository;
-    private BurgerRepository burgerRepository;
-
-    private BreadRepository breadRepository;
-    private MeatRepository meatRepository;
-
-    private ClientRepository clientRepository;
-
-    private BeverageRepository beverageRepository;
-    private SideOrderRepository sideOrderRepository;
-
     @Autowired
-    private ToppingRepository toppingRepo;
+    private PizzaRepository pizzaRepository;
+    @Autowired
+    private BurgerRepository burgerRepository;
+    @Autowired
+    private BreadRepository breadRepository;
+    @Autowired
+    private MeatRepository meatRepository;
+    @Autowired
+    private ClientRepository clientRepository;
+    @Autowired
+    private BeverageRepository beverageRepository;
+    @Autowired
+    private SideOrderRepository sideOrderRepository;
+    @Autowired
+    private ToppingRepository toppingRepository;
+    @Autowired
+    private DressingRepository dressingRepository;
 
-    public CreationService(ProductRepository productRepository, ClientOrderRepository clientOrderRepository, CreationRepository creationRepository, DoughRepository doughRepository, SauceRepository sauceRepository, SizeRepository sizeRepository, CheeseRepository cheeseRepository, PizzaRepository pizzaRepository, ClientRepository clientRepository, BeverageRepository beverageRepository, SideOrderRepository sideOrderRepository, BreadRepository breadRepository, MeatRepository meatRepository, BurgerRepository burgerRepository) {
+    public CreationService(ProductRepository productRepository, ClientOrderRepository clientOrderRepository, CreationRepository creationRepository, DoughRepository doughRepository, SauceRepository sauceRepository, SizeRepository sizeRepository, CheeseRepository cheeseRepository, PizzaRepository pizzaRepository, ClientRepository clientRepository, BeverageRepository beverageRepository, SideOrderRepository sideOrderRepository, BreadRepository breadRepository, MeatRepository meatRepository, BurgerRepository burgerRepository, ToppingRepository toppingRepository, DressingRepository dressingRepository) {
         this.productRepository = productRepository;
         this.clientOrderRepository = clientOrderRepository;
         this.creationRepository = creationRepository;
@@ -76,7 +82,23 @@ public class CreationService {
 
         this.beverageRepository = beverageRepository;
         this.sideOrderRepository = sideOrderRepository;
+
+        this.toppingRepository = toppingRepository;
+        this.dressingRepository = dressingRepository;
     }
+
+    //funcion para comparar listas de toppings/dressings devuelve true si son diferentes (si son diferentes se crea una nueva creation)
+    private boolean listsComparison(List<?> a, List<?> b) {
+        Map<Object, Long> countA = a.stream()
+                .collect(Collectors.groupingBy(x -> x, Collectors.counting()));
+
+        Map<Object, Long> countB = b.stream()
+                .collect(Collectors.groupingBy(x -> x, Collectors.counting()));
+
+        return !countA.equals(countB);
+    }
+
+
 
     @Transactional
     public PizzaCreationRequest createPizza(PizzaCreationRequest pizzaCreated) throws IngredientNotFound, ClientNotFound {
@@ -126,22 +148,23 @@ public class CreationService {
             pizzaRepository.save(newPizza);
         }
 
-        List<Topping> listaToppings = new LinkedList<>();
+        List<Topping> toppingsList = new LinkedList<>();
         pizzaCreated.getToppings().forEach(s -> {
-            toppingRepo.findByTypeTopping(s).ifPresent(t -> listaToppings.add(t));
+            toppingRepository.findByTypeTopping(s).ifPresent(t -> toppingsList.add(t));
         });
 
         //creo la creacion
         Creation newCreation = new Creation();
         newCreation.setProduct(newPizza);
-        newCreation.setToppings(listaToppings);
+        newCreation.setToppings(toppingsList);
         newCreation.setCreationDate(pizzaCreated.getOrderDate());
         newCreation.setFavourite(false);
         newCreation.setClient(optionalClient.get());
 
         //verifico que la creacion no haya ya sido creada por el cliente
         Optional<Creation> optionalCreation = creationRepository.findByUserIdAndPizza(pizzaCreated.getUserId(), newPizza);
-        if (optionalCreation.isEmpty() || optionalCreation.get().getToppings().equals(pizzaCreated.getToppings())) {
+        if (optionalCreation.isEmpty() ||
+                listsComparison(optionalCreation.get().getToppings(), toppingsList)){
             creationRepository.save(newCreation);
         }
 
@@ -200,18 +223,30 @@ public class CreationService {
             pizzaRepository.save(newBurger);
         }
 
+        List<Topping> toppingsList = new LinkedList<>();
+        burgerCreated.getToppings().forEach(s -> {
+            toppingRepository.findByTypeTopping(s).ifPresent(t -> toppingsList.add(t));
+        });
+
+        List<Dressing> dressingsList = new LinkedList<>();
+        burgerCreated.getDressings().forEach(d -> {
+            dressingRepository.findByTypeDressing(d).ifPresent(dressing -> dressingsList.add(dressing));
+        });
+
         //creo la creacion
         Creation newCreation = new Creation();
         newCreation.setProduct(newBurger);
-        newCreation.setToppings(burgerCreated.getToppings());
-        newCreation.setDressings(burgerCreated.getDressings());
+        newCreation.setToppings(toppingsList);
+        newCreation.setDressings(dressingsList);
         newCreation.setCreationDate(burgerCreated.getOrderDate());
         newCreation.setFavourite(false);
         newCreation.setClient(optionalClient.get());
 
         //verifico que la creacion no haya ya sido creada por el cliente
         Optional<Creation> optionalCreation = creationRepository.findByUserIdAndBurger(burgerCreated.getUserId(), newBurger);
-        if (optionalCreation.isEmpty() || optionalCreation.get().getToppings().equals(burgerCreated.getToppings())) {
+        if (optionalCreation.isEmpty() ||
+                listsComparison(optionalCreation.get().getToppings(), toppingsList)  ||
+                listsComparison(optionalCreation.get().getDressings(), dressingsList)) {
             creationRepository.save(newCreation);
         }
 
@@ -225,33 +260,45 @@ public class CreationService {
         return burgerCreated;
     }
 
-    public void addBeverage(ClientOrder order, String beverage) {
+    public void addBeverage(Long clientOrderId, String beverage) throws OrderNotFound, IngredientNotFound {
         Optional<Beverage> optionalBeverage = beverageRepository.findByTypeBeverageIgnoreCase(beverage);
+        Optional<ClientOrder> optionalClientOrder = clientOrderRepository.findByClientOrderId(clientOrderId);
 
         if (optionalBeverage.isEmpty()) {
             throw new IngredientNotFound("Type of beverage was not found");
         }
 
-        order.setBeverage(optionalBeverage.get());
+        if (optionalClientOrder.isEmpty()) {
+            throw new OrderNotFound("The order was not found");
+        }
+        optionalClientOrder.get().setBeverage(optionalBeverage.get());
+        clientOrderRepository.save(optionalClientOrder.get());
     }
 
-    public void addSideOrder(ClientOrder order, String sideOrder) {
+    public void addSideOrder(Long clientOrderId, String sideOrder) throws OrderNotFound, IngredientNotFound {
         Optional<SideOrder> optionalSideOrder = sideOrderRepository.findByTypeSideOrderIgnoreCase(sideOrder);
+        Optional<ClientOrder> optionalClientOrder = clientOrderRepository.findByClientOrderId(clientOrderId);
 
         if (optionalSideOrder.isEmpty()) {
-            throw new IngredientNotFound("Type of side order was not found");
+            throw new IngredientNotFound("Type of beverage was not found");
         }
 
-        order.setSideorder(optionalSideOrder.get());
+        if (optionalClientOrder.isEmpty()) {
+            throw new OrderNotFound("The order was not found");
+        }
+        optionalClientOrder.get().setSideOrder(optionalSideOrder.get());
+        clientOrderRepository.save(optionalClientOrder.get());
     }
 
-    public void selectOrderAddress(Long clientOrderId, String address, Long userId) {
-        Optional<ClientOrder> clientOrder = clientOrderRepository.findByClientOrderId(clientOrderId);
-        clientOrder.get().setOrderAddress(address);
+    public void selectOrderAddress(Long clientOrderId, String address) throws OrderNotFound {
+        Optional<ClientOrder> optionalClientOrder = clientOrderRepository.findByClientOrderId(clientOrderId);
+
+        if (optionalClientOrder.isEmpty()) {
+            throw new OrderNotFound("The order was not found");
+        }
+        optionalClientOrder.get().setOrderAddress(address);
+        clientOrderRepository.save(optionalClientOrder.get());
     }
 
-    public void updateOrderStatus(ClientOrder order, String orderStatus) {
-        order.setOrderStatus(orderStatus);
-    }
 
 }

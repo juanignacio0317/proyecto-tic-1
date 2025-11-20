@@ -9,8 +9,11 @@ import um.edu.demospringum.entities.PizzaIngr.Sauce;
 import um.edu.demospringum.entities.PizzaIngr.Size;
 import um.edu.demospringum.entities.Products.Pizza;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface ClientOrderRepository extends JpaRepository<ClientOrder, Long> {
     Optional<ClientOrder> findByClientOrderId(Long clientOrderId);
+    List<ClientOrder> findByClient(Client client);
 }

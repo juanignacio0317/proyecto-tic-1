@@ -43,7 +43,7 @@ public class ClientOrder {
 
     @ManyToOne
     @JoinColumn(name = "sideOrderId")
-    private SideOrder sideorder;
+    private SideOrder sideOrder;
 
 
 

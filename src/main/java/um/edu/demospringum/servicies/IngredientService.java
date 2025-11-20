@@ -22,10 +22,15 @@ public class IngredientService {
 
     @Autowired
     private BreadRepository breadRepository;
+    @Autowired
     private MeatRepository meatRepository;
+    @Autowired
     private DoughRepository doughRepository;
+    @Autowired
     private SauceRepository sauceRepository;
+    @Autowired
     private SizeRepository sizeRepository;
+    @Autowired
     private CheeseRepository cheeseRepository;
 
     public IngredientService(BreadRepository breadRepository, MeatRepository meatRepository, DoughRepository doughRepository, SauceRepository sauceRepository, SizeRepository sizeRepository, CheeseRepository cheeseRepository){
