@@ -1,5 +1,6 @@
 package um.edu.demospringum.entities.Products;
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,37 +9,38 @@ import um.edu.demospringum.servicies.Ingredient;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+@Entity
+@Table(name = "side_order")
+
 @Getter
 @Setter
-@Entity
-@Table(name = "dressing")
-public class Dressing  implements Serializable, Ingredient {
+public class SideOrder implements Serializable, Ingredient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long dressingId;
+    private int sideOrderId;
 
     @Column(nullable = false)
-    private String typeDressing;
+    private String typeSideOrder;
+
+    @Column(nullable = false)
+    private boolean sideOrderAvailability;
 
     @Column(nullable = false, scale = 2)
-    private BigDecimal dressingPrice;
-
-
-    @Column(nullable = false)
-    private boolean dressingAvailability;
-
+    private BigDecimal sideOrderPrice;
 
 
     public String getType(){
-        return typeDressing;
+        return typeSideOrder;
     }
 
     public boolean getAvailability(){
-        return dressingAvailability;
+        return sideOrderAvailability;
     }
 
     public BigDecimal getPrice(){
-        return dressingPrice;
+        return sideOrderPrice;
     }
+
+
 }

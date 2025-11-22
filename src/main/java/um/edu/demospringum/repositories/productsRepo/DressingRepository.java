@@ -1,4 +1,4 @@
-package um.edu.demospringum.repositories;
+package um.edu.demospringum.repositories.productsRepo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import um.edu.demospringum.entities.Products.Dressing;
@@ -6,5 +6,6 @@ import um.edu.demospringum.entities.Products.Dressing;
 import java.util.Optional;
 
 public interface DressingRepository extends JpaRepository<Dressing, Long> {
-    Optional<Dressing> findByTypeDressingIgnoreCase(String typeDressing);
+    Optional<Dressing> findByTypeDressing(String typeDressing);
+
 }

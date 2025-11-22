@@ -2,9 +2,9 @@ package um.edu.demospringum.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import um.edu.demospringum.entities.Products.Dressing;
-import um.edu.demospringum.entities.Products.Product;
-import um.edu.demospringum.entities.Products.Topping;
+import lombok.Getter;
+import lombok.Setter;
+import um.edu.demospringum.entities.Products.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,6 +13,9 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "creation")
+
+@Getter
+@Setter
 public class Creation {
 
     @Id
@@ -46,11 +49,13 @@ public class Creation {
 
 
     @Column(nullable = false)
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime creationDate;
 
     @Column(nullable = false)
     private boolean favourite = false;
 
     @OneToMany(mappedBy = "creation")
     private List<ClientOrder> orders;
+
+
 }

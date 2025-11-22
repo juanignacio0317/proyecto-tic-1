@@ -3,6 +3,8 @@ package um.edu.demospringum.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import um.edu.demospringum.entities.Products.Beverage;
+import um.edu.demospringum.entities.Products.SideOrder;
 
 import java.time.LocalDateTime;
 
@@ -26,8 +28,23 @@ public class ClientOrder {
     private Creation creation;
 
     @Column(nullable = false)
-    private LocalDateTime fechaPedido;
+    private LocalDateTime orderDate;
 
     @Column(nullable = false)
-    private String status;
+    private String orderStatus;
+
+    @Column
+    private String orderAddress;
+
+
+    @ManyToOne
+    @JoinColumn(name = "beverageId")
+    private Beverage beverage;
+
+    @ManyToOne
+    @JoinColumn(name = "sideOrderId")
+    private SideOrder sideOrder;
+
+
+
 }
