@@ -14,6 +14,7 @@ import um.edu.demospringum.entities.Products.Dressing;
 import um.edu.demospringum.exceptions.ExistingIngredient;
 import um.edu.demospringum.exceptions.IngredientNotFound;
 import um.edu.demospringum.servicies.IngredientService;
+import um.edu.demospringum.servicies.ProductService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,6 +26,8 @@ public class IngredientAdminController {
 
     @Autowired
     private IngredientService ingredientService;
+    @Autowired
+    private ProductService productService;
 
     // ==================== BREADS ====================
 
@@ -183,14 +186,14 @@ public class IngredientAdminController {
 
     @GetMapping("/toppings")
     public ResponseEntity<List<IngredientsDto>> getAllToppings() {
-        return ResponseEntity.ok(ingredientService.listToppings());
+        return ResponseEntity.ok(productService.listToppings());
     }
 
     @PostMapping("/toppings")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createTopping(@RequestBody IngredientsDto dto) {
         try {
-            Topping newTopping = ingredientService.addTopping(
+            Topping newTopping = productService.addTopping(
                     dto.getType(),
                     dto.isAvailable(),
                     dto.getPrice()
@@ -210,7 +213,7 @@ public class IngredientAdminController {
             @PathVariable String type,
             @RequestParam boolean available) {
         try {
-            ingredientService.updateAvailabilityTopping(type, available);
+            productService.updateAvailabilityTopping(type, available);
             return ResponseEntity.ok().body("Disponibilidad actualizada");
         } catch (IngredientNotFound e) {
             return ResponseEntity.notFound().build();
@@ -223,7 +226,7 @@ public class IngredientAdminController {
             @PathVariable String type,
             @RequestParam BigDecimal price) {
         try {
-            ingredientService.updatePriceTopping(type, price);
+            productService.updatePriceTopping(type, price);
             return ResponseEntity.ok().body("Precio actualizado");
         } catch (IngredientNotFound e) {
             return ResponseEntity.notFound().build();
@@ -234,14 +237,14 @@ public class IngredientAdminController {
 
     @GetMapping("/dressings")
     public ResponseEntity<List<IngredientsDto>> getAllDressings() {
-        return ResponseEntity.ok(ingredientService.listDressings());
+        return ResponseEntity.ok(productService.listDressings());
     }
 
     @PostMapping("/dressings")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createDressing(@RequestBody IngredientsDto dto) {
         try {
-            Dressing newDressing = ingredientService.addDressing(
+            Dressing newDressing = productService.addDressing(
                     dto.getType(),
                     dto.isAvailable(),
                     dto.getPrice()
@@ -261,7 +264,7 @@ public class IngredientAdminController {
             @PathVariable String type,
             @RequestParam boolean available) {
         try {
-            ingredientService.updateAvailabilityDressing(type, available);
+            productService.updateAvailabilityDressing(type, available);
             return ResponseEntity.ok().body("Disponibilidad actualizada");
         } catch (IngredientNotFound e) {
             return ResponseEntity.notFound().build();
@@ -274,7 +277,7 @@ public class IngredientAdminController {
             @PathVariable String type,
             @RequestParam BigDecimal price) {
         try {
-            ingredientService.updatePriceDressing(type, price);
+            productService.updatePriceDressing(type, price);
             return ResponseEntity.ok().body("Precio actualizado");
         } catch (IngredientNotFound e) {
             return ResponseEntity.notFound().build();

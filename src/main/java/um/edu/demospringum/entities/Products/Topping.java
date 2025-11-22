@@ -32,26 +32,12 @@ public class Topping implements Serializable, Ingredient {
         return typeTopping;
     }
 
-    @Column(nullable = false, scale = 2)
-    private BigDecimal toppingPrice;
-
 
     @Column(nullable = false)
     private boolean toppingAvailability;
 
 
 
-    public String getType(){
-        return typeTopping;
-    }
-
-    public boolean getAvailability(){
-        return toppingAvailability;
-    }
-
-    public BigDecimal getPrice(){
-        return toppingPrice;
-    }
     @Override
     public boolean getAvailability() {
         return toppingAvailability;

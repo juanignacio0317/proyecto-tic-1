@@ -2,7 +2,7 @@ package um.edu.demospringum.servicies;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import um.edu.demospringum.dtos.IngredientsDto;
+import um.edu.demospringum.dto.IngredientsDto;
 import um.edu.demospringum.entities.Products.*;
 import um.edu.demospringum.exceptions.ExistingIngredient;
 import um.edu.demospringum.exceptions.IngredientNotFound;

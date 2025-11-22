@@ -2,7 +2,7 @@ package um.edu.demospringum.servicies;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import um.edu.demospringum.dtos.IngredientsDto;
+import um.edu.demospringum.dto.IngredientsDto;
 import um.edu.demospringum.entities.Burgingr.Bread;
 import um.edu.demospringum.entities.Burgingr.Meat;
 import um.edu.demospringum.entities.PizzaIngr.Cheese;
@@ -12,6 +12,7 @@ import um.edu.demospringum.entities.PizzaIngr.Size;
 import um.edu.demospringum.exceptions.ExistingIngredient;
 import um.edu.demospringum.exceptions.IngredientNotFound;
 import um.edu.demospringum.repositories.ingredientesRepo.*;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +22,16 @@ public class IngredientService {
 
     @Autowired
     private BreadRepository breadRepository;
+    @Autowired
     private MeatRepository meatRepository;
+    @Autowired
     private DoughRepository doughRepository;
+    @Autowired
     private SauceRepository sauceRepository;
+    @Autowired
     private SizeRepository sizeRepository;
+    @Autowired
     private CheeseRepository cheeseRepository;
-
 
     public IngredientService(BreadRepository breadRepository, MeatRepository meatRepository, DoughRepository doughRepository, SauceRepository sauceRepository, SizeRepository sizeRepository, CheeseRepository cheeseRepository){
         this.breadRepository = breadRepository;
@@ -35,7 +40,6 @@ public class IngredientService {
         this.sauceRepository = sauceRepository;
         this.sizeRepository = sizeRepository;
         this.cheeseRepository = cheeseRepository;
-
     }
 
 

@@ -1,11 +1,10 @@
 package um.edu.demospringum.servicies;
 
 import jakarta.transaction.Transactional;
-import org.hibernate.query.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import um.edu.demospringum.dtos.BurgerCreationRequest;
-import um.edu.demospringum.dtos.PizzaCreationRequest;
+import um.edu.demospringum.dto.BurgerCreationRequest;
+import um.edu.demospringum.dto.PizzaCreationRequest;
 import um.edu.demospringum.entities.Burgingr.Bread;
 import um.edu.demospringum.entities.Burgingr.Meat;
 import um.edu.demospringum.entities.Client;
@@ -162,7 +161,7 @@ public class CreationService {
         newCreation.setClient(optionalClient.get());
 
         //verifico que la creacion no haya ya sido creada por el cliente
-        Optional<Creation> optionalCreation = creationRepository.findByUserIdAndPizza(pizzaCreated.getUserId(), newPizza);
+        Optional<Creation> optionalCreation = creationRepository.findByClientIdAndProductId(pizzaCreated.getUserId(), newPizza.getProductId());
         if (optionalCreation.isEmpty() ||
                 listsComparison(optionalCreation.get().getToppings(), toppingsList)){
             creationRepository.save(newCreation);
@@ -216,7 +215,7 @@ public class CreationService {
 
         //busco si la pizza ya ha sido creada
 
-        Optional<Burger> optionalBurger = burgerRepository.findByBreadAndMeatAndCheese(optionalBread.get(), optionalMeat.get(), optionalCheese.get());
+        Optional<Burger> optionalBurger = burgerRepository.findByBurgerBreadAndBurgerMeatAndBurgerCheese(optionalBread.get(), optionalMeat.get(), optionalCheese.get());
 
         //si es la primera vez que se crea la guardo como una nueva pizza
         if (optionalBurger.isEmpty()) {
@@ -243,7 +242,7 @@ public class CreationService {
         newCreation.setClient(optionalClient.get());
 
         //verifico que la creacion no haya ya sido creada por el cliente
-        Optional<Creation> optionalCreation = creationRepository.findByUserIdAndBurger(burgerCreated.getUserId(), newBurger);
+        Optional<Creation> optionalCreation = creationRepository.findByClientIdAndProductId(burgerCreated.getUserId(), newBurger.getProductId());
         if (optionalCreation.isEmpty() ||
                 listsComparison(optionalCreation.get().getToppings(), toppingsList)  ||
                 listsComparison(optionalCreation.get().getDressings(), dressingsList)) {
@@ -262,7 +261,7 @@ public class CreationService {
 
     public void addBeverage(Long clientOrderId, String beverage) throws OrderNotFound, IngredientNotFound {
         Optional<Beverage> optionalBeverage = beverageRepository.findByTypeBeverageIgnoreCase(beverage);
-        Optional<ClientOrder> optionalClientOrder = clientOrderRepository.findByClientOrderId(clientOrderId);
+        Optional<ClientOrder> optionalClientOrder = clientOrderRepository.findById(clientOrderId);
 
         if (optionalBeverage.isEmpty()) {
             throw new IngredientNotFound("Type of beverage was not found");
@@ -277,7 +276,7 @@ public class CreationService {
 
     public void addSideOrder(Long clientOrderId, String sideOrder) throws OrderNotFound, IngredientNotFound {
         Optional<SideOrder> optionalSideOrder = sideOrderRepository.findByTypeSideOrderIgnoreCase(sideOrder);
-        Optional<ClientOrder> optionalClientOrder = clientOrderRepository.findByClientOrderId(clientOrderId);
+        Optional<ClientOrder> optionalClientOrder = clientOrderRepository.findById(clientOrderId);
 
         if (optionalSideOrder.isEmpty()) {
             throw new IngredientNotFound("Type of beverage was not found");
@@ -291,7 +290,7 @@ public class CreationService {
     }
 
     public void selectOrderAddress(Long clientOrderId, String address) throws OrderNotFound {
-        Optional<ClientOrder> optionalClientOrder = clientOrderRepository.findByClientOrderId(clientOrderId);
+        Optional<ClientOrder> optionalClientOrder = clientOrderRepository.findById(clientOrderId);
 
         if (optionalClientOrder.isEmpty()) {
             throw new OrderNotFound("The order was not found");

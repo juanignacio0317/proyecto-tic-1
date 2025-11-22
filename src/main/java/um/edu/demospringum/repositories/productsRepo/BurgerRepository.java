@@ -13,5 +13,5 @@ import um.edu.demospringum.entities.Products.Pizza;
 import java.util.Optional;
 
 public interface BurgerRepository extends JpaRepository<Burger, Long> {
-    Optional<Burger> findByBreadAndMeatAndCheese(Bread bread, Meat meat, Cheese cheese);
+    Optional<Burger> findByBurgerBreadAndBurgerMeatAndBurgerCheese(Bread burguerbread, Meat burguermeat, Cheese burguercheese);
 }

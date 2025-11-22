@@ -4,7 +4,7 @@ package um.edu.demospringum.servicies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import um.edu.demospringum.dtos.TopProductDto;
+import um.edu.demospringum.dto.TopProductDto;
 import um.edu.demospringum.entities.Client;
 import um.edu.demospringum.entities.ClientOrder;
 import um.edu.demospringum.entities.Creation;
@@ -153,10 +153,10 @@ public class ProductsDataService {
 
         if (product instanceof Pizza pizza) {
             dto.setProductType("pizza");
-            dto.setDough(pizza.getPizzaDough().getType());
-            dto.setSize(pizza.getPizzaSize().getType());
-            dto.setSauce(pizza.getPizzaSauce().getType());
-            dto.setPizzaCheese(pizza.getPizzaCheese().getType());
+            dto.setDough(pizza.getDough().getType());
+            dto.setSize(pizza.getSize().getType());
+            dto.setSauce(pizza.getSauce().getType());
+            dto.setPizzaCheese(pizza.getCheese().getType());
         }
         else if (product instanceof Burger burger) {
             dto.setProductType("burger");
