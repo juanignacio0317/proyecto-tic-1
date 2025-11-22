@@ -38,7 +38,12 @@ public class ProductService {
     private <T extends Ingredient> List<IngredientsDto> listMapToDto(List<T> ingredients) {
         List<IngredientsDto> ingredientAvailability = new ArrayList<>();
         for (int ingredient = 0; ingredient < ingredients.size(); ingredient++){
-            ingredientAvailability.add(new IngredientsDto(ingredients.get(ingredient).getType(), ingredients.get(ingredient).getAvailability(), ingredients.get(ingredient).getPrice()));
+            ingredientAvailability.add(new IngredientsDto(
+                    ingredients.get(ingredient).getId(),
+                    ingredients.get(ingredient).getType(),
+                    ingredients.get(ingredient).getAvailability(),
+                    ingredients.get(ingredient).getPrice()
+            ));
         }
         return ingredientAvailability;
     }

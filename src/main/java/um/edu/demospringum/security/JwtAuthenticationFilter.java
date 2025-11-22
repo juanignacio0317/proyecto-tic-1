@@ -30,6 +30,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+
+        if (!path.startsWith("/api/admin/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+
         final String authorizationHeader = request.getHeader("Authorization");
 
         String username = null;
@@ -40,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwt = authorizationHeader.substring(7);
             try {
                 username = jwtUtil.extractUsername(jwt);
-                role = jwtUtil.extractRole(jwt); // NUEVO: Extraer el rol
+                role = jwtUtil.extractRole(jwt);
             } catch (Exception e) {
                 logger.error("Error al extraer información del token", e);
             }
@@ -50,14 +59,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
-                // Crear autoridad basada en el rol
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
 
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
-                                Collections.singletonList(authority) // MODIFICADO: Incluir el rol
+                                Collections.singletonList(authority)
                         );
 
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

@@ -29,7 +29,10 @@ public class SideOrder implements Serializable, Ingredient {
     @Column(nullable = false, scale = 2)
     private BigDecimal sideOrderPrice;
 
-
+    @Override
+    public int getId() {
+        return this.sideOrderId;
+    }
     public String getType(){
         return typeSideOrder;
     }

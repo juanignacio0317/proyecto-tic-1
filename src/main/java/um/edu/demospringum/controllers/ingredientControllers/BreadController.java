@@ -13,7 +13,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/breads")
+@RequestMapping("/api/breads")
+@CrossOrigin(origins = "*")
 public class BreadController {
 
     private IngredientService ingredientService;
@@ -23,13 +24,14 @@ public class BreadController {
         this.ingredientService = ingredientService;
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<IngredientsDto>> listBreads() {
         return ResponseEntity.ok(ingredientService.listBreads());
     }
 
     @PostMapping("/create")
     public ResponseEntity<Bread> addBread(@RequestBody IngredientsDto dto) throws ExistingIngredient {
+        System.out.println("POST /api/breads/create llamado con: " + dto.getType());
         Bread newBread = ingredientService.addBread(dto.getType(), dto.isAvailable(), dto.getPrice());
         return ResponseEntity.ok(newBread);
     }

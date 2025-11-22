@@ -16,7 +16,6 @@ import java.util.List;
 @Table(name = "meat")
 
 public class Meat implements Serializable, Ingredient {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int meatId;
@@ -35,7 +34,10 @@ public class Meat implements Serializable, Ingredient {
 
     @OneToMany
     private List<Burger> burgers;
-
+    @Override
+    public int getId() {
+        return this.meatId;
+    }
 
     public String getType(){
         return typeMeat;

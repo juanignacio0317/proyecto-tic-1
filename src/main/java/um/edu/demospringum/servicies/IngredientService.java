@@ -45,8 +45,13 @@ public class IngredientService {
 
     private <T extends Ingredient> List<IngredientsDto> listMapToDto(List<T> ingredients) {
         List<IngredientsDto> ingredientAvailability = new ArrayList<>();
-        for (int ingredient = 0; ingredient < ingredients.size(); ingredient++){
-            ingredientAvailability.add(new IngredientsDto(ingredients.get(ingredient).getType(), ingredients.get(ingredient).getAvailability(), ingredients.get(ingredient).getPrice()));
+        for (int ingredient = 0; ingredient < ingredients.size(); ingredient++) {
+            ingredientAvailability.add(new IngredientsDto(
+                    ingredients.get(ingredient).getId(),           // AGREGAR ID
+                    ingredients.get(ingredient).getType(),
+                    ingredients.get(ingredient).getAvailability(),
+                    ingredients.get(ingredient).getPrice()
+            ));
         }
         return ingredientAvailability;
     }
@@ -75,9 +80,7 @@ public class IngredientService {
 
 
 
-
-
-    private <T extends Ingredient> IngredientsDto addMapToDto(String newIngredient, boolean available, BigDecimal price, List<T> ingredients) throws  ExistingIngredient{
+    private <T extends Ingredient> IngredientsDto addMapToDto(String newIngredient, boolean available, BigDecimal price, List<T> ingredients) throws ExistingIngredient{
         for (int ingredient = 0; ingredient < ingredients.size(); ingredient++){
             if (ingredients.get(ingredient).getType().equalsIgnoreCase(newIngredient)){
                 throw new ExistingIngredient("This ingredient already exists");

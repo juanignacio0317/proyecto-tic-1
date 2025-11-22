@@ -1,19 +1,20 @@
 // src/services/ingredientService.js
-import { authFetch } from './authService';
-
-const API_URL = 'http://localhost:8080/api/admin/ingredients';
+const API_URL = 'http://localhost:8080/api';
 
 export const ingredientService = {
     // ==================== BREADS ====================
     async getAllBreads() {
-        const response = await authFetch(`${API_URL}/breads`);
+        const response = await fetch(`${API_URL}/breads`);
         if (!response.ok) throw new Error('Error al obtener panes');
         return response.json();
     },
 
     async createBread(data) {
-        const response = await authFetch(`${API_URL}/breads`, {
+        const response = await fetch(`${API_URL}/breads/create`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(data),
         });
         if (!response.ok) {
@@ -24,33 +25,44 @@ export const ingredientService = {
     },
 
     async updateBreadAvailability(type, available) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/breads/${encodeURIComponent(type)}/availability?available=${available}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar disponibilidad');
-        return response.json();
     },
 
     async updateBreadPrice(type, price) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/breads/${encodeURIComponent(type)}/price?price=${price}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar precio');
-        return response.json();
     },
 
     // ==================== MEATS ====================
     async getAllMeats() {
-        const response = await authFetch(`${API_URL}/meats`);
+        const response = await fetch(`${API_URL}/meats`);
         if (!response.ok) throw new Error('Error al obtener carnes');
         return response.json();
     },
 
     async createMeat(data) {
-        const response = await authFetch(`${API_URL}/meats`, {
+        const response = await fetch(`${API_URL}/meats/create`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(data),
         });
         if (!response.ok) {
@@ -61,33 +73,44 @@ export const ingredientService = {
     },
 
     async updateMeatAvailability(type, available) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/meats/${encodeURIComponent(type)}/availability?available=${available}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar disponibilidad');
-        return response.json();
     },
 
     async updateMeatPrice(type, price) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/meats/${encodeURIComponent(type)}/price?price=${price}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar precio');
-        return response.json();
     },
 
     // ==================== CHEESES ====================
     async getAllCheeses() {
-        const response = await authFetch(`${API_URL}/cheeses`);
+        const response = await fetch(`${API_URL}/cheeses`);
         if (!response.ok) throw new Error('Error al obtener quesos');
         return response.json();
     },
 
     async createCheese(data) {
-        const response = await authFetch(`${API_URL}/cheeses`, {
+        const response = await fetch(`${API_URL}/cheeses/create`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(data),
         });
         if (!response.ok) {
@@ -98,33 +121,44 @@ export const ingredientService = {
     },
 
     async updateCheeseAvailability(type, available) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/cheeses/${encodeURIComponent(type)}/availability?available=${available}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar disponibilidad');
-        return response.json();
     },
 
     async updateCheesePrice(type, price) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/cheeses/${encodeURIComponent(type)}/price?price=${price}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar precio');
-        return response.json();
     },
 
     // ==================== TOPPINGS ====================
     async getAllToppings() {
-        const response = await authFetch(`${API_URL}/toppings`);
+        const response = await fetch(`${API_URL}/toppings`);
         if (!response.ok) throw new Error('Error al obtener toppings');
         return response.json();
     },
 
     async createTopping(data) {
-        const response = await authFetch(`${API_URL}/toppings`, {
+        const response = await fetch(`${API_URL}/toppings/create`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(data),
         });
         if (!response.ok) {
@@ -135,33 +169,44 @@ export const ingredientService = {
     },
 
     async updateToppingAvailability(type, available) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/toppings/${encodeURIComponent(type)}/availability?available=${available}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar disponibilidad');
-        return response.json();
     },
 
     async updateToppingPrice(type, price) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/toppings/${encodeURIComponent(type)}/price?price=${price}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar precio');
-        return response.json();
     },
 
     // ==================== DRESSINGS (SALSAS) ====================
     async getAllDressings() {
-        const response = await authFetch(`${API_URL}/dressings`);
+        const response = await fetch(`${API_URL}/dressings`);
         if (!response.ok) throw new Error('Error al obtener salsas');
         return response.json();
     },
 
     async createDressing(data) {
-        const response = await authFetch(`${API_URL}/dressings`, {
+        const response = await fetch(`${API_URL}/dressings/create`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(data),
         });
         if (!response.ok) {
@@ -172,20 +217,28 @@ export const ingredientService = {
     },
 
     async updateDressingAvailability(type, available) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/dressings/${encodeURIComponent(type)}/availability?available=${available}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar disponibilidad');
-        return response.json();
     },
 
     async updateDressingPrice(type, price) {
-        const response = await authFetch(
+        const response = await fetch(
             `${API_URL}/dressings/${encodeURIComponent(type)}/price?price=${price}`,
-            { method: 'PUT' }
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
         );
         if (!response.ok) throw new Error('Error al actualizar precio');
-        return response.json();
     },
 };

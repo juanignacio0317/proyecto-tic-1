@@ -14,7 +14,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sizes")
+@RequestMapping("/api/sizes")
+@CrossOrigin(origins = "*")
 public class SizeController {
 
     private IngredientService ingredientService;
@@ -24,7 +25,7 @@ public class SizeController {
         this.ingredientService = ingredientService;
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<IngredientsDto>> listSizes() {
         return ResponseEntity.ok(ingredientService.listSizes());
     }

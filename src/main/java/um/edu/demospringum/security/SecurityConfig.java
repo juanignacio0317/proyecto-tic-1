@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true) // IMPORTANTE: Habilita @PreAuthorize
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Autowired
@@ -38,14 +38,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Endpoints públicos
-                        .requestMatchers("/api/auth/**").permitAll()
-
-                        // Endpoints de admin - SOLO para usuarios con rol ADMIN
+                        // Solo /api/admin/** requiere autenticación de ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Cualquier otra petición requiere autenticación
-                        .anyRequest().authenticated()
+                        // Todo lo demás es público
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

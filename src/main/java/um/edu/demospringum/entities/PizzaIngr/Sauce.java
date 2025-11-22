@@ -17,6 +17,7 @@ import java.util.List;
 @Setter
 public class Sauce implements Serializable, Ingredient {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int sauceId;
@@ -32,6 +33,11 @@ public class Sauce implements Serializable, Ingredient {
 
     @OneToMany
     private List<Pizza> pizzas;
+
+    @Override
+    public int getId() {
+        return this.sauceId;
+    }
 
     public String getType(){
         return typeSauce;

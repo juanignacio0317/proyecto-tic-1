@@ -29,6 +29,10 @@ public class Beverage implements Serializable, Ingredient {
     @Column(nullable = false, scale = 2)
     private BigDecimal beveragePrice;
 
+    @Override
+    public int getId() {
+        return this.beverageId;
+    }
 
 
     public String getType(){

@@ -16,7 +16,7 @@ public class Dressing  implements Serializable, Ingredient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long dressingId;
+    private int dressingId;
 
     @Column(nullable = false)
     private String typeDressing;
@@ -27,6 +27,11 @@ public class Dressing  implements Serializable, Ingredient {
 
     @Column(nullable = false)
     private boolean dressingAvailability;
+
+    @Override
+    public int getId() {
+        return this.dressingId;
+    }
 
 
 

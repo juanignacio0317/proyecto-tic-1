@@ -28,7 +28,12 @@ public class Cheese implements Ingredient {
     @Column(nullable = false)
     private BigDecimal cheesePrice;
 
-    // Implementación de la interfaz Ingredient
+    @Override
+    public int getId() {
+        return this.cheeseId;
+    }
+
+
     @Override
     public String getType() {
         return typeCheese;

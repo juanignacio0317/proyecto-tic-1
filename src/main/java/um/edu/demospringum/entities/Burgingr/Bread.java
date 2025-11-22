@@ -31,6 +31,11 @@ public class Bread implements Serializable, Ingredient {
     private BigDecimal breadPrice;
 
 
+    @Override
+    public int getId() {
+        return this.breadId;
+    }
+
     @OneToMany
     private List<Burger> burgers;
 

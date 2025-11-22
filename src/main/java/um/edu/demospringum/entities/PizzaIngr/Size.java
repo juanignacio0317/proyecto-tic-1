@@ -18,6 +18,7 @@ import java.util.List;
 @Setter
 public class Size implements Serializable, Ingredient {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int sizeId;
@@ -34,6 +35,11 @@ public class Size implements Serializable, Ingredient {
     @OneToMany
     private List<Pizza> pizzas;
 
+
+    @Override
+    public int getId() {
+        return this.sizeId;
+    }
 
     public String getType(){
         return typeSize;

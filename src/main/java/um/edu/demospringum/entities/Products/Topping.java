@@ -16,7 +16,7 @@ public class Topping implements Serializable, Ingredient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long toppingId;
+    private int toppingId;
 
     @Column(nullable = false, unique = true)
     private String typeTopping;
@@ -31,7 +31,10 @@ public class Topping implements Serializable, Ingredient {
     public String getType() {
         return typeTopping;
     }
-
+    @Override
+    public int getId() {
+        return this.toppingId;
+    }
 
     @Column(nullable = false)
     private boolean toppingAvailability;
