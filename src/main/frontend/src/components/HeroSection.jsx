@@ -1,14 +1,14 @@
 
 import BurgerSVG from '../assets/hero-burger.svg?url'
 import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom' // ← Agregar esto
+import { Link } from 'react-router-dom'
 
 export default function HeroSection() {
   useEffect(() => {
     if (window.AOS) {
       window.AOS.init({
         duration: 1000,
-        easing: 'ease-out',
+        easing: 'ease-out', //api para las animaciones
         once: true,
         offset: 100,
       })
@@ -17,6 +17,7 @@ export default function HeroSection() {
   return (
       <section
           id="inicio"
+
           className="bg-[#1D7B74] text-[#FDF8E7] py-5"
       >
         <div className="container">
@@ -29,9 +30,10 @@ export default function HeroSection() {
                 Elegí tamaño, ingredientes y salsas. En minutos, tu creación única está en camino.
               </p>
 
+              {/* Botones */}
               <div className="d-flex gap-3">
                 <Link
-                    to="/personaliza"  // ← Cambiar href por to
+                    to="/personaliza"
                     className="btn fw-semibold btn-lg text-[#1B7F79] border-0 shadow-sm"
                     style={{
                       backgroundColor: '#F2C94C',

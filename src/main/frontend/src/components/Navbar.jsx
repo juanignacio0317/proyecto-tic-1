@@ -28,11 +28,11 @@ export default function Navbar() {
 
 
   const items = [
-    { label: "Inicio", href: "#inicio" },
+    { label: "Inicio", href: "#inicio", icon: "home"},
 
     user
-        ? { label: "Mis Creaciones", to: "/mis-creaciones", isRoute: true }
-        : { label: "Creaciones", href: "#creaciones" },
+        ? { label: "Mis Creaciones", to: "/mis-creaciones", isRoute: true, icon: "local_pizza"}
+        : { label: "Creaciones", href: "#creaciones", icon: "local_pizza"},
 
     // Agregar Mis Pedidos solo si el usuario está logueado
     ...(user
@@ -47,8 +47,8 @@ export default function Navbar() {
 
     user
         ? { label: `Hola, ${user.name}`, isUser: true }
-        : { label: "Inicio de sesión", to: "/login", isRoute: true },
-    { label: "Carrito", to: "/carrito", isRoute: true },
+        : { label: "Inicio de sesión", to: "/login", isRoute: true, icon: "person"},
+    { label: "Carrito", to: "/carrito", isRoute: true, icon: "shopping_cart"  },
   ];
 
   const linkBase =
@@ -135,5 +135,5 @@ export default function Navbar() {
           </nav>
         </div>
       </header>
-  );
+  )
 }
