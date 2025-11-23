@@ -17,7 +17,6 @@ export default function PersonalizaPage() {
         salsas: []
     });
 
-    // Opciones disponibles (ahora se cargan del backend)
     const [opciones, setOpciones] = useState({
         panes: [],
         carnes: [],
@@ -25,8 +24,6 @@ export default function PersonalizaPage() {
         toppings: [],
         salsas: []
     });
-
-    // Colores por defecto para la visualización
     const coloresPorDefecto = {
         pan: '#D4A574',
         carne: '#8B4513',
@@ -35,8 +32,7 @@ export default function PersonalizaPage() {
         salsa: '#DC143C'
     };
 
-    // Función para asignar colores según el nombre del ingrediente
-    // Función para asignar colores según el nombre del ingrediente
+
     const asignarColor = (nombre, tipo) => {
         // Manejar valores undefined o null
         if (!nombre) {
@@ -234,21 +230,61 @@ export default function PersonalizaPage() {
         try {
             setLoading(true);
 
-            // Preparar toppings (incluye queso y vegetales)
-            const toppingIds = [...burger.toppings];
-            if (burger.queso) {
-                toppingIds.push(burger.queso);
+            // OBTENER EL USER ID CON LOGS DE DEBUG
+            const userId = authService.getUserId();
+            console.log('===== DEBUG USERID =====');
+            console.log('userId obtenido:', userId);
+            console.log('tipo de userId:', typeof userId);
+            console.log('token:', localStorage.getItem('token'));
+            console.log('userId en localStorage:', localStorage.getItem('userId'));
+            console.log('========================');
+
+            if (!userId) {
+                alert('No se pudo obtener tu ID de usuario. Por favor, inicia sesión nuevamente.');
+                navigate('/login');
+                return;
             }
 
-            // Preparar datos para enviar al backend
+            // Convertir IDs a nombres
+            const panSeleccionado = opciones.panes.find(p => p.id === burger.pan);
+            const carneSeleccionada = opciones.carnes.find(c => c.id === burger.carne);
+            const quesoSeleccionado = burger.queso ? opciones.quesos.find(q => q.id === burger.queso) : null;
+
+            console.log('Pan seleccionado:', panSeleccionado);
+            console.log('Carne seleccionada:', carneSeleccionada);
+            console.log('Queso seleccionado:', quesoSeleccionado);
+
+            // Obtener nombres de toppings (vegetales)
+            const toppingNombres = burger.toppings.map(id => {
+                const topping = opciones.toppings.find(t => t.id === id);
+                return topping ? topping.nombre : null;
+            }).filter(nombre => nombre !== null);
+
+            // Obtener nombres de salsas
+            const salsaNombres = burger.salsas.map(id => {
+                const salsa = opciones.salsas.find(s => s.id === id);
+                return salsa ? salsa.nombre : null;
+            }).filter(nombre => nombre !== null);
+
+            // Si hay queso seleccionado, agregarlo a los toppings
+            if (quesoSeleccionado) {
+                toppingNombres.push(quesoSeleccionado.nombre);
+            }
+
+            // Preparar datos en el formato que espera el backend
             const burgerData = {
-                breadId: parseInt(burger.pan),
-                meatId: parseInt(burger.carne),
-                toppingIds: toppingIds.map(id => parseInt(id)),
-                dressingIds: burger.salsas.map(id => parseInt(id))
+                userId: parseInt(userId),
+                bread: panSeleccionado.nombre,
+                meat: carneSeleccionada.nombre,
+                cheese: quesoSeleccionado ? quesoSeleccionado.nombre : null,
+                toppings: toppingNombres,
+                dressings: salsaNombres,
+                orderDate: new Date().toISOString()
             };
 
-            console.log('Enviando hamburguesa:', burgerData);
+            console.log('===== DATOS A ENVIAR =====');
+            console.log('burgerData completo:', JSON.stringify(burgerData, null, 2));
+            console.log('==========================');
 
             // Enviar al backend
             const response = await burgerService.createBurger(burgerData);
@@ -262,10 +298,10 @@ export default function PersonalizaPage() {
                 salsas: []
             });
 
-            alert(`¡Hamburguesa guardada exitosamente! 🍔\nPrecio total: $${response.price}`);
+            alert(`¡Hamburguesa guardada exitosamente! 🍔`);
 
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error completo:', error);
             alert('Error al guardar la hamburguesa: ' + error.message);
         } finally {
             setLoading(false);

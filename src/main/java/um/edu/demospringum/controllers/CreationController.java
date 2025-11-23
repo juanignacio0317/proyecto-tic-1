@@ -13,7 +13,7 @@ import um.edu.demospringum.repositories.CreationRepository;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/creations")
+@RequestMapping("/api/create")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 public class CreationController {
 

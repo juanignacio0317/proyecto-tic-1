@@ -22,6 +22,6 @@ public class Burger extends Product {
     private Meat burgerMeat;
 
     @ManyToOne
-    @JoinColumn(name = "cheeseId")
+    @JoinColumn(name = "cheeseId", nullable = true)
     private Cheese burgerCheese;
 }

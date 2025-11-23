@@ -11,10 +11,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuthResponse {
     private String token;
+    private Long userId;
     private String email;
     private String name;
     private String surname;
-    private String role; // AGREGADO
+    private String role;
 
     // Constructor original para compatibilidad
     public AuthResponse(String token, String email, String name, String surname) {
@@ -22,6 +23,6 @@ public class AuthResponse {
         this.email = email;
         this.name = name;
         this.surname = surname;
-        this.role = "USER"; // Por defecto
+        this.role = "USER";
     }
 }

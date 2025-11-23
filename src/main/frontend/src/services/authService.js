@@ -62,12 +62,23 @@ export const authService = {
             console.log('✅ Registro exitoso');
             if (data.token) {
                 localStorage.setItem('token', data.token);
+
+                // ← AGREGAR: Guardar userId si viene en la respuesta
+                if (data.userId) {
+                    localStorage.setItem('userId', data.userId.toString());
+                    console.log('✅ userId guardado:', data.userId);
+                }
+
                 localStorage.setItem('user', JSON.stringify({
                     email: data.email,
                     name: data.name,
                     surname: data.surname,
-                    role: data.role || 'USER' // AGREGADO
+                    role: data.role || 'USER'
                 }));
+
+                if (data.role) {
+                    localStorage.setItem('userRole', data.role);
+                }
             }
 
             return data;
@@ -98,7 +109,9 @@ export const authService = {
 
             if (contentType && contentType.includes("application/json")) {
                 data = await response.json();
-                console.log('📥 Respuesta JSON:', data);
+                console.log('📥 Respuesta JSON completa:', data);
+                console.log('📥 data.userId:', data.userId);
+                console.log('📥 data.role:', data.role);
             } else {
                 data = await response.text();
                 console.log('📥 Respuesta texto:', data);
@@ -113,12 +126,39 @@ export const authService = {
             console.log('✅ Login exitoso');
             if (data.token) {
                 localStorage.setItem('token', data.token);
+                console.log('✅ Token guardado');
+
+
+                if (data.userId) {
+                    localStorage.setItem('userId', data.userId.toString());
+                    console.log('✅ userId guardado en localStorage:', data.userId);
+                } else {
+                    console.error('❌ NO SE RECIBIÓ userId del backend');
+                    console.error('❌ Respuesta completa:', data);
+                }
+
+
                 localStorage.setItem('user', JSON.stringify({
                     email: data.email,
                     name: data.name,
                     surname: data.surname,
-                    role: data.role || 'USER' // AGREGADO
+                    role: data.role || 'USER',
+                    userId: data.userId
                 }));
+
+                // Guardar role
+                if (data.role) {
+                    localStorage.setItem('userRole', data.role);
+                    console.log('✅ userRole guardado:', data.role);
+                }
+
+                // Verificación final
+                console.log('===== VERIFICACIÓN localStorage =====');
+                console.log('token:', localStorage.getItem('token') ? '✅ Existe' : '❌ No existe');
+                console.log('userId:', localStorage.getItem('userId'));
+                console.log('userRole:', localStorage.getItem('userRole'));
+                console.log('user:', localStorage.getItem('user'));
+                console.log('=====================================');
             }
 
             return data;
@@ -132,6 +172,8 @@ export const authService = {
     logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userRole');
     },
 
     getCurrentUser() {
@@ -143,14 +185,58 @@ export const authService = {
         return localStorage.getItem('token');
     },
 
-    isAuthenticated() {
-        return !!this.getToken();
+    isAuthenticated: () => {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const expiration = payload.exp * 1000;
+            return Date.now() < expiration;
+        } catch (error) {
+            return false;
+        }
     },
 
-    // NUEVO: Verificar si el usuario es admin
     isAdmin() {
         const user = this.getCurrentUser();
         return user && user.role === 'ADMIN';
+    },
+
+    getUserId: () => {
+        const userId = localStorage.getItem('userId');
+        if (userId && userId !== 'null' && userId !== 'undefined') {
+            console.log('getUserId() retorna desde localStorage:', userId);
+            return userId;
+        }
+
+        const user = authService.getCurrentUser();
+        if (user && user.userId) {
+            console.log('getUserId() retorna desde user object:', user.userId);
+            return user.userId.toString();
+        }
+
+        // Como último recurso, intentar decodificar del token
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload.userId) {
+                    console.log('getUserId() retorna desde token:', payload.userId);
+                    return payload.userId.toString();
+                }
+            } catch (error) {
+                console.error('Error decodificando token:', error);
+            }
+        }
+
+        console.error('❌ No se pudo obtener userId de ninguna fuente');
+        return null;
+    },
+
+    getUserRole: () => {
+        const role = localStorage.getItem('userRole');
+        return role;
     }
 };
 

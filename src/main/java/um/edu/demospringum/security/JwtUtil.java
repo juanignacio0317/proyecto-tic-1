@@ -36,7 +36,6 @@ public class JwtUtil {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // NUEVO: Método para extraer el rol del token
     public String extractRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
@@ -58,15 +57,13 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    // MODIFICADO: Ahora busca el usuario y obtiene su rol
+
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
 
-        // Buscar el usuario en la base de datos para obtener su rol
         UserData user = userDataRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Agregar el rol a los claims
         claims.put("role", user.getRole());
 
         return createToken(claims, username);

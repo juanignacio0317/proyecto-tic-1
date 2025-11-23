@@ -6,6 +6,7 @@ import lombok.Setter;
 import um.edu.demospringum.entities.Creation;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -24,7 +25,7 @@ public abstract class Product implements Serializable {
     private String type;                  //type indica si es pizza o burger
 
     @Column(nullable = false)
-    private double precio;
+    private BigDecimal price;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Creation> creations;

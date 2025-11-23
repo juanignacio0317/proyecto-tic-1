@@ -5,7 +5,7 @@ const API_URL = 'http://localhost:8080/api';
 
 export const burgerService = {
     async createBurger(burgerData) {
-        const response = await authFetch(`${API_URL}/burgers/create`, {
+        const response = await authFetch('http://localhost:8080/api/create/burger', {
             method: 'POST',
             body: JSON.stringify(burgerData)
         });
@@ -28,7 +28,6 @@ export const burgerService = {
         return await response.json();
     },
 
-    // Métodos para obtener ingredientes individuales
     async getAllBreads() {
         const response = await fetch(`${API_URL}/breads`);
         if (!response.ok) {

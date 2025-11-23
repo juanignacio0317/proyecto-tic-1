@@ -86,6 +86,7 @@ public class AuthController {
 
             return ResponseEntity.ok(new AuthResponse(
                     token,
+                    client.getUserId(),
                     client.getEmail(),
                     client.getName(),
                     client.getSurname(),
@@ -116,10 +117,11 @@ public class AuthController {
 
             return ResponseEntity.ok(new AuthResponse(
                     token,
+                    userData.getUserId(),
                     userData.getEmail(),
                     userData.getName(),
                     userData.getSurname(),
-                    userData.getRole() // AGREGADO
+                    userData.getRole()
             ));
 
         } catch (BadCredentialsException e) {

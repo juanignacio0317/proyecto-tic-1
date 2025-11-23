@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import um.edu.demospringum.entities.Client;
 import um.edu.demospringum.entities.Creation;
+import um.edu.demospringum.entities.Products.Product;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,4 +24,7 @@ public interface CreationRepository extends JpaRepository<Creation, Long> {
     @Query(value = "SELECT * FROM creation WHERE client_id = :clientId",
             nativeQuery = true)
     List<Creation> findByClientId(@Param("clientId") Long clientId);
+
+    // ✅ Agregar este método
+    List<Creation> findByClientAndProduct(Client client, Product product);
 }

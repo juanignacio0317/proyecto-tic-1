@@ -24,6 +24,8 @@ import um.edu.demospringum.repositories.CreationRepository;
 import um.edu.demospringum.repositories.productsRepo.*;
 import um.edu.demospringum.repositories.ingredientesRepo.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -181,18 +183,15 @@ public class CreationService {
 
     public BurgerCreationRequest createBurger(BurgerCreationRequest burgerCreated) throws IngredientNotFound, ClientNotFound {
 
-        //busco si existe el cliente
+        // 1. Buscar el cliente
         Optional<Client> optionalClient = clientRepository.findById(burgerCreated.getUserId());
-
         if (optionalClient.isEmpty()) {
             throw new ClientNotFound("Client was not found");
         }
 
-        //busco si existen los ingredientes
+        // 2. Buscar ingredientes obligatorios
         Optional<Bread> optionalBread = breadRepository.findByTypeBreadIgnoreCase(burgerCreated.getBread());
         Optional<Meat> optionalMeat = meatRepository.findByTypeMeatIgnoreCase(burgerCreated.getMeat());
-        Optional<Cheese> optionalCheese = cheeseRepository.findByTypeCheeseIgnoreCase(burgerCreated.getCheese());
-
 
         if (optionalBread.isEmpty()) {
             throw new IngredientNotFound("Bread type not found");
@@ -201,59 +200,136 @@ public class CreationService {
             throw new IngredientNotFound("Meat type not found");
         }
 
-        if (optionalCheese.isEmpty()) {
-            throw new IngredientNotFound("Cheese type not found");
+        // 3. Buscar queso (opcional)
+        Optional<Cheese> optionalCheese = Optional.empty();
+        String cheeseType = burgerCreated.getCheese();
+
+        if (cheeseType != null &&
+                !cheeseType.isEmpty() &&
+                !cheeseType.equalsIgnoreCase("null") &&
+                !cheeseType.equalsIgnoreCase("sin queso")) {
+
+            optionalCheese = cheeseRepository.findByTypeCheeseIgnoreCase(cheeseType);
+            if (optionalCheese.isEmpty()) {
+                throw new IngredientNotFound("Cheese type not found: " + cheeseType);
+            }
         }
 
-
-        //creo la nueva burger
-
-        Burger newBurger = new Burger();
-        newBurger.setBurgerBread(optionalBread.get());
-        newBurger.setBurgerMeat(optionalMeat.get());
-        newBurger.setBurgerCheese(optionalCheese.get());
-
-        //busco si la pizza ya ha sido creada
-
-        Optional<Burger> optionalBurger = burgerRepository.findByBurgerBreadAndBurgerMeatAndBurgerCheese(optionalBread.get(), optionalMeat.get(), optionalCheese.get());
-
-        //si es la primera vez que se crea la guardo como una nueva pizza
-        if (optionalBurger.isEmpty()) {
-            pizzaRepository.save(newBurger);
-        }
-
+        // 4. Cargar toppings
         List<Topping> toppingsList = new LinkedList<>();
-        burgerCreated.getToppings().forEach(s -> {
-            toppingRepository.findByTypeTopping(s).ifPresent(t -> toppingsList.add(t));
-        });
-
-        List<Dressing> dressingsList = new LinkedList<>();
-        burgerCreated.getDressings().forEach(d -> {
-            dressingRepository.findByTypeDressing(d).ifPresent(dressing -> dressingsList.add(dressing));
-        });
-
-        //creo la creacion
-        Creation newCreation = new Creation();
-        newCreation.setProduct(newBurger);
-        newCreation.setToppings(toppingsList);
-        newCreation.setDressings(dressingsList);
-        newCreation.setCreationDate(burgerCreated.getOrderDate());
-        newCreation.setFavourite(false);
-        newCreation.setClient(optionalClient.get());
-
-        //verifico que la creacion no haya ya sido creada por el cliente
-        Optional<Creation> optionalCreation = creationRepository.findByClientIdAndProductId(burgerCreated.getUserId(), newBurger.getProductId());
-        if (optionalCreation.isEmpty() ||
-                listsComparison(optionalCreation.get().getToppings(), toppingsList)  ||
-                listsComparison(optionalCreation.get().getDressings(), dressingsList)) {
-            creationRepository.save(newCreation);
+        BigDecimal toppingsPrice = BigDecimal.ZERO;
+        if (burgerCreated.getToppings() != null) {
+            for (String toppingName : burgerCreated.getToppings()) {
+                Optional<Topping> optionalTopping = toppingRepository.findByTypeTopping(toppingName);
+                if (optionalTopping.isPresent()) {
+                    Topping topping = optionalTopping.get();
+                    toppingsList.add(topping);
+                    toppingsPrice = toppingsPrice.add(topping.getPrice());
+                }
+            }
         }
 
+        // 5. Cargar dressings
+        List<Dressing> dressingsList = new LinkedList<>();
+        BigDecimal dressingsPrice = BigDecimal.ZERO;
+        if (burgerCreated.getDressings() != null) {
+            for (String dressingName : burgerCreated.getDressings()) {
+                Optional<Dressing> optionalDressing = dressingRepository.findByTypeDressing(dressingName);
+                if (optionalDressing.isPresent()) {
+                    Dressing dressing = optionalDressing.get();
+                    dressingsList.add(dressing);
+                    dressingsPrice = dressingsPrice.add(dressing.getPrice());
+                }
+            }
+        }
 
+        // 6. Calcular precio total
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        totalPrice = totalPrice.add(optionalBread.get().getPrice());
+        totalPrice = totalPrice.add(optionalMeat.get().getPrice());
+        if (optionalCheese.isPresent()) {
+            totalPrice = totalPrice.add(optionalCheese.get().getPrice());
+        }
+        totalPrice = totalPrice.add(toppingsPrice);
+        totalPrice = totalPrice.add(dressingsPrice);
+
+        // 7. Buscar o crear Burger (SOLO pan + carne + queso)
+        // ✅ CAMBIO: Usar findFirst para evitar error de múltiples resultados
+        Optional<Burger> optionalBurger = burgerRepository.findFirstByBurgerBreadAndBurgerMeatAndBurgerCheese(
+                optionalBread.get(),
+                optionalMeat.get(),
+                optionalCheese.orElse(null)
+        );
+
+        Burger burger;
+
+        if (optionalBurger.isPresent()) {
+            // Reutilizar burger existente
+            burger = optionalBurger.get();
+        } else {
+            // Crear nueva burger
+            burger = new Burger();
+            burger.setType("BURGER");
+
+
+            // Precio base (solo ingredientes principales)
+            BigDecimal basePrice = optionalBread.get().getPrice()
+                    .add(optionalMeat.get().getPrice());
+            if (optionalCheese.isPresent()) {
+                basePrice = basePrice.add(optionalCheese.get().getPrice());
+            }
+            burger.setPrice(basePrice);
+
+            burger.setBurgerBread(optionalBread.get());
+            burger.setBurgerMeat(optionalMeat.get());
+            if (optionalCheese.isPresent()) {
+                burger.setBurgerCheese(optionalCheese.get());
+            }
+
+            burger = burgerRepository.save(burger);
+        }
+
+        // 8. ✅ IMPORTANTE: Verificar si ya existe esta MISMA Creation para este cliente
+        // Buscar todas las creations de este cliente con este burger
+        List<Creation> existingCreations = creationRepository.findByClientAndProduct(
+                optionalClient.get(),
+                burger
+        );
+
+        Creation creation = null;
+        boolean creationExists = false;
+
+        // Verificar si alguna creation tiene los MISMOS toppings y dressings
+        for (Creation existingCreation : existingCreations) {
+            boolean sameToppings = !listsComparison(existingCreation.getToppings(), toppingsList);
+            boolean sameDressings = !listsComparison(existingCreation.getDressings(), dressingsList);
+
+            if (sameToppings && sameDressings) {
+                // Ya existe esta creation exacta para este cliente
+                creation = existingCreation;
+                creationExists = true;
+                break;
+            }
+        }
+
+        // 9. Crear nueva creation solo si NO existe
+        if (!creationExists) {
+            creation = new Creation();
+            creation.setProduct(burger);
+            creation.setToppings(toppingsList);
+            creation.setDressings(dressingsList);
+            creation.setCreationDate(LocalDateTime.now());
+            creation.setFavourite(false);
+            creation.setClient(optionalClient.get());
+            creation = creationRepository.save(creation);
+        }
+
+        // 10. Crear orden (SIEMPRE se crea una nueva orden)
         ClientOrder newOrder = new ClientOrder();
-        newOrder.setCreation(newCreation);
-        newOrder.setOrderDate(burgerCreated.getOrderDate());
+        newOrder.setCreation(creation);
+        newOrder.setOrderDate(LocalDateTime.now());
         newOrder.setOrderStatus("in basket");
+        newOrder.setClient(optionalClient.get());
         clientOrderRepository.save(newOrder);
 
         return burgerCreated;
