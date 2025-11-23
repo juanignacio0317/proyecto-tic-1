@@ -34,6 +34,12 @@ export default function Navbar() {
         ? { label: "Mis Creaciones", to: "/mis-creaciones", isRoute: true }
         : { label: "Creaciones", href: "#creaciones" },
 
+    // Agregar Mis Pedidos solo si el usuario está logueado
+    ...(user
+            ? [{ label: "Mis Pedidos", to: "/mis-pedidos", isRoute: true }]
+            : []
+    ),
+
     ...(authService.isAdmin()
             ? [{ label: "Administración", to: "/admin", isRoute: true, isAdmin: true }]
             : []

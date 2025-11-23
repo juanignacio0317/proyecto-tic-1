@@ -10,6 +10,7 @@ import CartPage from "./components/CartPage.jsx";
 import AdminPage from "./components/AdminPage.jsx";
 import { authService } from "./services/authService";
 import MyCreationsPage from "./components/MyCreationPage.jsx";
+import MyOrdersPage from "./components/MyOrderPage.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
@@ -32,10 +33,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                     element={
                         authService.isAdmin()
                             ? <AdminPage />
-                            : <Navigate to="/login" replace />   // ✅ redirige al login si no es admin
+                            : <Navigate to="/login" replace />   // redirige al login si no es admin
                     }
                 />
                 <Route path="/mis-creaciones" element={<MyCreationsPage />} />
+                <Route path="/mis-pedidos" element={<MyOrdersPage />} />
             </Routes>
         </BrowserRouter>
     </React.StrictMode>
