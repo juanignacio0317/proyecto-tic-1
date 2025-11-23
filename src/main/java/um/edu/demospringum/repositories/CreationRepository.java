@@ -25,6 +25,15 @@ public interface CreationRepository extends JpaRepository<Creation, Long> {
             nativeQuery = true)
     List<Creation> findByClientId(@Param("clientId") Long clientId);
 
-    // ✅ Agregar este método
+
     List<Creation> findByClientAndProduct(Client client, Product product);
+
+
+    List<Creation> findByClientOrderByCreationDateDesc(Client client);
+
+    // Obtener solo las creaciones favoritas de un cliente
+    List<Creation> findByClientAndFavouriteOrderByCreationDateDesc(Client client, boolean favourite);
+
+    // Obtener una creación específica por ID y cliente (para seguridad)
+    Optional<Creation> findByCreationIdAndClient(Long creationId, Client client);
 }

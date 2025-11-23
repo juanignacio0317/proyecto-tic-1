@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
-import { authService } from "../services/authService"; // Ajusta la ruta según tu estructura
+import { authService } from "../services/authService";
 
 export default function Navbar() {
   const [atTop, setAtTop] = useState(true);
@@ -14,7 +14,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Cargar usuario al montar y cuando cambie la ubicación
+
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
@@ -26,16 +26,19 @@ export default function Navbar() {
     navigate("/");
   };
 
-  // Construir items dinámicamente
+
   const items = [
     { label: "Inicio", href: "#inicio" },
-    { label: "Creaciones", href: "#creaciones" },
-    // NUEVO: Mostrar "Administración" solo si el usuario es ADMIN
+
+    user
+        ? { label: "Mis Creaciones", to: "/mis-creaciones", isRoute: true }
+        : { label: "Creaciones", href: "#creaciones" },
+
     ...(authService.isAdmin()
             ? [{ label: "Administración", to: "/admin", isRoute: true, isAdmin: true }]
             : []
     ),
-    // Condicional: si hay usuario, mostrar su nombre; si no, "Inicio de sesión"
+
     user
         ? { label: `Hola, ${user.name}`, isUser: true }
         : { label: "Inicio de sesión", to: "/login", isRoute: true },
@@ -46,7 +49,7 @@ export default function Navbar() {
       "transition-colors duration-300 fw-medium " +
       (atTop ? "text-[#FDF8E7]" : "text-[#1B7F79]");
 
-  // Estilo especial para el link de admin (opcional - lo hace destacar)
+
   const adminLinkStyle = (isActive) =>
       linkBase +
       (isActive ? " underline underline-offset-4" : "");

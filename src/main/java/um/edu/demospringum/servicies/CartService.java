@@ -31,9 +31,7 @@ public class CartService {
         this.clientRepository = clientRepository;
     }
 
-    /**
-     * Obtiene todos los pedidos en el carrito (estado "in basket") de un cliente
-     */
+
     public List<CartItemDTO> getCartItems(Long clientId) throws ClientNotFound {
         Optional<Client> optionalClient = clientRepository.findById(clientId);
 
@@ -50,9 +48,7 @@ public class CartService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Convierte un ClientOrder a CartItemDTO
-     */
+
     private CartItemDTO convertToDTO(ClientOrder order) {
         CartItemDTO dto = new CartItemDTO();
 
@@ -131,11 +127,7 @@ public class CartService {
         return dto;
     }
 
-    /**
-     * Procesa todos los pedidos del carrito:
-     * - Asigna la dirección seleccionada
-     * - Cambia el estado a "in queue"
-     */
+
     @Transactional
     public void processCart(Long clientId, String selectedAddress) throws ClientNotFound, OrderNotFound {
         Optional<Client> optionalClient = clientRepository.findById(clientId);
@@ -164,9 +156,7 @@ public class CartService {
         }
     }
 
-    /**
-     * Elimina un pedido del carrito
-     */
+
     @Transactional
     public void removeFromCart(Long orderId) throws OrderNotFound {
         Optional<ClientOrder> optionalOrder = clientOrderRepository.findById(orderId);
@@ -185,9 +175,7 @@ public class CartService {
         clientOrderRepository.delete(order);
     }
 
-    /**
-     * Obtiene las direcciones del cliente
-     */
+
     public String getClientAddress(Long clientId) throws ClientNotFound {
         Optional<Client> optionalClient = clientRepository.findById(clientId);
 

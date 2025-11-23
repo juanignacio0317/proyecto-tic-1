@@ -2,20 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { ingredientService } from '../services/ingredientService';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function AdminPage() {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('breads');
+    const [activeTab, setActiveTab] = useState('orders');
     const [loading, setLoading] = useState(false);
 
-    // Estados para cada tipo de ingrediente
+    // Estados para ingredientes
     const [breads, setBreads] = useState([]);
     const [meats, setMeats] = useState([]);
     const [cheeses, setCheeses] = useState([]);
     const [toppings, setToppings] = useState([]);
     const [dressings, setDressings] = useState([]);
 
-    // Estado del formulario
+    // Estados para pedidos
+    const [orders, setOrders] = useState([]);
+    const [statusFilter, setStatusFilter] = useState('all');
+
+    // Estado del formulario de ingredientes
     const [formData, setFormData] = useState({
         type: '',
         price: '',
@@ -30,10 +35,109 @@ export default function AdminPage() {
         }
     }, [navigate]);
 
-    // Cargar ingredientes según la pestaña activa
+    // Cargar datos según la pestaña activa
     useEffect(() => {
-        loadIngredients();
-    }, [activeTab]);
+        if (activeTab === 'orders') {
+            loadOrders();
+        } else {
+            loadIngredients();
+        }
+    }, [activeTab, statusFilter]);
+
+    // ==================== PEDIDOS ====================
+
+    const loadOrders = async () => {
+        setLoading(true);
+        try {
+            const token = authService.getToken();
+            let url = 'http://localhost:8080/api/admin/orders/active';
+
+            if (statusFilter !== 'all') {
+                url = `http://localhost:8080/api/admin/orders/status/${statusFilter}`;
+            }
+
+            const response = await axios.get(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            console.log('✅ Pedidos cargados:', response.data);
+            setOrders(response.data);
+        } catch (error) {
+            console.error('❌ Error al cargar pedidos:', error);
+            alert('Error al cargar pedidos: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const advanceOrderStatus = async (orderId) => {
+        if (!window.confirm('¿Avanzar este pedido al siguiente estado?')) {
+            return;
+        }
+
+        try {
+            const token = authService.getToken();
+            await axios.post(
+                `http://localhost:8080/api/admin/orders/${orderId}/advance`,
+                {},
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+
+            alert('✅ Estado actualizado exitosamente');
+            loadOrders();
+        } catch (error) {
+            console.error('❌ Error al actualizar estado:', error);
+            alert('Error: ' + (error.response?.data || error.message));
+        }
+    };
+
+    const getStatusBadgeClass = (status) => {
+        const statusLower = status.toLowerCase();
+        switch (statusLower) {
+            case 'in queue':
+                return 'bg-info';
+            case 'in preparation':
+                return 'bg-warning text-dark';
+            case 'on the way':
+                return 'bg-primary';
+            case 'delivered':
+                return 'bg-success';
+            default:
+                return 'bg-secondary';
+        }
+    };
+
+    const getStatusText = (status) => {
+        const statusLower = status.toLowerCase();
+        switch (statusLower) {
+            case 'in queue':
+                return 'En Cola';
+            case 'in preparation':
+                return 'En Preparación';
+            case 'on the way':
+                return 'En Camino';
+            case 'delivered':
+                return 'Entregado';
+            default:
+                return status;
+        }
+    };
+
+    const getNextStatusText = (status) => {
+        const statusLower = status.toLowerCase();
+        switch (statusLower) {
+            case 'in queue':
+                return 'Iniciar Preparación';
+            case 'in preparation':
+                return 'Enviar';
+            case 'on the way':
+                return 'Marcar Entregado';
+            default:
+                return 'Avanzar';
+        }
+    };
+
+    // ==================== INGREDIENTES ====================
 
     const loadIngredients = async () => {
         setLoading(true);
@@ -179,6 +283,7 @@ export default function AdminPage() {
 
     const getTabLabel = (tab) => {
         const labels = {
+            orders: 'Gestión de Pedidos',
             breads: 'Panes',
             meats: 'Carnes',
             cheeses: 'Quesos',
@@ -195,7 +300,7 @@ export default function AdminPage() {
                 <div className="bg-white rounded-3 shadow-lg p-4 mb-4">
                     <div className="d-flex justify-content-between align-items-center">
                         <h1 className="h2 fw-bold mb-0" style={{ color: '#1B7F79' }}>
-                            Panel de Administración - Ingredientes
+                            Panel de Administración
                         </h1>
                         <button
                             onClick={() => navigate('/')}
@@ -207,155 +312,327 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                <div className="row g-4">
-                    {/* Navegación de pestañas */}
-                    <div className="col-12">
-                        <div className="bg-white rounded-3 shadow-lg p-3">
-                            <div className="d-flex gap-2 flex-wrap">
-                                {['breads', 'meats', 'cheeses', 'toppings', 'dressings'].map(tab => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setActiveTab(tab)}
-                                        className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                        style={activeTab === tab ? {
-                                            backgroundColor: '#1B7F79',
-                                            borderColor: '#1B7F79'
-                                        } : {}}
-                                    >
-                                        {getTabLabel(tab)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Formulario para agregar */}
-                    <div className="col-lg-4">
-                        <div className="bg-white rounded-3 shadow-lg p-4">
-                            <h3 className="h4 fw-bold mb-4" style={{ color: '#1B7F79' }}>
-                                Agregar {getTabLabel(activeTab)}
-                            </h3>
-
-                            <form onSubmit={handleSubmit}>
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">Nombre</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={formData.type}
-                                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                        placeholder="Ej: Pan Integral"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label className="form-label fw-semibold">Precio ($)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        className="form-control"
-                                        value={formData.price}
-                                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                        placeholder="Ej: 50"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="mb-3 form-check">
-                                    <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        id="available"
-                                        checked={formData.available}
-                                        onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
-                                    />
-                                    <label className="form-check-label" htmlFor="available">
-                                        Disponible
-                                    </label>
-                                </div>
-
+                {/* Navegación de pestañas */}
+                <div className="col-12 mb-4">
+                    <div className="bg-white rounded-3 shadow-lg p-3">
+                        <div className="d-flex gap-2 flex-wrap">
+                            {['orders', 'breads', 'meats', 'cheeses', 'toppings', 'dressings'].map(tab => (
                                 <button
-                                    type="submit"
-                                    className="btn w-100 fw-bold"
-                                    style={{ backgroundColor: '#F2C94C', color: '#1B7F79' }}
-                                    disabled={loading}
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                    style={activeTab === tab ? {
+                                        backgroundColor: '#1B7F79',
+                                        borderColor: '#1B7F79'
+                                    } : {}}
                                 >
-                                    {loading ? 'Guardando...' : 'Agregar Ingrediente'}
+                                    {tab === 'orders' ? '📦 ' : ''}
+                                    {getTabLabel(tab)}
                                 </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    {/* Lista de ingredientes */}
-                    <div className="col-lg-8">
-                        <div className="bg-white rounded-3 shadow-lg p-4">
-                            <h3 className="h4 fw-bold mb-4" style={{ color: '#1B7F79' }}>
-                                Lista de {getTabLabel(activeTab)}
-                            </h3>
-
-                            {loading ? (
-                                <div className="text-center py-5">
-                                    <div className="spinner-border" style={{ color: '#1B7F79' }} role="status">
-                                        <span className="visually-hidden">Cargando...</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="table-responsive">
-                                    <table className="table table-hover">
-                                        <thead>
-                                        <tr>
-                                            <th>Nombre</th>
-                                            <th>Precio</th>
-                                            <th>Estado</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {getCurrentIngredients().length === 0 ? (
-                                            <tr>
-                                                <td colSpan="4" className="text-center py-4 text-muted">
-                                                    No hay ingredientes registrados
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            getCurrentIngredients().map((ingredient, index) => (
-                                                <tr key={index}>
-                                                    <td className="fw-semibold">{ingredient.type}</td>
-                                                    <td>${ingredient.price}</td>
-                                                    <td>
-                                                            <span className={`badge ${ingredient.available ? 'bg-success' : 'bg-secondary'}`}>
-                                                                {ingredient.available ? 'Disponible' : 'No disponible'}
-                                                            </span>
-                                                    </td>
-                                                    <td>
-                                                        <div className="d-flex gap-2">
-                                                            <button
-                                                                onClick={() => toggleAvailability(ingredient.type, ingredient.available)}
-                                                                className="btn btn-sm btn-outline-primary"
-                                                                title="Cambiar disponibilidad"
-                                                            >
-                                                                {ingredient.available ? '🔒' : '✅'}
-                                                            </button>
-                                                            <button
-                                                                onClick={() => updatePrice(ingredient.type)}
-                                                                className="btn btn-sm btn-outline-warning"
-                                                                title="Cambiar precio"
-                                                            >
-                                                                💲
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
+                            ))}
                         </div>
                     </div>
                 </div>
+
+                {/* ==================== CONTENIDO: PEDIDOS ==================== */}
+                {activeTab === 'orders' && (
+                    <div className="bg-white rounded-3 shadow-lg p-4">
+                        {/* Filtros de estado */}
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h3 className="h4 fw-bold mb-0" style={{ color: '#1B7F79' }}>
+                                Gestión de Pedidos
+                            </h3>
+                            <div className="d-flex gap-2">
+                                <select
+                                    className="form-select"
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    style={{ width: '200px' }}
+                                >
+                                    <option value="all">Todos los activos</option>
+                                    <option value="in queue">En Cola</option>
+                                    <option value="in preparation">En Preparación</option>
+                                    <option value="on the way">En Camino</option>
+                                </select>
+                                <button
+                                    onClick={loadOrders}
+                                    className="btn btn-sm btn-outline-primary"
+                                >
+                                    🔄 Actualizar
+                                </button>
+                            </div>
+                        </div>
+
+                        {loading ? (
+                            <div className="text-center py-5">
+                                <div className="spinner-border" style={{ color: '#1B7F79' }} role="status">
+                                    <span className="visually-hidden">Cargando...</span>
+                                </div>
+                            </div>
+                        ) : orders.length === 0 ? (
+                            <div className="text-center py-5">
+                                <p className="text-muted">No hay pedidos activos</p>
+                            </div>
+                        ) : (
+                            <div className="table-responsive">
+                                <table className="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th style={{ width: '80px' }}>Pedido #</th>
+                                        <th style={{ width: '150px' }}>Cliente</th>
+                                        <th style={{ width: '120px' }}>Producto</th>
+                                        <th style={{ width: '300px' }}>Detalles de la Orden</th>
+                                        <th style={{ width: '150px' }}>Dirección</th>
+                                        <th style={{ width: '80px' }}>Total</th>
+                                        <th style={{ width: '130px' }}>Estado</th>
+                                        <th style={{ width: '150px' }}>Acción</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {orders.map((order) => (
+                                        <tr key={order.orderId}>
+                                            <td className="fw-bold">#{order.orderId}</td>
+                                            <td>
+                                                <div>{order.clientName}</div>
+                                                <small className="text-muted">{order.clientEmail}</small>
+                                            </td>
+                                            <td>
+                                                    <span className="badge" style={{
+                                                        backgroundColor: order.productType === 'PIZZA' ? '#ef4444' : '#f59e0b'
+                                                    }}>
+                                                        {order.productType === 'PIZZA' ? '🍕 Pizza' : '🍔 Hamburguesa'}
+                                                    </span>
+                                            </td>
+                                            <td>
+                                                <div className="small" style={{ lineHeight: '1.6' }}>
+                                                    {/* Ingredientes base */}
+                                                    <div className="mb-2 p-2 bg-light rounded">
+                                                        {order.productType === 'PIZZA' ? (
+                                                            <>
+                                                                <div><strong>🍕 Tamaño:</strong> {order.size}</div>
+                                                                <div><strong>🥖 Masa:</strong> {order.dough}</div>
+                                                                <div><strong>🍅 Salsa:</strong> {order.sauce}</div>
+                                                                <div><strong>🧀 Queso:</strong> {order.cheese}</div>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <div><strong>🥖 Pan:</strong> {order.bread}</div>
+                                                                <div><strong>🥩 Carne:</strong> {order.meat}</div>
+                                                                {order.cheese && (
+                                                                    <div><strong>🧀 Queso:</strong> {order.cheese}</div>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Toppings */}
+                                                    {order.toppings && order.toppings.length > 0 && (
+                                                        <div className="mb-2 p-2 bg-success bg-opacity-10 rounded border border-success border-opacity-25">
+                                                            <strong className="text-success d-block mb-1">✨ Toppings:</strong>
+                                                            <div className="ps-2">
+                                                                {order.toppings.map((topping, idx) => (
+                                                                    <div key={idx} className="text-success">
+                                                                        ✓ {topping}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Dressings */}
+                                                    {order.dressings && order.dressings.length > 0 && (
+                                                        <div className="mb-2 p-2 bg-warning bg-opacity-10 rounded border border-warning border-opacity-25">
+                                                            <strong className="text-warning d-block mb-1">🧂 Aderezos:</strong>
+                                                            <div className="ps-2">
+                                                                {order.dressings.map((dressing, idx) => (
+                                                                    <div key={idx} className="text-warning">
+                                                                        ✓ {dressing}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Extras */}
+                                                    {(order.beverage || order.sideOrder) && (
+                                                        <div className="p-2 bg-info bg-opacity-10 rounded border border-info border-opacity-25">
+                                                            <strong className="text-info d-block mb-1">➕ Extras:</strong>
+                                                            <div className="ps-2">
+                                                                {order.beverage && (
+                                                                    <div className="text-info">✓ Bebida: {order.beverage}</div>
+                                                                )}
+                                                                {order.sideOrder && (
+                                                                    <div className="text-info">✓ Acompañamiento: {order.sideOrder}</div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small>{order.orderAddress || 'No especificada'}</small>
+                                            </td>
+                                            <td className="fw-bold">${order.totalPrice}</td>
+                                            <td>
+                                                    <span className={`badge ${getStatusBadgeClass(order.orderStatus)}`}>
+                                                        {getStatusText(order.orderStatus)}
+                                                    </span>
+                                            </td>
+                                            <td>
+                                                {order.orderStatus.toLowerCase() !== 'delivered' && (
+                                                    <button
+                                                        onClick={() => advanceOrderStatus(order.orderId)}
+                                                        className="btn btn-sm"
+                                                        style={{
+                                                            backgroundColor: '#F2C94C',
+                                                            color: '#1B7F79',
+                                                            fontWeight: 'bold'
+                                                        }}
+                                                    >
+                                                        ▶ {getNextStatusText(order.orderStatus)}
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ==================== CONTENIDO: INGREDIENTES ==================== */}
+                {activeTab !== 'orders' && (
+                    <div className="row g-4">
+                        {/* Formulario para agregar */}
+                        <div className="col-lg-4">
+                            <div className="bg-white rounded-3 shadow-lg p-4">
+                                <h3 className="h4 fw-bold mb-4" style={{ color: '#1B7F79' }}>
+                                    Agregar {getTabLabel(activeTab)}
+                                </h3>
+
+                                <form onSubmit={handleSubmit}>
+                                    <div className="mb-3">
+                                        <label className="form-label fw-semibold">Nombre</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={formData.type}
+                                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                                            placeholder="Ej: Pan Integral"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label className="form-label fw-semibold">Precio ($)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className="form-control"
+                                            value={formData.price}
+                                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                            placeholder="Ej: 50"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="mb-3 form-check">
+                                        <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            id="available"
+                                            checked={formData.available}
+                                            onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
+                                        />
+                                        <label className="form-check-label" htmlFor="available">
+                                            Disponible
+                                        </label>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="btn w-100 fw-bold"
+                                        style={{ backgroundColor: '#F2C94C', color: '#1B7F79' }}
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Guardando...' : 'Agregar Ingrediente'}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {/* Lista de ingredientes */}
+                        <div className="col-lg-8">
+                            <div className="bg-white rounded-3 shadow-lg p-4">
+                                <h3 className="h4 fw-bold mb-4" style={{ color: '#1B7F79' }}>
+                                    Lista de {getTabLabel(activeTab)}
+                                </h3>
+
+                                {loading ? (
+                                    <div className="text-center py-5">
+                                        <div className="spinner-border" style={{ color: '#1B7F79' }} role="status">
+                                            <span className="visually-hidden">Cargando...</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="table-responsive">
+                                        <table className="table table-hover">
+                                            <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Precio</th>
+                                                <th>Estado</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {getCurrentIngredients().length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="4" className="text-center py-4 text-muted">
+                                                        No hay ingredientes registrados
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                getCurrentIngredients().map((ingredient, index) => (
+                                                    <tr key={index}>
+                                                        <td className="fw-semibold">{ingredient.type}</td>
+                                                        <td>${ingredient.price}</td>
+                                                        <td>
+                                                                <span className={`badge ${ingredient.available ? 'bg-success' : 'bg-secondary'}`}>
+                                                                    {ingredient.available ? 'Disponible' : 'No disponible'}
+                                                                </span>
+                                                        </td>
+                                                        <td>
+                                                            <div className="d-flex gap-2">
+                                                                <button
+                                                                    onClick={() => toggleAvailability(ingredient.type, ingredient.available)}
+                                                                    className="btn btn-sm btn-outline-primary"
+                                                                    title="Cambiar disponibilidad"
+                                                                >
+                                                                    {ingredient.available ? '🔒' : '✅'}
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => updatePrice(ingredient.type)}
+                                                                    className="btn btn-sm btn-outline-warning"
+                                                                    title="Cambiar precio"
+                                                                >
+                                                                    💲
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

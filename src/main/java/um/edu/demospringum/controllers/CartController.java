@@ -22,10 +22,7 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    /**
-     * Obtener todos los items del carrito de un cliente
-     * GET /api/cart/{clientId}
-     */
+
     @GetMapping("/{clientId}")
     public ResponseEntity<?> getCart(@PathVariable Long clientId) {
         try {
@@ -38,11 +35,7 @@ public class CartController {
         }
     }
 
-    /**
-     * Procesar el carrito (confirmar pedido)
-     * POST /api/cart/{clientId}/process
-     * Body: { "address": "Calle 123, Montevideo" }
-     */
+
     @PostMapping("/{clientId}/process")
     public ResponseEntity<?> processCart(
             @PathVariable Long clientId,
@@ -63,10 +56,6 @@ public class CartController {
         }
     }
 
-    /**
-     * Eliminar un item del carrito
-     * DELETE /api/cart/item/{orderId}
-     */
     @DeleteMapping("/item/{orderId}")
     public ResponseEntity<?> removeFromCart(@PathVariable Long orderId) {
         try {
@@ -79,10 +68,7 @@ public class CartController {
         }
     }
 
-    /**
-     * Obtener la dirección del cliente
-     * GET /api/cart/{clientId}/address
-     */
+
     @GetMapping("/{clientId}/address")
     public ResponseEntity<?> getClientAddress(@PathVariable Long clientId) {
         try {

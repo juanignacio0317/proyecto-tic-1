@@ -7,8 +7,9 @@ import PersonalizaPage from "./components/PersonalizaPage.jsx";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
 import CartPage from "./components/CartPage.jsx";
-import AdminPage from "./components/AdminPage.jsx";  // ✅ Ruta corregida
+import AdminPage from "./components/AdminPage.jsx";
 import { authService } from "./services/authService";
+import MyCreationsPage from "./components/MyCreationPage.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
@@ -34,6 +35,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                             : <Navigate to="/login" replace />   // ✅ redirige al login si no es admin
                     }
                 />
+                <Route path="/mis-creaciones" element={<MyCreationsPage />} />
             </Routes>
         </BrowserRouter>
     </React.StrictMode>
