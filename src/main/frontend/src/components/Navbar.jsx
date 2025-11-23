@@ -31,28 +31,28 @@ export default function Navbar() {
     { label: "Inicio", href: "#inicio", icon: "home"},
 
     user
-        ? { label: "Mis Creaciones", to: "/mis-creaciones", isRoute: true, icon: "local_pizza"}
-        : { label: "Creaciones", href: "#creaciones", icon: "local_pizza"},
+        ? { label: "Mis Creaciones", to: "/mis-creaciones", isRoute: true, icon: "restaurant"}
+        : { label: "Creaciones", href: "#creaciones", icon: "restaurant"},
 
     // Agregar Mis Pedidos solo si el usuario está logueado
     ...(user
-            ? [{ label: "Mis Pedidos", to: "/mis-pedidos", isRoute: true }]
+            ? [{ label: "Mis Pedidos", to: "/mis-pedidos", isRoute: true, icon: "receipt_long" }]
             : []
     ),
 
     ...(authService.isAdmin()
-            ? [{ label: "Administración", to: "/admin", isRoute: true, isAdmin: true }]
+            ? [{ label: "Administración", to: "/admin", isRoute: true, isAdmin: true, icon: "admin_panel_settings" }]
             : []
     ),
 
     user
-        ? { label: `Hola, ${user.name}`, isUser: true }
-        : { label: "Inicio de sesión", to: "/login", isRoute: true, icon: "person"},
-    { label: "Carrito", to: "/carrito", isRoute: true, icon: "shopping_cart"  },
+        ? { label: `Hola, ${user.name}`, isUser: true, icon: "person" }
+        : { label: "Inicio de sesión", to: "/login", isRoute: true, icon: "login"},
+    { label: "Carrito", to: "/carrito", isRoute: true, icon: "shopping_cart" },
   ];
 
   const linkBase =
-      "transition-colors duration-300 fw-medium " +
+      "transition-colors duration-300 fw-medium d-flex align-items-center gap-2 " +
       (atTop ? "text-[#FDF8E7]" : "text-[#1B7F79]");
 
 
@@ -101,7 +101,8 @@ export default function Navbar() {
                     {item.isUser ? (
                         <div className="d-flex align-items-center gap-3">
                           <span className={linkBase}>
-                            {item.label}
+                            {item.icon && <span className="material-icons" style={{ fontSize: '20px' }}>{item.icon}</span>}
+                            <span>{item.label}</span>
                           </span>
                           <button
                               onClick={handleLogout}
@@ -109,7 +110,7 @@ export default function Navbar() {
                               style={{ cursor: 'pointer' }}
                               title="Cerrar sesión"
                           >
-                            <i className="bi bi-box-arrow-right"></i>
+                            <span className="material-icons" style={{ fontSize: '20px' }}>logout</span>
                           </button>
                         </div>
                     ) : item.isRoute ? (
@@ -122,11 +123,13 @@ export default function Navbar() {
                                     : linkBase + (isActive ? " underline underline-offset-4" : "")
                             }
                         >
-                          {item.label}
+                          {item.icon && <span className="material-icons" style={{ fontSize: '20px' }}>{item.icon}</span>}
+                          <span>{item.label}</span>
                         </NavLink>
                     ) : (
                         <a href={item.href} className={linkBase}>
-                          {item.label}
+                          {item.icon && <span className="material-icons" style={{ fontSize: '20px' }}>{item.icon}</span>}
+                          <span>{item.label}</span>
                         </a>
                     )}
                   </li>
@@ -135,5 +138,5 @@ export default function Navbar() {
           </nav>
         </div>
       </header>
-  )
+  );
 }
