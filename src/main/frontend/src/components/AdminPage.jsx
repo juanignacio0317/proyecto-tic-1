@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ingredientService } from '../services/ingredientService';
+import { administratorService } from '../services/administratorService';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -20,11 +21,22 @@ export default function AdminPage() {
     const [orders, setOrders] = useState([]);
     const [statusFilter, setStatusFilter] = useState('all');
 
+    // Estados para administradores
+    const [administrators, setAdministrators] = useState([]);
+
     // Estado del formulario de ingredientes
     const [formData, setFormData] = useState({
         type: '',
         price: '',
         available: true
+    });
+
+    // Estado del formulario de administradores
+    const [adminFormData, setAdminFormData] = useState({
+        name: '',
+        surname: '',
+        email: '',
+        password: ''
     });
 
     // Verificar que sea admin
@@ -39,6 +51,8 @@ export default function AdminPage() {
     useEffect(() => {
         if (activeTab === 'orders') {
             loadOrders();
+        } else if (activeTab === 'administrators') {
+            loadAdministrators();
         } else {
             loadIngredients();
         }
@@ -134,6 +148,62 @@ export default function AdminPage() {
                 return 'Marcar Entregado';
             default:
                 return 'Avanzar';
+        }
+    };
+
+    // ==================== ADMINISTRADORES ====================
+
+    const loadAdministrators = async () => {
+        setLoading(true);
+        try {
+            const admins = await administratorService.getAllAdministrators();
+            setAdministrators(admins);
+        } catch (error) {
+            console.error('Error al cargar administradores:', error);
+            alert('Error al cargar administradores: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAdminSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!adminFormData.name || !adminFormData.surname || !adminFormData.email || !adminFormData.password) {
+            alert('Por favor completa todos los campos');
+            return;
+        }
+
+        if (adminFormData.password.length < 6) {
+            alert('La contraseña debe tener al menos 6 caracteres');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await administratorService.createAdministrator(adminFormData);
+            alert('✅ ¡Administrador creado exitosamente!');
+            setAdminFormData({ name: '', surname: '', email: '', password: '' });
+            loadAdministrators();
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al crear administrador: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteAdmin = async (id, email) => {
+        if (!window.confirm(`¿Estás seguro de eliminar al administrador ${email}?`)) {
+            return;
+        }
+
+        try {
+            await administratorService.deleteAdministrator(id);
+            alert('✅ Administrador eliminado exitosamente');
+            loadAdministrators();
+        } catch (error) {
+            alert('Error al eliminar administrador: ' + error.message);
         }
     };
 
@@ -288,7 +358,8 @@ export default function AdminPage() {
             meats: 'Carnes',
             cheeses: 'Quesos',
             toppings: 'Toppings',
-            dressings: 'Salsas'
+            dressings: 'Salsas',
+            administrators: 'Administradores'
         };
         return labels[tab];
     };
@@ -312,27 +383,203 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {/* Navegación de pestañas */}
-                <div className="col-12 mb-4">
-                    <div className="bg-white rounded-3 shadow-lg p-3">
-                        <div className="d-flex gap-2 flex-wrap">
-                            {['orders', 'breads', 'meats', 'cheeses', 'toppings', 'dressings'].map(tab => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                    style={activeTab === tab ? {
-                                        backgroundColor: '#1B7F79',
-                                        borderColor: '#1B7F79'
-                                    } : {}}
-                                >
-                                    {tab === 'orders' ? '📦 ' : ''}
-                                    {getTabLabel(tab)}
-                                </button>
-                            ))}
-                        </div>
+                {/* Sección COCINA */}
+                <div className="bg-white rounded-3 shadow-lg p-3 mb-4">
+                    <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
+                        🍽️ COCINA
+                    </h3>
+                    <div className="d-flex gap-2 flex-wrap">
+                        <button
+                            onClick={() => setActiveTab('orders')}
+                            className={`btn ${activeTab === 'orders' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                            style={activeTab === 'orders' ? {
+                                backgroundColor: '#1B7F79',
+                                borderColor: '#1B7F79'
+                            } : {}}
+                        >
+                            📦 {getTabLabel('orders')}
+                        </button>
+                        {['breads', 'meats', 'cheeses', 'toppings', 'dressings'].map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                style={activeTab === tab ? {
+                                    backgroundColor: '#1B7F79',
+                                    borderColor: '#1B7F79'
+                                } : {}}
+                            >
+                                {getTabLabel(tab)}
+                            </button>
+                        ))}
                     </div>
                 </div>
+
+                {/* Sección ADMINISTRACIÓN */}
+                <div className="bg-white rounded-3 shadow-lg p-3 mb-4">
+                    <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
+                        ⚙️ ADMINISTRACIÓN
+                    </h3>
+                    <div className="d-flex gap-2 flex-wrap">
+                        <button
+                            onClick={() => setActiveTab('administrators')}
+                            className={`btn ${activeTab === 'administrators' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                            style={activeTab === 'administrators' ? {
+                                backgroundColor: '#1B7F79',
+                                borderColor: '#1B7F79'
+                            } : {}}
+                        >
+                            👥 {getTabLabel('administrators')}
+                        </button>
+                    </div>
+                </div>
+
+                {/* ==================== CONTENIDO: ADMINISTRADORES ==================== */}
+                {activeTab === 'administrators' && (
+                    <div className="row g-4">
+                        {/* Formulario para crear admin */}
+                        <div className="col-lg-4">
+                            <div className="bg-white rounded-3 shadow-lg p-4">
+                                <h3 className="h4 fw-bold mb-4" style={{ color: '#1B7F79' }}>
+                                    ➕ Crear Administrador
+                                </h3>
+
+                                <form onSubmit={handleAdminSubmit}>
+                                    <div className="mb-3">
+                                        <label className="form-label fw-semibold">Nombre</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={adminFormData.name}
+                                            onChange={(e) => setAdminFormData({ ...adminFormData, name: e.target.value })}
+                                            placeholder="Ej: Juan"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label className="form-label fw-semibold">Apellido</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={adminFormData.surname}
+                                            onChange={(e) => setAdminFormData({ ...adminFormData, surname: e.target.value })}
+                                            placeholder="Ej: Pérez"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label className="form-label fw-semibold">Email</label>
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            value={adminFormData.email}
+                                            onChange={(e) => setAdminFormData({ ...adminFormData, email: e.target.value })}
+                                            placeholder="admin@pizzumburgum.com"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label className="form-label fw-semibold">Contraseña</label>
+                                        <input
+                                            type="password"
+                                            className="form-control"
+                                            value={adminFormData.password}
+                                            onChange={(e) => setAdminFormData({ ...adminFormData, password: e.target.value })}
+                                            placeholder="Mínimo 6 caracteres"
+                                            required
+                                            minLength="6"
+                                        />
+                                        <small className="text-muted">Mínimo 6 caracteres</small>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="btn w-100 fw-bold"
+                                        style={{ backgroundColor: '#F2C94C', color: '#1B7F79' }}
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Creando...' : '✅ Crear Administrador'}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {/* Lista de administradores */}
+                        <div className="col-lg-8">
+                            <div className="bg-white rounded-3 shadow-lg p-4">
+                                <div className="d-flex justify-content-between align-items-center mb-4">
+                                    <h3 className="h4 fw-bold mb-0" style={{ color: '#1B7F79' }}>
+                                        👥 Lista de Administradores
+                                    </h3>
+                                    <button
+                                        onClick={loadAdministrators}
+                                        className="btn btn-sm btn-outline-primary"
+                                    >
+                                        🔄 Actualizar
+                                    </button>
+                                </div>
+
+                                {loading ? (
+                                    <div className="text-center py-5">
+                                        <div className="spinner-border" style={{ color: '#1B7F79' }} role="status">
+                                            <span className="visually-hidden">Cargando...</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="table-responsive">
+                                        <table className="table table-hover">
+                                            <thead>
+                                            <tr>
+                                                <th style={{ width: '60px' }}>ID</th>
+                                                <th>Nombre</th>
+                                                <th>Apellido</th>
+                                                <th>Email</th>
+                                                <th style={{ width: '100px' }}>Rol</th>
+                                                <th style={{ width: '100px' }}>Acciones</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {administrators.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="6" className="text-center py-4 text-muted">
+                                                        No hay administradores registrados
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                administrators.map((admin) => (
+                                                    <tr key={admin.userId}>
+                                                        <td className="fw-bold">#{admin.userId}</td>
+                                                        <td>{admin.name}</td>
+                                                        <td>{admin.surname}</td>
+                                                        <td>{admin.email}</td>
+                                                        <td>
+                                                            <span className="badge bg-danger">
+                                                                {admin.role}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                onClick={() => deleteAdmin(admin.userId, admin.email)}
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                title="Eliminar administrador"
+                                                            >
+                                                                🗑️
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ==================== CONTENIDO: PEDIDOS ==================== */}
                 {activeTab === 'orders' && (
@@ -503,7 +750,7 @@ export default function AdminPage() {
                 )}
 
                 {/* ==================== CONTENIDO: INGREDIENTES ==================== */}
-                {activeTab !== 'orders' && (
+                {activeTab !== 'orders' && activeTab !== 'administrators' && (
                     <div className="row g-4">
                         {/* Formulario para agregar */}
                         <div className="col-lg-4">

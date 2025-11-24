@@ -16,6 +16,11 @@ export default function MyCreationsPage() {
             navigate("/login");
             return;
         }
+        if (authService.isAdmin()) {
+            alert("Debes iniciar sesión como cliente para ver tus creaciones");
+            navigate("/");
+            return;
+        }
 
         loadCreations();
     }, [filterFavorites, navigate]);

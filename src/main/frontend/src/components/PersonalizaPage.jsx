@@ -8,6 +8,12 @@ export default function PersonalizaPage() {
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
 
+    if (authService.isAdmin()) {
+        alert("Debes iniciar sesión como cliente para crear tu propia hamburguesa");
+        navigate("/login");
+        return;
+    }
+
     // Estado para la construcción de la hamburguesa
     const [burger, setBurger] = useState({
         pan: null,

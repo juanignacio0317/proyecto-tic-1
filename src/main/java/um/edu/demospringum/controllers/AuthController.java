@@ -55,7 +55,7 @@ public class AuthController {
             client.setName(request.getName());
             client.setSurname(request.getSurname());
             client.setPhone(request.getPhone());
-            client.setAddress(request.getAddress());
+            client.getAddresses().add(request.getAddress());
             client.setEmail(request.getEmail());
             client.setPassword(passwordEncoder.encode(request.getPassword()));
             client.setRole("USER");

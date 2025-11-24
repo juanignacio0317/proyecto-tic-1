@@ -40,8 +40,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Solo /api/admin/** requiere autenticación de ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/payment-methods/**").hasRole("USER")
+                        .requestMatchers("/api/addresses/**").hasRole("USER")
 
-                        // Todo lo demás es público
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session

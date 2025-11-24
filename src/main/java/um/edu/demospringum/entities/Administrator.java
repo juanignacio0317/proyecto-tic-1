@@ -1,8 +1,6 @@
 package um.edu.demospringum.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,10 +10,18 @@ import java.io.Serializable;
 @Setter
 @Entity
 @Table(name = "administrator")
-
 public class Administrator extends UserData implements Serializable {
+
 
     @Column(nullable = false)
     private String role = "ADMIN";
-}
 
+    //forzamos que el role siempre sea ADMIN
+    @PrePersist
+    @PreUpdate
+    public void ensureAdminRole() {
+
+        super.setRole("ADMIN");
+        this.role = "ADMIN";
+    }
+}

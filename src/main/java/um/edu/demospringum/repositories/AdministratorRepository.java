@@ -7,7 +7,6 @@ import um.edu.demospringum.entities.Administrator;
 import java.util.Optional;
 
 public interface AdministratorRepository extends JpaRepository<Administrator, Long> {
-    // Métodos personalizados opcionales:
     Optional<Administrator> findByEmail(String email);
     boolean existsByEmail(String email);
 }

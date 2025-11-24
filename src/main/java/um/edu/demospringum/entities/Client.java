@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -15,8 +16,10 @@ public class Client extends UserData implements Serializable {
     @Column(name = "phone")
     private String phone;
 
+    @ElementCollection
+    @CollectionTable(name = "client_addresses", joinColumns = @JoinColumn(name = "client_id"))
     @Column(name = "address")
-    private String address;
+    private List<String> addresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Creation> creations;

@@ -13,6 +13,7 @@ import um.edu.demospringum.repositories.ClientRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -151,7 +152,7 @@ public class CartService {
         for (ClientOrder order : cartOrders) {
             order.setOrderAddress(selectedAddress);
             order.setOrderStatus("in queue");
-            order.setOrderDate(LocalDateTime.now()); // Actualizar fecha de procesamiento
+            order.setOrderDate(LocalDateTime.now());
             clientOrderRepository.save(order);
         }
     }
@@ -183,6 +184,26 @@ public class CartService {
             throw new ClientNotFound("Client not found");
         }
 
-        return optionalClient.get().getAddress();
+        Client client = optionalClient.get();
+
+
+        if (client.getAddresses() != null && !client.getAddresses().isEmpty()) {
+            return client.getAddresses().get(0);
+        }
+
+        return "";
+    }
+
+
+    public List<String> getClientAddresses(Long clientId) throws ClientNotFound {
+        Optional<Client> optionalClient = clientRepository.findById(clientId);
+
+        if (optionalClient.isEmpty()) {
+            throw new ClientNotFound("Client not found");
+        }
+
+        Client client = optionalClient.get();
+
+        return client.getAddresses() != null ? client.getAddresses() : new ArrayList<>();
     }
 }

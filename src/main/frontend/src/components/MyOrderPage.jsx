@@ -16,6 +16,11 @@ export default function MyOrdersPage() {
             navigate("/login");
             return;
         }
+        if (authService.isAdmin()) {
+            alert("Debes iniciar sesión como cliente para ver tu carrito");
+            navigate("/");
+            return;
+        }
 
         loadOrders();
     }, [statusFilter, navigate]);
@@ -28,7 +33,7 @@ export default function MyOrdersPage() {
 
             if (!userId) {
                 alert("Error al obtener información del usuario.");
-                navigate("/login");
+                navigate("/");
                 return;
             }
 

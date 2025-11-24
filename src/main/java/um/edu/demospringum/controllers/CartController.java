@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"}) // ✅ Agregar 5173
 public class CartController {
 
     @Autowired
@@ -81,7 +81,20 @@ public class CartController {
         }
     }
 
-    // Clases internas para requests/responses
+
+    @GetMapping("/{clientId}/addresses")
+    public ResponseEntity<?> getClientAddresses(@PathVariable Long clientId) {
+        try {
+            List<String> addresses = cartService.getClientAddresses(clientId);
+            return ResponseEntity.ok(new AddressesResponse(addresses));
+        } catch (ClientNotFound e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener las direcciones: " + e.getMessage());
+        }
+    }
+
+
     public static class ProcessCartRequest {
         private String address;
 
@@ -107,6 +120,23 @@ public class CartController {
 
         public void setAddress(String address) {
             this.address = address;
+        }
+    }
+
+
+    public static class AddressesResponse {
+        private List<String> addresses;
+
+        public AddressesResponse(List<String> addresses) {
+            this.addresses = addresses;
+        }
+
+        public List<String> getAddresses() {
+            return addresses;
+        }
+
+        public void setAddresses(List<String> addresses) {
+            this.addresses = addresses;
         }
     }
 }

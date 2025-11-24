@@ -11,6 +11,8 @@ import AdminPage from "./components/AdminPage.jsx";
 import { authService } from "./services/authService";
 import MyCreationsPage from "./components/MyCreationPage.jsx";
 import MyOrdersPage from "./components/MyOrderPage.jsx";
+import PaymentMethodsPage from "./components/PaymentMethodPage.jsx";
+import AddressesPage from "./components/AddressPage.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
@@ -38,6 +40,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 />
                 <Route path="/mis-creaciones" element={<MyCreationsPage />} />
                 <Route path="/mis-pedidos" element={<MyOrdersPage />} />
+                <Route path="/mis-tarjetas" element={<PaymentMethodsPage />} />
+                <Route path="/mis-direcciones" element={<AddressesPage />} />
             </Routes>
         </BrowserRouter>
     </React.StrictMode>
