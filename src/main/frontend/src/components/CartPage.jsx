@@ -64,7 +64,7 @@ export default function CartPage() {
                             </p>
                             <p>
                                 <strong>Favorito:</strong>{" "}
-                                {creation.favourite ? "Sí ❤️" : "No"}
+                                {creation.favourite ? "Sí ️" : "No"}
                             </p>
                         </li>
                     ))}

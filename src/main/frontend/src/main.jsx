@@ -7,6 +7,7 @@ import PersonalizaPage from './components/PersonalizaPage.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import CartPage from "./components/CartPage.jsx";
+import PersonalizaPizzaPage from "./components/PersonalizaPizzaPage.jsx";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 <Route path="/register" element={<Register />} />
                 <Route path="/personaliza" element={<PersonalizaPage />} />
                 <Route path="/carrito" element={<CartPage />} />
+                <Route path="/personalizapizza" element={<PersonalizaPizzaPage />} />
 
 
             </Routes>

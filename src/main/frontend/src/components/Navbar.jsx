@@ -28,7 +28,7 @@ export default function Navbar() {
 
   const items = [
     { label: "Inicio", href: "#inicio" },
-    { label: "Creaciones", href: "#creaciones" },
+    { label: "Creaciones", to: "/personaliza", isRoute: true },
     // Condicional: si hay usuario, mostrar su nombre; si no, "Inicio de sesión"
     user
         ? { label: `Hola, ${user.name}`, isUser: true }

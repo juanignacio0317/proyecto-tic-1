@@ -4,7 +4,7 @@ const API_URL = 'http://localhost:8080/api/auth';
 export const authService = {
     async register(userData) {
         try {
-            console.log('📤 Enviando datos de registro:', {
+            console.log(' Enviando datos de registro:', {
                 name: userData.name,
                 surname: userData.surname,
                 email: userData.email,
