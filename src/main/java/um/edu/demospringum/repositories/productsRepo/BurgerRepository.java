@@ -14,10 +14,10 @@ import java.util.Optional;
 
 public interface BurgerRepository extends JpaRepository<Burger, Long> {
 
-    // ✅ Usar findFirst para evitar error de múltiples resultados
-    Optional<Burger> findFirstByBurgerBreadAndBurgerMeatAndBurgerCheese(
+    Optional<Burger> findFirstByBurgerBreadAndBurgerMeatAndBurgerCheeseAndMeatQuantity(
             Bread bread,
             Meat meat,
-            Cheese cheese
+            Cheese cheese,
+            Integer meatQuantity
     );
 }

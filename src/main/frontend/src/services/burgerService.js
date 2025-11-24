@@ -44,6 +44,14 @@ export const burgerService = {
         return await response.json();
     },
 
+    async getAllCheeses() {
+        const response = await fetch(`${API_URL}/cheeses`);
+        if (!response.ok) {
+            throw new Error('Error al obtener quesos');
+        }
+        return await response.json();
+    },
+
     async getAllToppings() {
         const response = await fetch(`${API_URL}/toppings`);
         if (!response.ok) {

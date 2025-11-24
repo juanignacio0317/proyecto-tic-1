@@ -20,7 +20,7 @@ public class RegisterRequest {
         private String cardNumber; // Número completo (lo procesaremos en el backend)
         private String cardBrand; // "Visa" o "Mastercard"
         private String expirationDate; // MM/YY
-        // CVV no se guarda, solo se valida
+
         private String cvv;
     }
 }

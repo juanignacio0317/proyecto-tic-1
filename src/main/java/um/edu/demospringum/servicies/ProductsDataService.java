@@ -162,7 +162,13 @@ public class ProductsDataService {
             dto.setProductType("burger");
             dto.setMeat(burger.getBurgerMeat().getType());
             dto.setBread(burger.getBurgerBread().getType());
-            dto.setBurgerCheese(burger.getBurgerCheese().getType());
+            dto.setMeatQuantity(burger.getMeatQuantity());
+
+            if (burger.getBurgerCheese() != null) {
+                dto.setBurgerCheese(burger.getBurgerCheese().getType());
+            } else {
+                dto.setBurgerCheese("SIN QUESO");
+            }
         }
 
         return dto;

@@ -664,7 +664,22 @@ export default function AdminPage() {
                                                         ) : (
                                                             <>
                                                                 <div><strong>🥖 Pan:</strong> {order.bread}</div>
-                                                                <div><strong>🥩 Carne:</strong> {order.meat}</div>
+                                                                {/* En la tabla de pedidos, sección de hamburguesa: */}
+                                                                <div><strong>🥩 Carne:</strong> {order.meat}
+                                                                    {order.meatQuantity && order.meatQuantity > 1 && (
+                                                                        <span style={{
+                                                                            marginLeft: '8px',
+                                                                            padding: '2px 8px',
+                                                                            backgroundColor: '#fef3c7',
+                                                                            color: '#92400e',
+                                                                            borderRadius: '12px',
+                                                                            fontSize: '11px',
+                                                                            fontWeight: 'bold'
+                                                                        }}>
+                                                                        x{order.meatQuantity}
+                                                                         </span>
+                                                                    )}
+                                                                </div>
                                                                 {order.cheese && (
                                                                     <div><strong>🧀 Queso:</strong> {order.cheese}</div>
                                                                 )}

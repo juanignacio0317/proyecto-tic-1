@@ -3,6 +3,8 @@ package um.edu.demospringum.servicies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import um.edu.demospringum.dto.CardOwnerInfoDto;
+import um.edu.demospringum.dto.CardOwnersListDto;
 import um.edu.demospringum.dto.PaymentMethodRequestDto;
 import um.edu.demospringum.dto.PaymentMethodResponseDto;
 import um.edu.demospringum.entities.Client;
@@ -21,6 +23,59 @@ public class PaymentMethodService {
 
     @Autowired
     private ClientRepository clientRepository;
+
+    @Transactional(readOnly = true)
+    public CardOwnersListDto getAllCardOwners(String cardNumber) {
+        List<PaymentMethod> paymentMethods = paymentMethodRepository.findAllByCardNumber(cardNumber);
+
+        if (paymentMethods.isEmpty()) {
+            throw new RuntimeException("Tarjeta no encontrada");
+        }
+
+        CardOwnersListDto response = new CardOwnersListDto();
+        response.setCardNumber(maskCardNumber(cardNumber));
+        response.setTotalOwners(paymentMethods.size());
+
+        List<CardOwnerInfoDto> owners = paymentMethods.stream()
+                .map(this::convertToCardOwnerInfo)
+                .collect(Collectors.toList());
+
+        response.setOwners(owners);
+
+        return response;
+    }
+
+
+    @Transactional(readOnly = true)
+    public CardOwnerInfoDto getCardOwnerInfo(String cardNumber) {
+        PaymentMethod paymentMethod = paymentMethodRepository.findByCardNumber(cardNumber)
+                .orElseThrow(() -> new RuntimeException("Tarjeta no encontrada"));
+
+        return convertToCardOwnerInfo(paymentMethod);
+    }
+
+
+    private CardOwnerInfoDto convertToCardOwnerInfo(PaymentMethod paymentMethod) {
+        Client client = paymentMethod.getClient();
+
+        CardOwnerInfoDto dto = new CardOwnerInfoDto();
+
+        // Datos del cliente
+        dto.setClientId(client.getUserId());
+        dto.setName(client.getName());
+        dto.setSurname(client.getSurname());
+        dto.setEmail(client.getEmail());
+        dto.setPhone(client.getPhone());
+        dto.setAddresses(client.getAddresses());
+
+        // Datos de la tarjeta
+        dto.setCardHolderName(paymentMethod.getCardHolderName());
+        dto.setCardNumber(maskCardNumber(paymentMethod.getCardNumber()));
+        dto.setExpirationDate(paymentMethod.getExpirationDate());
+        dto.setCardBrand(paymentMethod.getCardBrand());
+
+        return dto;
+    }
 
     @Transactional
     public PaymentMethodResponseDto addPaymentMethod(Long clientId, PaymentMethodRequestDto requestDto) {

@@ -200,6 +200,12 @@ public class CreationService {
             throw new IngredientNotFound("Meat type not found");
         }
 
+        // Validar cantidad de carnes (debe estar entre 1 y 3)
+        Integer meatQuantity = burgerCreated.getMeatQuantity();
+        if (meatQuantity == null || meatQuantity < 1 || meatQuantity > 3) {
+            throw new IllegalArgumentException("La cantidad de carnes debe ser entre 1 y 3");
+        }
+
         // 3. Buscar queso (opcional)
         Optional<Cheese> optionalCheese = Optional.empty();
         String cheeseType = burgerCreated.getCheese();
@@ -243,22 +249,27 @@ public class CreationService {
             }
         }
 
-        // 6. Calcular precio total
+        // 6. Calcular precio total incluyendo cantidad de carnes
         BigDecimal totalPrice = BigDecimal.ZERO;
         totalPrice = totalPrice.add(optionalBread.get().getPrice());
-        totalPrice = totalPrice.add(optionalMeat.get().getPrice());
+
+        // Multiplicar precio de carne por la cantidad
+        BigDecimal meatPrice = optionalMeat.get().getPrice()
+                .multiply(BigDecimal.valueOf(meatQuantity));
+        totalPrice = totalPrice.add(meatPrice);
+
         if (optionalCheese.isPresent()) {
             totalPrice = totalPrice.add(optionalCheese.get().getPrice());
         }
         totalPrice = totalPrice.add(toppingsPrice);
         totalPrice = totalPrice.add(dressingsPrice);
 
-        // 7. Buscar o crear Burger (SOLO pan + carne + queso)
-        // ✅ CAMBIO: Usar findFirst para evitar error de múltiples resultados
-        Optional<Burger> optionalBurger = burgerRepository.findFirstByBurgerBreadAndBurgerMeatAndBurgerCheese(
+        // 7. Buscar o crear Burger (INCLUYE meatQuantity)
+        Optional<Burger> optionalBurger = burgerRepository.findFirstByBurgerBreadAndBurgerMeatAndBurgerCheeseAndMeatQuantity(
                 optionalBread.get(),
                 optionalMeat.get(),
-                optionalCheese.orElse(null)
+                optionalCheese.orElse(null),
+                meatQuantity
         );
 
         Burger burger;
@@ -267,14 +278,12 @@ public class CreationService {
             // Reutilizar burger existente
             burger = optionalBurger.get();
         } else {
-            // Crear nueva burger
             burger = new Burger();
             burger.setType("BURGER");
 
 
-            // Precio base (solo ingredientes principales)
             BigDecimal basePrice = optionalBread.get().getPrice()
-                    .add(optionalMeat.get().getPrice());
+                    .add(optionalMeat.get().getPrice().multiply(BigDecimal.valueOf(meatQuantity)));
             if (optionalCheese.isPresent()) {
                 basePrice = basePrice.add(optionalCheese.get().getPrice());
             }
@@ -282,6 +291,7 @@ public class CreationService {
 
             burger.setBurgerBread(optionalBread.get());
             burger.setBurgerMeat(optionalMeat.get());
+            burger.setMeatQuantity(meatQuantity);
             if (optionalCheese.isPresent()) {
                 burger.setBurgerCheese(optionalCheese.get());
             }
@@ -289,8 +299,7 @@ public class CreationService {
             burger = burgerRepository.save(burger);
         }
 
-        // 8. ✅ IMPORTANTE: Verificar si ya existe esta MISMA Creation para este cliente
-        // Buscar todas las creations de este cliente con este burger
+        // 8. Verificar si ya existe esta MISMA Creation para este cliente
         List<Creation> existingCreations = creationRepository.findByClientAndProduct(
                 optionalClient.get(),
                 burger
@@ -305,7 +314,6 @@ public class CreationService {
             boolean sameDressings = !listsComparison(existingCreation.getDressings(), dressingsList);
 
             if (sameToppings && sameDressings) {
-                // Ya existe esta creation exacta para este cliente
                 creation = existingCreation;
                 creationExists = true;
                 break;

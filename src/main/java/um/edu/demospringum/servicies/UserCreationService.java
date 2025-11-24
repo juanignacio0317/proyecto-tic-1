@@ -149,6 +149,7 @@ public class UserCreationService {
             Burger burger = (Burger) product;
             dto.setBread(burger.getBurgerBread().getTypeBread());
             dto.setMeat(burger.getBurgerMeat().getTypeMeat());
+            dto.setMeatQuantity(burger.getMeatQuantity());
             if (burger.getBurgerCheese() != null) {
                 dto.setCheese(burger.getBurgerCheese().getTypeCheese());
             }

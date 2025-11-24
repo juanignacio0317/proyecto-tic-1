@@ -13,6 +13,9 @@ import um.edu.demospringum.entities.PizzaIngr.Cheese;
 @Table(name = "burger")
 public class Burger extends Product {
 
+    @Column(nullable = false)
+    private Integer meatQuantity = 1;
+
     @ManyToOne
     @JoinColumn(name = "breadId")
     private Bread burgerBread;

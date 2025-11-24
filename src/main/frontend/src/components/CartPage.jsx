@@ -309,7 +309,14 @@ export default function CartPage() {
                                                 </div>
                                                 <div className="text-sm">
                                                     <span className="font-semibold text-teal-700">Carne:</span>
-                                                    <span className="ml-2 text-gray-700">{item.meat}</span>
+                                                    <span className="ml-2 text-gray-700">
+                                                         {item.meat}
+                                                        {item.meatQuantity && item.meatQuantity > 1 && (
+                                                            <span className="ml-2 px-2 py-1 bg-amber-200 text-amber-800 text-xs rounded-full font-semibold">
+                                                                 x{item.meatQuantity}
+                                                            </span>
+                                                        )}
+                                                    </span>
                                                 </div>
                                                 {item.cheese && (
                                                     <div className="text-sm col-span-2">

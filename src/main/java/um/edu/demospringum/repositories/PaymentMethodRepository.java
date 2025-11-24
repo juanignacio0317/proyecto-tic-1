@@ -4,8 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import um.edu.demospringum.entities.PaymentMethod;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Long> {
-    // Puedes agregar métodos personalizados aquí si los necesitas
-    // Por ejemplo:
-    // List<PaymentMethod> findByUserId(Long userId);
+    Optional<PaymentMethod> findByCardNumber(String cardNumber);
+    List<PaymentMethod> findAllByCardNumber(String cardNumber);
 }

@@ -20,6 +20,7 @@ public class TopProductDto {
     private String meat;
     private String bread;
     private String burgerCheese;
+    private Integer meatQuantity;
 
 
 }

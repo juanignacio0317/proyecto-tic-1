@@ -10,6 +10,7 @@ import um.edu.demospringum.exceptions.ClientNotFound;
 import um.edu.demospringum.exceptions.OrderNotFound;
 import um.edu.demospringum.repositories.ClientOrderRepository;
 import um.edu.demospringum.repositories.ClientRepository;
+import um.edu.demospringum.repositories.PaymentMethodRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,11 +28,16 @@ public class CartService {
     @Autowired
     private ClientRepository clientRepository;
 
-    public CartService(ClientOrderRepository clientOrderRepository, ClientRepository clientRepository) {
+    @Autowired
+    private PaymentMethodRepository paymentMethodRepository;
+
+    public CartService(ClientOrderRepository clientOrderRepository,
+                       ClientRepository clientRepository,
+                       PaymentMethodRepository paymentMethodRepository) {
         this.clientOrderRepository = clientOrderRepository;
         this.clientRepository = clientRepository;
+        this.paymentMethodRepository = paymentMethodRepository;
     }
-
 
     public List<CartItemDTO> getCartItems(Long clientId) throws ClientNotFound {
         Optional<Client> optionalClient = clientRepository.findById(clientId);
@@ -42,13 +48,11 @@ public class CartService {
 
         List<ClientOrder> orders = clientOrderRepository.findByClient(optionalClient.get());
 
-        // Filtrar solo los que están en el carrito
         return orders.stream()
                 .filter(order -> "in basket".equalsIgnoreCase(order.getOrderStatus()))
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
 
     private CartItemDTO convertToDTO(ClientOrder order) {
         CartItemDTO dto = new CartItemDTO();
@@ -64,10 +68,8 @@ public class CartService {
 
         dto.setProductType(product.getType());
 
-        // Calcular precio total
         BigDecimal totalPrice = product.getPrice();
 
-        // Procesar según el tipo de producto
         if (product instanceof Pizza) {
             Pizza pizza = (Pizza) product;
             dto.setDough(pizza.getDough().getTypeDough());
@@ -78,46 +80,41 @@ public class CartService {
             Burger burger = (Burger) product;
             dto.setBread(burger.getBurgerBread().getTypeBread());
             dto.setMeat(burger.getBurgerMeat().getTypeMeat());
+            dto.setMeatQuantity(burger.getMeatQuantity());
             if (burger.getBurgerCheese() != null) {
                 dto.setCheese(burger.getBurgerCheese().getTypeCheese());
             }
         }
 
-        // Toppings
         if (creation.getToppings() != null && !creation.getToppings().isEmpty()) {
             List<String> toppingNames = creation.getToppings().stream()
                     .map(Topping::getTypeTopping)
                     .collect(Collectors.toList());
             dto.setToppings(toppingNames);
 
-            // Sumar precio de toppings
             BigDecimal toppingsPrice = creation.getToppings().stream()
                     .map(Topping::getPrice)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             totalPrice = totalPrice.add(toppingsPrice);
         }
 
-        // Dressings
         if (creation.getDressings() != null && !creation.getDressings().isEmpty()) {
             List<String> dressingNames = creation.getDressings().stream()
                     .map(Dressing::getTypeDressing)
                     .collect(Collectors.toList());
             dto.setDressings(dressingNames);
 
-            // Sumar precio de dressings
             BigDecimal dressingsPrice = creation.getDressings().stream()
                     .map(Dressing::getPrice)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             totalPrice = totalPrice.add(dressingsPrice);
         }
 
-        // Bebida
         if (order.getBeverage() != null) {
             dto.setBeverage(order.getBeverage().getTypeBeverage());
             totalPrice = totalPrice.add(order.getBeverage().getPrice());
         }
 
-        // Acompañamiento
         if (order.getSideOrder() != null) {
             dto.setSideOrder(order.getSideOrder().getTypeSideOrder());
             totalPrice = totalPrice.add(order.getSideOrder().getPrice());
@@ -128,18 +125,30 @@ public class CartService {
         return dto;
     }
 
-
     @Transactional
-    public void processCart(Long clientId, String selectedAddress) throws ClientNotFound, OrderNotFound {
-        Optional<Client> optionalClient = clientRepository.findById(clientId);
+    public void processCart(Long clientId, String selectedAddress, Long paymentMethodId)
+            throws ClientNotFound, OrderNotFound {
 
+        Optional<Client> optionalClient = clientRepository.findById(clientId);
         if (optionalClient.isEmpty()) {
             throw new ClientNotFound("Client not found");
         }
 
+
+        Optional<PaymentMethod> optionalPaymentMethod = paymentMethodRepository.findById(paymentMethodId);
+        if (optionalPaymentMethod.isEmpty()) {
+            throw new RuntimeException("Payment method not found");
+        }
+
+        PaymentMethod paymentMethod = optionalPaymentMethod.get();
+
+
+        if (!paymentMethod.getClient().getUserId().equals(clientId)) {
+            throw new RuntimeException("Payment method does not belong to this client");
+        }
+
         List<ClientOrder> orders = clientOrderRepository.findByClient(optionalClient.get());
 
-        // Filtrar pedidos en el carrito
         List<ClientOrder> cartOrders = orders.stream()
                 .filter(order -> "in basket".equalsIgnoreCase(order.getOrderStatus()))
                 .collect(Collectors.toList());
@@ -148,15 +157,14 @@ public class CartService {
             throw new OrderNotFound("No orders in cart");
         }
 
-        // Actualizar cada pedido
         for (ClientOrder order : cartOrders) {
             order.setOrderAddress(selectedAddress);
             order.setOrderStatus("in queue");
             order.setOrderDate(LocalDateTime.now());
+            order.setPaymentMethod(paymentMethod); // ← NUEVO
             clientOrderRepository.save(order);
         }
     }
-
 
     @Transactional
     public void removeFromCart(Long orderId) throws OrderNotFound {
@@ -168,14 +176,12 @@ public class CartService {
 
         ClientOrder order = optionalOrder.get();
 
-        // Solo permitir eliminar si está en el carrito
         if (!"in basket".equalsIgnoreCase(order.getOrderStatus())) {
             throw new OrderNotFound("Order is not in cart");
         }
 
         clientOrderRepository.delete(order);
     }
-
 
     public String getClientAddress(Long clientId) throws ClientNotFound {
         Optional<Client> optionalClient = clientRepository.findById(clientId);
@@ -186,14 +192,12 @@ public class CartService {
 
         Client client = optionalClient.get();
 
-
         if (client.getAddresses() != null && !client.getAddresses().isEmpty()) {
             return client.getAddresses().get(0);
         }
 
         return "";
     }
-
 
     public List<String> getClientAddresses(Long clientId) throws ClientNotFound {
         Optional<Client> optionalClient = clientRepository.findById(clientId);

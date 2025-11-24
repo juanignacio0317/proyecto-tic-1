@@ -24,6 +24,7 @@ public class CartItemDTO {
     private String bread;
     private String meat;
     private String cheese;
+    private Integer meatQuantity;
 
     // Extras
     private List<String> toppings;

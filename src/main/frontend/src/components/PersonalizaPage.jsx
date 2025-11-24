@@ -18,6 +18,7 @@ export default function PersonalizaPage() {
     const [burger, setBurger] = useState({
         pan: null,
         carne: null,
+        meatQuantity: 1,
         queso: null,
         toppings: [],
         salsas: []
@@ -112,32 +113,24 @@ export default function PersonalizaPage() {
 
             console.log('Iniciando carga de datos...');
 
-            // Cargar todos los datos en paralelo
-            const [panes, carnes, toppings, salsas] = await Promise.all([
+            // ✅ MODIFICAR: Cargar quesos desde su propio endpoint
+            const [panes, carnes, quesos, toppings, salsas] = await Promise.all([
                 burgerService.getAllBreads(),
                 burgerService.getAllMeats(),
+                burgerService.getAllCheeses(),
                 burgerService.getAllToppings(),
                 burgerService.getAllDressings()
             ]);
 
-            console.log('Datos cargados del backend:', { panes, carnes, toppings, salsas });
+            console.log('Datos cargados del backend:', { panes, carnes, quesos, toppings, salsas });
 
-            // Separar toppings en quesos y vegetales
-            // CAMBIO: Usar 'type' en lugar de 'name'
-            const quesos = toppings.filter(t =>
-                (t.type && t.type.toLowerCase().includes('queso')) ||
-                (t.name && t.name.toLowerCase().includes('queso'))
-            );
-            const vegetales = toppings.filter(t =>
-                !(t.type && t.type.toLowerCase().includes('queso')) &&
-                !(t.name && t.name.toLowerCase().includes('queso'))
-            );
 
-            console.log('Quesos encontrados:', quesos);
-            console.log('Vegetales encontrados:', vegetales);
+            const vegetales = toppings;
+
+            console.log('Quesos cargados:', quesos);
+            console.log('Vegetales (toppings):', vegetales);
 
             // Formatear los datos para el frontend
-            // CAMBIO: Usar 'type' como nombre principal
             setOpciones({
                 panes: Array.isArray(panes) ? panes
                     .filter(pan => pan.available)
@@ -147,6 +140,7 @@ export default function PersonalizaPage() {
                         precio: parseFloat(pan.price) || 0,
                         color: asignarColor(pan.type || pan.name || '', 'pan')
                     })) : [],
+
                 carnes: Array.isArray(carnes) ? carnes
                     .filter(carne => carne.available)
                     .map(carne => ({
@@ -155,14 +149,17 @@ export default function PersonalizaPage() {
                         precio: parseFloat(carne.price) || 0,
                         color: asignarColor(carne.type || carne.name || '', 'carne')
                     })) : [],
+
+
                 quesos: Array.isArray(quesos) ? quesos
                     .filter(queso => queso.available)
                     .map(queso => ({
                         id: queso.id?.toString() || '',
-                        nombre: queso.type || queso.name || 'Sin nombre',
+                        nombre: queso.type || 'Sin nombre',
                         precio: parseFloat(queso.price) || 0,
-                        color: asignarColor(queso.type || queso.name || '', 'queso')
+                        color: asignarColor(queso.type || '', 'queso')
                     })) : [],
+
                 toppings: Array.isArray(vegetales) ? vegetales
                     .filter(topping => topping.available)
                     .map(topping => ({
@@ -171,6 +168,7 @@ export default function PersonalizaPage() {
                         precio: parseFloat(topping.price) || 0,
                         color: asignarColor(topping.type || topping.name || '', 'topping')
                     })) : [],
+
                 salsas: Array.isArray(salsas) ? salsas
                     .filter(salsa => salsa.available)
                     .map(salsa => ({
@@ -199,7 +197,7 @@ export default function PersonalizaPage() {
         }
         if (burger.carne) {
             const carne = opciones.carnes.find(c => c.id === burger.carne);
-            if (carne) total += carne.precio;
+            if (carne) total += carne.precio * burger.meatQuantity;
         }
         if (burger.queso) {
             const queso = opciones.quesos.find(q => q.id === burger.queso);
@@ -282,6 +280,7 @@ export default function PersonalizaPage() {
                 userId: parseInt(userId),
                 bread: panSeleccionado.nombre,
                 meat: carneSeleccionada.nombre,
+                meatQuantity: burger.meatQuantity,
                 cheese: quesoSeleccionado ? quesoSeleccionado.nombre : null,
                 toppings: toppingNombres,
                 dressings: salsaNombres,
@@ -300,6 +299,7 @@ export default function PersonalizaPage() {
                 pan: null,
                 carne: null,
                 queso: null,
+                meatQuantity: 1,
                 toppings: [],
                 salsas: []
             });
@@ -351,6 +351,15 @@ export default function PersonalizaPage() {
                             <h2 className="h3 fw-bold mb-4" style={{ color: '#1B7F79' }}>
                                 Armá tu Hamburguesa
                             </h2>
+                            {/* 🔍 DEBUG - Eliminar después */}
+                            <div className="alert alert-info">
+                                <strong>Estado actual:</strong>
+                                <div>Quesos en estado: {opciones.quesos.length}</div>
+                                <div>¿Array válido?: {Array.isArray(opciones.quesos) ? 'Sí' : 'No'}</div>
+                                {opciones.quesos.length > 0 && (
+                                    <div>Primer queso: {JSON.stringify(opciones.quesos[0])}</div>
+                                )}
+                            </div>
 
                             {/* Selección de Pan */}
                             <div className="mb-4">
@@ -393,7 +402,7 @@ export default function PersonalizaPage() {
                             {/* Selección de Carne */}
                             <div className="mb-4">
                                 <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
-                                    2. Elegí tu Carne {opciones.carnes.length === 0 && <span className="small text-muted">(No hay carnes disponibles)</span>}
+                                    2. Elegí tu Carne
                                 </h3>
                                 <div className="row g-3">
                                     {opciones.carnes.map(carne => (
@@ -426,14 +435,63 @@ export default function PersonalizaPage() {
                                         </div>
                                     ))}
                                 </div>
+
+                                {burger.carne && (
+                                    <div className="mt-4 p-4 bg-light rounded-3">
+                                        <h4 className="h6 fw-bold mb-3" style={{ color: '#1B7F79' }}>
+                                            ¿Cuántas carnes querés?
+                                        </h4>
+                                        <div className="d-flex align-items-center gap-3">
+                                            <button
+                                                onClick={() => setBurger({...burger, meatQuantity: Math.max(1, burger.meatQuantity - 1)})}
+                                                disabled={burger.meatQuantity <= 1}
+                                                className="btn btn-outline-primary"
+                                                style={{ width: '48px', height: '48px' }}
+                                            >
+                                                <strong>−</strong>
+                                            </button>
+
+                                            <div className="flex-grow-1 text-center">
+                                                <div className="h2 fw-bold mb-0" style={{ color: '#1B7F79' }}>
+                                                    {burger.meatQuantity}
+                                                </div>
+                                                <small className="text-muted">
+                                                    {burger.meatQuantity === 1 ? 'carne' : 'carnes'}
+                                                </small>
+                                            </div>
+
+                                            <button
+                                                onClick={() => setBurger({...burger, meatQuantity: Math.min(3, burger.meatQuantity + 1)})}
+                                                disabled={burger.meatQuantity >= 3}
+                                                className="btn btn-outline-primary"
+                                                style={{ width: '48px', height: '48px' }}
+                                            >
+                                                <strong>+</strong>
+                                            </button>
+                                        </div>
+
+                                        <div className="mt-3 text-center">
+                                            <span className="badge" style={{ backgroundColor: '#F2C94C', color: '#1B7F79', fontSize: '14px' }}>
+                                                Subtotal carnes: ${opciones.carnes.find(c => c.id === burger.carne)?.precio * burger.meatQuantity || 0}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
+
                             {/* Selección de Queso */}
-                            {opciones.quesos.length > 0 && (
-                                <div className="mb-4">
-                                    <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
-                                        3. Agregá Queso (opcional)
-                                    </h3>
+                            <div className="mb-4">
+                                <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
+                                    3. Agregá Queso (opcional)
+                                    <span className="small text-muted ms-2">
+                                            ({opciones.quesos.length} disponibles)
+                                     </span>
+                                </h3>
+
+                                {opciones.quesos.length === 0 ? (
+                                    <p className="text-muted">Cargando quesos...</p>
+                                ) : (
                                     <div className="row g-3">
                                         {opciones.quesos.map(queso => (
                                             <div key={queso.id} className="col-6 col-md-3">
@@ -465,8 +523,8 @@ export default function PersonalizaPage() {
                                             </div>
                                         ))}
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
 
                             {/* Selección de toppings */}
                             {opciones.toppings.length > 0 && (
@@ -606,15 +664,17 @@ export default function PersonalizaPage() {
                                             }}
                                         ></div>
                                     )}
-                                    {burger.carne && (
+                                    {burger.carne && Array.from({ length: burger.meatQuantity }).map((_, index) => (
                                         <div
+                                            key={`carne-${index}`}
                                             className="rounded"
                                             style={{
                                                 backgroundColor: opciones.carnes.find(c => c.id === burger.carne)?.color || '#8B4513',
-                                                height: '64px'
+                                                height: '64px',
+                                                marginTop: index > 0 ? '-8px' : '0' // Superposición visual
                                             }}
                                         ></div>
-                                    )}
+                                    ))}
                                     {burger.pan && (
                                         <div
                                             className="rounded-bottom"
@@ -639,8 +699,15 @@ export default function PersonalizaPage() {
                                 )}
                                 {burger.carne && opciones.carnes.find(c => c.id === burger.carne) && (
                                     <div className="d-flex justify-content-between mb-2 small">
-                                        <span>{opciones.carnes.find(c => c.id === burger.carne).nombre}</span>
-                                        <span className="fw-semibold">${opciones.carnes.find(c => c.id === burger.carne).precio}</span>
+                                            <span>
+                                                {opciones.carnes.find(c => c.id === burger.carne).nombre}
+                                                {burger.meatQuantity > 1 && (
+                                                    <span className="badge bg-secondary ms-2">x{burger.meatQuantity}</span>
+                                                )}
+                                            </span>
+                                                                            <span className="fw-semibold">
+                                                ${(opciones.carnes.find(c => c.id === burger.carne).precio * burger.meatQuantity).toFixed(2)}
+                                            </span>
                                     </div>
                                 )}
                                 {burger.queso && opciones.quesos.find(q => q.id === burger.queso) && (

@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"}) // ✅ Agregar 5173
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 public class CartController {
 
     @Autowired
@@ -21,7 +21,6 @@ public class CartController {
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
-
 
     @GetMapping("/{clientId}")
     public ResponseEntity<?> getCart(@PathVariable Long clientId) {
@@ -35,7 +34,6 @@ public class CartController {
         }
     }
 
-
     @PostMapping("/{clientId}/process")
     public ResponseEntity<?> processCart(
             @PathVariable Long clientId,
@@ -45,7 +43,11 @@ public class CartController {
                 return ResponseEntity.badRequest().body("La dirección es obligatoria");
             }
 
-            cartService.processCart(clientId, request.getAddress());
+            if (request.getPaymentMethodId() == null) {
+                return ResponseEntity.badRequest().body("El método de pago es obligatorio");
+            }
+
+            cartService.processCart(clientId, request.getAddress(), request.getPaymentMethodId());
             return ResponseEntity.ok("Pedido procesado exitosamente");
         } catch (ClientNotFound e) {
             return ResponseEntity.status(404).body(e.getMessage());
@@ -68,7 +70,6 @@ public class CartController {
         }
     }
 
-
     @GetMapping("/{clientId}/address")
     public ResponseEntity<?> getClientAddress(@PathVariable Long clientId) {
         try {
@@ -80,7 +81,6 @@ public class CartController {
             return ResponseEntity.status(500).body("Error al obtener la dirección: " + e.getMessage());
         }
     }
-
 
     @GetMapping("/{clientId}/addresses")
     public ResponseEntity<?> getClientAddresses(@PathVariable Long clientId) {
@@ -94,9 +94,9 @@ public class CartController {
         }
     }
 
-
     public static class ProcessCartRequest {
         private String address;
+        private Long paymentMethodId; // ← NUEVO
 
         public String getAddress() {
             return address;
@@ -104,6 +104,14 @@ public class CartController {
 
         public void setAddress(String address) {
             this.address = address;
+        }
+
+        public Long getPaymentMethodId() {
+            return paymentMethodId;
+        }
+
+        public void setPaymentMethodId(Long paymentMethodId) {
+            this.paymentMethodId = paymentMethodId;
         }
     }
 
@@ -122,7 +130,6 @@ public class CartController {
             this.address = address;
         }
     }
-
 
     public static class AddressesResponse {
         private List<String> addresses;

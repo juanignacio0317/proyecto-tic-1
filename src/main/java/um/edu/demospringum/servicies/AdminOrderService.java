@@ -38,9 +38,7 @@ public class AdminOrderService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Obtiene pedidos filtrados por estado
-     */
+
     public List<AdminOrderDTO> getOrdersByStatus(String status) {
         List<ClientOrder> allOrders = clientOrderRepository.findAll();
 
@@ -50,10 +48,7 @@ public class AdminOrderService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Actualiza el estado de un pedido
-     * Estados permitidos: "in queue" -> "in preparation" -> "on the way" -> "delivered"
-     */
+
     @Transactional
     public void updateOrderStatus(Long orderId, String newStatus) throws OrderNotFound {
         Optional<ClientOrder> optionalOrder = clientOrderRepository.findById(orderId);
@@ -82,9 +77,6 @@ public class AdminOrderService {
         clientOrderRepository.save(order);
     }
 
-    /**
-     * Valida que la transición de estado sea lógica
-     */
     private boolean isValidTransition(String from, String to) {
 
         // in queue -> in preparation
@@ -138,6 +130,7 @@ public class AdminOrderService {
             Burger burger = (Burger) product;
             dto.setBread(burger.getBurgerBread().getTypeBread());
             dto.setMeat(burger.getBurgerMeat().getTypeMeat());
+            dto.setMeatQuantity(burger.getMeatQuantity());
             if (burger.getBurgerCheese() != null) {
                 dto.setCheese(burger.getBurgerCheese().getTypeCheese());
             }

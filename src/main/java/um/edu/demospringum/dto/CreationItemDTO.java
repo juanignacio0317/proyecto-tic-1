@@ -19,6 +19,7 @@ public class CreationItemDTO {
     private boolean favourite;
 
 
+
     private String dough;
     private String sauce;
     private String size;
@@ -26,6 +27,7 @@ public class CreationItemDTO {
 
     private String bread;
     private String meat;
+    private Integer meatQuantity;
 
 
     private String cheese;

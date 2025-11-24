@@ -1,5 +1,6 @@
 package um.edu.demospringum.dto;
 
+import lombok.Getter;
 import um.edu.demospringum.entities.Products.Burger;
 import um.edu.demospringum.entities.Products.Dressing;
 import um.edu.demospringum.entities.Products.Topping;
@@ -18,9 +19,9 @@ public class BurgerCreationRequest {
     private List<String> dressings;
     private Long userId;
     private LocalDateTime orderDate;
+    private Integer meatQuantity;
 
-
-    public String getBread() { return bread; }
+    public String getBread() {return bread;}
     public void setBread(String bread) { this.bread = bread; }
 
     public String getMeat() { return meat; }
@@ -40,4 +41,7 @@ public class BurgerCreationRequest {
 
     public LocalDateTime getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
+
+    public Integer getMeatQuantity() { return meatQuantity; }
+    public void setMeatQuantity(Integer meatQuantity) { this.meatQuantity = meatQuantity; }
 }

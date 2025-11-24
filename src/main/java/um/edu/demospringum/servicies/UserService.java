@@ -23,20 +23,4 @@ public class UserService {
         userDataRepository.save(user);
     }
 
-    public void addAddress(UserData user){
-
-    }
-
-    public void removeAddress(UserData user){
-
-    }
-
-    public void addPayentMethod(UserData user){
-    }
-
-    public void removePaymentMethod(UserData user){
-
-    }
-
-
 }

@@ -252,7 +252,14 @@ export default function MyCreationsPage() {
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="font-semibold text-gray-600">Carne:</span>
-                                                    <span className="text-gray-800">{creation.meat}</span>
+                                                    <span className="text-gray-800">
+                                                                          {creation.meat}
+                                                        {creation.meatQuantity && creation.meatQuantity > 1 && (
+                                                            <span className="ml-2 px-2 py-1 bg-amber-200 text-amber-800 text-xs rounded-full">
+                                                                x{creation.meatQuantity}
+                                                            </span>
+                                                        )}
+                                                    </span>
                                                 </div>
                                                 {creation.cheese && (
                                                     <div className="flex justify-between">

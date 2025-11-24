@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "client_order")
-
 @Getter
 @Setter
 public class ClientOrder {
@@ -36,7 +35,6 @@ public class ClientOrder {
     @Column
     private String orderAddress;
 
-
     @ManyToOne
     @JoinColumn(name = "beverageId")
     private Beverage beverage;
@@ -45,6 +43,7 @@ public class ClientOrder {
     @JoinColumn(name = "sideOrderId")
     private SideOrder sideOrder;
 
-
-
+    @ManyToOne
+    @JoinColumn(name = "paymentMethodId")
+    private PaymentMethod paymentMethod;
 }
