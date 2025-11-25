@@ -83,11 +83,35 @@ export default function AdminPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            console.log('✅ Pedidos cargados:', response.data);
+            console.log('Pedidos cargados:', response.data);
             setOrders(response.data);
         } catch (error) {
-            console.error('❌ Error al cargar pedidos:', error);
+            console.error('Error al cargar pedidos:', error);
             alert('Error al cargar pedidos: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadDefaultData = async () => {
+        if (!window.confirm(`¿Cargar datos predeterminados para ${getTabLabel(activeTab)}? Esto no borrará los existentes.`)) {
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const token = authService.getToken();
+            const endpoint = `http://localhost:8080/api/admin/init-data/${activeTab}`;
+
+            const response = await axios.post(endpoint, {}, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            alert(`${response.data.message}\n\nCreados: ${response.data.created}\nTotal: ${response.data.total}`);
+            loadIngredients();
+        } catch (error) {
+            console.error('Error al cargar datos predeterminados:', error);
+            alert('Error: ' + (error.response?.data || error.message));
         } finally {
             setLoading(false);
         }
@@ -106,10 +130,10 @@ export default function AdminPage() {
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
 
-            alert('✅ Estado actualizado exitosamente');
+            alert('Estado actualizado exitosamente');
             loadOrders();
         } catch (error) {
-            console.error('❌ Error al actualizar estado:', error);
+            console.error('Error al actualizar estado:', error);
             alert('Error: ' + (error.response?.data || error.message));
         }
     };
@@ -191,7 +215,7 @@ export default function AdminPage() {
         setLoading(true);
         try {
             await administratorService.createAdministrator(adminFormData);
-            alert('✅ ¡Administrador creado exitosamente!');
+            alert('¡Administrador creado exitosamente!');
             setAdminFormData({ name: '', surname: '', email: '', password: '' });
             loadAdministrators();
         } catch (error) {
@@ -209,7 +233,7 @@ export default function AdminPage() {
 
         try {
             await administratorService.deleteAdministrator(id);
-            alert('✅ Administrador eliminado exitosamente');
+            alert('Administrador eliminado exitosamente');
             loadAdministrators();
         } catch (error) {
             alert('Error al eliminar administrador: ' + error.message);
@@ -955,9 +979,23 @@ export default function AdminPage() {
                         {/* Lista de ingredientes */}
                         <div className="col-lg-8">
                             <div className="bg-white rounded-3 shadow-lg p-4">
-                                <h3 className="h4 fw-bold mb-4" style={{ color: '#1B7F79' }}>
-                                    Lista de {getTabLabel(activeTab)}
-                                </h3>
+                                <div className="d-flex justify-content-between align-items-center mb-4">
+                                    <h3 className="h4 fw-bold mb-0" style={{ color: '#1B7F79' }}>
+                                        Lista de {getTabLabel(activeTab)}
+                                    </h3>
+                                    <button
+                                        onClick={loadDefaultData}
+                                        className="btn btn-sm"
+                                        style={{
+                                            backgroundColor: '#F2C94C',
+                                            color: '#1B7F79',
+                                            fontWeight: 'bold'
+                                        }}
+                                        disabled={loading}
+                                    >
+                                        ⚡ Cargar Predeterminados
+                                    </button>
+                                </div>
 
                                 {loading ? (
                                     <div className="text-center py-5">

@@ -60,7 +60,7 @@ export default function Navbar() {
   };
 
   const items = [
-    { label: "Inicio", href: "#inicio", icon: "home"},
+    { label: "Inicio", href: "/", icon: "home"},
 
     authService.isAdmin()
         ? { }
@@ -167,7 +167,7 @@ export default function Navbar() {
                                border: '1px solid #e5e7eb'
                              }}>
                           <ul className="list-unstyled m-0 py-2">
-                            {/* Mis Datos - PARA TODOS (admins y usuarios) */}
+                            {/* Mis Datos */}
                             <li>
                               <button
                                   onClick={() => {

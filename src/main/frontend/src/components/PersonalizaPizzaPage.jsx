@@ -74,15 +74,16 @@ export default function PersonalizaPizzaPage() {
 
         // Colores para toppings
         if (tipo === 'topping') {
-            if (nombreLower.includes('pepperoni')) return '#B22222';
-            if (nombreLower.includes('jamón') || nombreLower.includes('jamon')) return '#F5A9B8';
-            if (nombreLower.includes('champiñon') || nombreLower.includes('champignon')) return '#D3D3D3';
-            if (nombreLower.includes('aceituna')) return '#556B2F';
-            if (nombreLower.includes('morrón') || nombreLower.includes('morron') || nombreLower.includes('pimiento')) return '#FF6347';
-            if (nombreLower.includes('cebolla')) return '#BA55D3';
-            if (nombreLower.includes('ananá') || nombreLower.includes('piña')) return '#FFE066';
+            if (nombreLower.includes('lechuga')) return '#90EE90';
             if (nombreLower.includes('tomate')) return '#FF6347';
-            if (nombreLower.includes('albahaca')) return '#228B22';
+            if (nombreLower.includes('cebolla')) return '#F5F5DC';
+            if (nombreLower.includes('pepino')) return '#8FBC8F';
+            if (nombreLower.includes('bacon')) return '#8B4513';
+            if (nombreLower.includes('huevo')) return '#FFD700';
+            if (nombreLower.includes('champiñon') || nombreLower.includes('champignon')) return '#D2B48C';
+            if (nombreLower.includes('jalapeño') || nombreLower.includes('jalapeno')) return '#228B22';
+            if (nombreLower.includes('cebolla caramelizada')) return '#D2691E';
+            if (nombreLower.includes('aguacate') || nombreLower.includes('palta')) return '#7CFC00';
             return '#90EE90';
         }
 
