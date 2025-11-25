@@ -26,7 +26,7 @@ public class DataInitializer {
 
 
                 System.out.println(" ADMINISTRADOR INICIAL CREADO");;
-                System.out.println("Email:      admin@pizzumburgum.com");
+                System.out.println("Email:      admin@admin.com");
                 System.out.println("Contraseña: adminadmin");
 
             } else {
