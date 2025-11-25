@@ -60,7 +60,7 @@ export default function Navbar() {
   };
 
   const items = [
-    { label: "Inicio", href: "#inicio", icon: "home"},
+    { label: "Inicio", href: "/", icon: "home"},
 
     authService.isAdmin()
         ? { }
