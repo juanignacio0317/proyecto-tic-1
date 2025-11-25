@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
 import Navbar from "./Navbar.jsx";
 
+
 export default function CartPage() {
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,13 +21,11 @@ export default function CartPage() {
 
     useEffect(() => {
         if (!authService.isAuthenticated()) {
-            alert("Debes iniciar sesión para ver tu carrito.");
             navigate("/login");
             return;
         }
 
         if (authService.isAdmin()) {
-            alert("Debes iniciar sesión como cliente para ver tu carrito");
             navigate("/login");
             return;
         }
@@ -36,18 +35,20 @@ export default function CartPage() {
 
         if (!userId) {
             console.error('❌ No se pudo obtener userId');
-            alert("Error al obtener información del usuario. Por favor, inicia sesión nuevamente.");
-            navigate("/login");
+            Swal.fire({
+                icon: "error",
+                title: "Error de sesión",
+                text: "No se pudo obtener la información del usuario. Inicia sesión nuevamente.",
+                confirmButtonColor: "#1B7F79"
+            }).then(() => navigate("/login"));
             return;
         }
 
         loadCart(userId);
         loadAddress(userId);
         loadPaymentMethods(userId);
-        loadAvailableExtras(); // ← AGREGAR ESTA LÍNEA
+        loadAvailableExtras();
     }, [navigate]);
-
-
 
     const loadPaymentMethods = async (userId) => {
         try {
@@ -60,7 +61,6 @@ export default function CartPage() {
             );
             setPaymentMethods(response.data);
 
-            // Seleccionar automáticamente el primer método si existe
             if (response.data.length > 0) {
                 setSelectedPaymentMethod(response.data[0].idPM);
             }
@@ -83,7 +83,6 @@ export default function CartPage() {
             console.log('✅ Carrito cargado:', response.data);
             setCartItems(response.data);
 
-
             const extrasMap = {};
             response.data.forEach(item => {
                 extrasMap[item.orderId] = {
@@ -96,14 +95,25 @@ export default function CartPage() {
         } catch (error) {
             console.error("❌ Error al cargar el carrito:", error);
             if (error.response?.status === 401) {
-                alert("Sesión expirada. Inicia sesión nuevamente.");
-                authService.logout();
-                navigate("/login");
+                Swal.fire({
+                    icon: "warning",
+                    title: "Sesión expirada",
+                    text: "Inicia sesión nuevamente para continuar.",
+                    confirmButtonColor: "#1B7F79"
+                }).then(() => {
+                    authService.logout();
+                    navigate("/login");
+                });
             } else if (error.response?.status === 404) {
                 console.log('ℹ️ Cliente no encontrado o sin items en carrito');
                 setCartItems([]);
             } else {
-                alert("Error al cargar el carrito. Intenta nuevamente.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error al cargar el carrito",
+                    text: "No se pudo cargar tu carrito. Intenta nuevamente.",
+                    confirmButtonColor: "#1B7F79"
+                });
             }
         } finally {
             setLoading(false);
@@ -130,7 +140,6 @@ export default function CartPage() {
             }
         } catch (error) {
             console.error("❌ Error al cargar las direcciones:", error);
-
         }
     };
 
@@ -138,14 +147,12 @@ export default function CartPage() {
         try {
             const token = authService.getToken();
 
-            // Cargar bebidas
             const beveragesResponse = await axios.get('http://localhost:8080/api/beverages', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             console.log('✅ Bebidas cargadas:', beveragesResponse.data);
             setAvailableBeverages(beveragesResponse.data.filter(b => b.available));
 
-            // Cargar acompañamientos
             const sideOrdersResponse = await axios.get('http://localhost:8080/api/sideOrders', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -158,18 +165,33 @@ export default function CartPage() {
 
     const handleProcessCart = async () => {
         if (!selectedAddress || selectedAddress.trim() === "") {
-            alert("Por favor, ingresa una dirección de entrega");
+            Swal.fire({
+                icon: "warning",
+                title: "Dirección requerida",
+                text: "Por favor, ingresa una dirección de entrega.",
+                confirmButtonColor: "#1B7F79"
+            });
             return;
         }
 
         if (!selectedPaymentMethod) {
-            alert("Por favor, selecciona un método de pago");
+            Swal.fire({
+                icon: "warning",
+                title: "Método de pago requerido",
+                text: "Por favor, selecciona un método de pago.",
+                confirmButtonColor: "#1B7F79"
+            });
             return;
         }
 
         const userId = authService.getUserId();
         if (!userId) {
-            alert("Error al obtener información del usuario.");
+            Swal.fire({
+                icon: "error",
+                title: "Error de sesión",
+                text: "No se pudo obtener la información del usuario.",
+                confirmButtonColor: "#1B7F79"
+            });
             return;
         }
 
@@ -179,11 +201,9 @@ export default function CartPage() {
             console.log('🚀 Procesando carrito para userId:', userId);
             const token = authService.getToken();
 
-
             for (const item of cartItems) {
                 const extras = itemExtras[item.orderId] || {};
 
-                // Agregar bebida si fue seleccionada
                 if (extras.beverage && extras.beverage !== item.beverage) {
                     console.log(`🥤 Agregando bebida ${extras.beverage} a orden ${item.orderId}`);
                     await axios.post(
@@ -193,7 +213,6 @@ export default function CartPage() {
                     );
                 }
 
-                // Agregar acompañamiento si fue seleccionado
                 if (extras.sideOrder && extras.sideOrder !== item.sideOrder) {
                     console.log(`🍟 Agregando acompañamiento ${extras.sideOrder} a orden ${item.orderId}`);
                     await axios.post(
@@ -219,44 +238,77 @@ export default function CartPage() {
             );
 
             console.log('✅ Pedido procesado exitosamente');
-            alert("¡Pedido procesado exitosamente! Tu orden está en cola.");
-            navigate("/mis-pedidos");
+            Swal.fire({
+                icon: "success",
+                title: "¡Pedido confirmado!",
+                text: "Tu orden fue enviada y está en cola.",
+                confirmButtonColor: "#1B7F79"
+            }).then(() => {
+                navigate("/mis-pedidos");
+            });
+
         } catch (error) {
             console.error("❌ Error al procesar el carrito:", error);
-            alert("Error al procesar el pedido: " + (error.response?.data || error.message));
+            Swal.fire({
+                icon: "error",
+                title: "Error al procesar el pedido",
+                text: error.response?.data || error.message || "Ocurrió un error inesperado.",
+                confirmButtonColor: "#1B7F79"
+            });
         } finally {
             setProcessing(false);
         }
     };
 
     const handleRemoveItem = async (orderId) => {
-        if (!window.confirm("¿Estás seguro de eliminar este item del carrito?")) {
-            return;
-        }
+        Swal.fire({
+            icon: "warning",
+            title: "¿Eliminar del carrito?",
+            text: "¿Estás seguro de eliminar este ítem del carrito?",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar"
+        }).then(async (result) => {
+            if (!result.isConfirmed) return;
 
-        try {
-            console.log('🗑️ Eliminando item del carrito:', orderId);
-            const token = authService.getToken();
+            try {
+                console.log('🗑️ Eliminando item del carrito:', orderId);
+                const token = authService.getToken();
 
-            await axios.delete(`http://localhost:8080/api/cart/item/${orderId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+                await axios.delete(`http://localhost:8080/api/cart/item/${orderId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log('✅ Item eliminado');
+
+                const userId = authService.getUserId();
+                if (userId) {
+                    loadCart(userId);
                 }
-            });
 
-            console.log('✅ Item eliminado');
-
-            // Recargar el carrito
-            const userId = authService.getUserId();
-            if (userId) {
-                loadCart(userId);
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: "success",
+                    title: "Item eliminado del carrito",
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true
+                });
+            } catch (error) {
+                console.error("❌ Error al eliminar item:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error al eliminar",
+                    text: "No se pudo eliminar el item. Intenta nuevamente.",
+                    confirmButtonColor: "#1B7F79"
+                });
             }
-
-            alert("Item eliminado del carrito");
-        } catch (error) {
-            console.error("❌ Error al eliminar item:", error);
-            alert("Error al eliminar el item. Intenta nuevamente.");
-        }
+        });
     };
 
     const handleSelectBeverage = (orderId, beverageType) => {
@@ -305,7 +357,6 @@ export default function CartPage() {
         return cartItems.reduce((sum, item) => {
             let itemTotal = parseFloat(item.totalPrice || 0);
 
-            // ✅ Agregar precio de bebida seleccionada (si es diferente a la que ya tiene)
             const selectedBeverage = itemExtras[item.orderId]?.beverage;
             if (selectedBeverage && selectedBeverage !== item.beverage) {
                 const beverageObj = availableBeverages.find(b => b.type === selectedBeverage);
@@ -314,7 +365,6 @@ export default function CartPage() {
                 }
             }
 
-            // ✅ Agregar precio de acompañamiento seleccionado (si es diferente al que ya tiene)
             const selectedSideOrder = itemExtras[item.orderId]?.sideOrder;
             if (selectedSideOrder && selectedSideOrder !== item.sideOrder) {
                 const sideOrderObj = availableSideOrders.find(s => s.type === selectedSideOrder);
@@ -464,7 +514,7 @@ export default function CartPage() {
                                         </div>
                                     )}
 
-                                    {/* Extras - VERSIÓN CON SELECCIÓN LOCAL */}
+                                    {/* Extras */}
                                     <div className="border-t pt-4 mt-4 space-y-4">
                                         {/* Bebida */}
                                         <div>
@@ -533,32 +583,31 @@ export default function CartPage() {
                                         </div>
                                     </div>
 
-                                    {/* Precio */}
-                                    {/* Precio - CON CÁLCULO DINÁMICO */}
+                                    {/* Precio del item */}
                                     <div className="border-t pt-3 mt-3 flex justify-end">
-                                                <span className="text-2xl font-bold text-teal-700">
-                                                    ${(() => {
-                                                    let itemTotal = parseFloat(item.totalPrice || 0);
+                                        <span className="text-2xl font-bold text-teal-700">
+                                            ${(() => {
+                                            let itemTotal = parseFloat(item.totalPrice || 0);
 
-                                                    const selectedBeverage = itemExtras[item.orderId]?.beverage;
-                                                    if (selectedBeverage && selectedBeverage !== item.beverage) {
-                                                        const beverageObj = availableBeverages.find(b => b.type === selectedBeverage);
-                                                        if (beverageObj) {
-                                                            itemTotal += parseFloat(beverageObj.price || 0);
-                                                        }
-                                                    }
+                                            const selectedBeverage = itemExtras[item.orderId]?.beverage;
+                                            if (selectedBeverage && selectedBeverage !== item.beverage) {
+                                                const beverageObj = availableBeverages.find(b => b.type === selectedBeverage);
+                                                if (beverageObj) {
+                                                    itemTotal += parseFloat(beverageObj.price || 0);
+                                                }
+                                            }
 
-                                                    const selectedSideOrder = itemExtras[item.orderId]?.sideOrder;
-                                                    if (selectedSideOrder && selectedSideOrder !== item.sideOrder) {
-                                                        const sideOrderObj = availableSideOrders.find(s => s.type === selectedSideOrder);
-                                                        if (sideOrderObj) {
-                                                            itemTotal += parseFloat(sideOrderObj.price || 0);
-                                                        }
-                                                    }
+                                            const selectedSideOrder = itemExtras[item.orderId]?.sideOrder;
+                                            if (selectedSideOrder && selectedSideOrder !== item.sideOrder) {
+                                                const sideOrderObj = availableSideOrders.find(s => s.type === selectedSideOrder);
+                                                if (sideOrderObj) {
+                                                    itemTotal += parseFloat(sideOrderObj.price || 0);
+                                                }
+                                            }
 
-                                                    return itemTotal.toFixed(2);
-                                                })()}
-                                                </span>
+                                            return itemTotal.toFixed(2);
+                                        })()}
+                                        </span>
                                     </div>
                                 </div>
                             ))}
@@ -613,7 +662,6 @@ export default function CartPage() {
                                     )}
                                 </div>
 
-                                {/* Dirección de entrega */}
                                 <div className="mb-6">
                                     <div className="flex justify-between items-center mb-2">
                                         <label className="block text-sm font-semibold text-gray-700">
@@ -664,7 +712,6 @@ export default function CartPage() {
                                     )}
                                 </div>
 
-                                {/* Total de items */}
                                 <div className="border-t border-b py-4 mb-4">
                                     <div className="flex justify-between mb-2">
                                         <span className="text-gray-600">Items</span>
@@ -675,7 +722,6 @@ export default function CartPage() {
                                         <span className="text-teal-700">${calculateTotal()}</span>
                                     </div>
                                 </div>
-
 
                                 <button
                                     onClick={handleProcessCart}

@@ -32,10 +32,16 @@ export default function LoginPage() {
 
             // Si llega aquí, el login fue exitoso
             const user = authService.getCurrentUser();
-            alert(`¡Bienvenido/a de nuevo ${user.name}!`);
+            Swal.fire({
+                icon: "success",
+                title: "¡Inicio de sesión exitoso!",
+                text: "Inicio de sesión exitoso, seras redirigido al inicio.",
+                timer:1500,
+                showConfirmButton: false,
 
-            // Redirigir a la página principal
-            navigate("/");
+            }).then(() => {
+                window.location.href = "/";
+            });
 
         } catch (err) {
             setError(err.message || "Email o contraseña incorrectos.");

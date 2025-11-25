@@ -32,10 +32,31 @@ export default function Navbar() {
   }, [showUserMenu]);
 
   const handleLogout = () => {
-    authService.logout();
-    setUser(null);
-    setShowUserMenu(false);
-    navigate("/");
+    Swal.fire({
+      title: "¿Cerrar sesión?",
+      text: "¿Seguro que querés salir de tu cuenta?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#1B7F79",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, salir",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        authService.logout();
+        setUser(null);
+        setShowUserMenu(false);
+
+        Swal.fire({
+          icon: "success",
+          title: "Sesión cerrada",
+          timer: 1200,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate("/");
+        });
+      }
+    });
   };
 
   const items = [

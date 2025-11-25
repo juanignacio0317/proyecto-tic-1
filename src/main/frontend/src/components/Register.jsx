@@ -181,8 +181,16 @@ export default function Register() {
 
             await authService.register(userData);
 
-            alert(`¡Bienvenido/a ${nombre} ${apellido}! Tu cuenta fue creada correctamente.`);
-            navigate("/");
+            Swal.fire({
+                icon: "success",
+                title: "¡Cuenta creada con éxito!",
+                text: "Tu cuenta fue creada con éxito, seras redirigido al inicio.",
+                timer:1000,
+                showConfirmButton: false,
+
+            }).then(() => {
+                window.location.href = "/";
+            });
         } catch (err) {
             setError(err.message || "Error al crear la cuenta");
         } finally {

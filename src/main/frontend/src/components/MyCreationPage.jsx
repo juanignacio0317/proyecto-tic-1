@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
 
+
 export default function MyCreationsPage() {
     const [creations, setCreations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -10,14 +11,11 @@ export default function MyCreationsPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Verificar autenticación
         if (!authService.isAuthenticated()) {
-            alert("Debes iniciar sesión para ver tus creaciones.");
             navigate("/login");
             return;
         }
         if (authService.isAdmin()) {
-            alert("Debes iniciar sesión como cliente para ver tus creaciones");
             navigate("/");
             return;
         }
@@ -29,11 +27,13 @@ export default function MyCreationsPage() {
         setLoading(true);
         try {
             const userId = authService.getUserId();
-            console.log('🎨 Cargando creaciones para userId:', userId);
-
             if (!userId) {
-                alert("Error al obtener información del usuario.");
-                navigate("/login");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error de sesión",
+                    text: "No se pudo obtener la información del usuario.",
+                    confirmButtonColor: "#1B7F79"
+                }).then(() => navigate("/login"));
                 return;
             }
 
@@ -46,23 +46,33 @@ export default function MyCreationsPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            console.log('✅ Creaciones cargadas:', response.data);
             setCreations(response.data);
+
         } catch (error) {
-            console.error("❌ Error al cargar creaciones:", error);
             if (error.response?.status === 401) {
-                alert("Sesión expirada. Inicia sesión nuevamente.");
-                authService.logout();
-                navigate("/login");
+                Swal.fire({
+                    icon: "warning",
+                    title: "Sesión expirada",
+                    text: "Inicia sesión nuevamente para continuar.",
+                    confirmButtonColor: "#1B7F79"
+                }).then(() => {
+                    authService.logout();
+                    navigate("/login");
+                });
             } else {
-                alert("Error al cargar creaciones. Intenta nuevamente.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error al cargar",
+                    text: "No se pudieron cargar tus creaciones. Intenta nuevamente.",
+                    confirmButtonColor: "#1B7F79"
+                });
             }
         } finally {
             setLoading(false);
         }
     };
 
-    const toggleFavorite = async (creationId) => {
+    const toggleFavorite = async (creationId, currentFavourite) => {
         try {
             const userId = authService.getUserId();
             const token = authService.getToken();
@@ -73,11 +83,29 @@ export default function MyCreationsPage() {
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
 
-            console.log('✅ Favorito actualizado');
-            loadCreations(); // Recargar la lista
+
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: "success",
+                title: currentFavourite
+                    ? "Creación eliminada de favoritos"
+                    : "Creación agregada a favoritos",
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+
+            // Recargar la lista
+            loadCreations();
+
         } catch (error) {
-            console.error("❌ Error al actualizar favorito:", error);
-            alert("Error al actualizar favorito. Intenta nuevamente.");
+            Swal.fire({
+                icon: "error",
+                title: "Error al actualizar favorito",
+                text: "No se pudo actualizar esta creación.",
+                confirmButtonColor: "#1B7F79"
+            });
         }
     };
 
@@ -92,11 +120,21 @@ export default function MyCreationsPage() {
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
 
-            console.log('✅ Agregado al carrito');
-            alert("¡Creación agregada al carrito!");
+            Swal.fire({
+                icon: "success",
+                title: "Agregado al carrito",
+                text: "Tu creación fue agregada correctamente.",
+                timer: 1400,
+                showConfirmButton: false
+            });
+
         } catch (error) {
-            console.error("❌ Error al agregar al carrito:", error);
-            alert("Error al agregar al carrito. Intenta nuevamente.");
+            Swal.fire({
+                icon: "error",
+                title: "Error al agregar",
+                text: "No se pudo agregar la creación al carrito.",
+                confirmButtonColor: "#1B7F79"
+            });
         }
     };
 
@@ -122,7 +160,7 @@ export default function MyCreationsPage() {
     return (
         <div className="min-h-screen bg-teal-700 py-8 px-4">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
+
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-white mb-2">Mis Creaciones</h1>
                     <p className="text-teal-100">
@@ -130,10 +168,9 @@ export default function MyCreationsPage() {
                     </p>
                 </div>
 
-                {/* Filtros y acciones */}
                 <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
                     <div className="flex flex-wrap justify-between items-center gap-4">
-                        {/* Filtro de favoritos */}
+
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setFilterFavorites(false)}
@@ -145,6 +182,7 @@ export default function MyCreationsPage() {
                             >
                                 📚 Todas las Creaciones
                             </button>
+
                             <button
                                 onClick={() => setFilterFavorites(true)}
                                 className={`px-6 py-2 rounded-lg font-semibold transition-all ${
@@ -157,14 +195,12 @@ export default function MyCreationsPage() {
                             </button>
                         </div>
 
-                        {/* Contador */}
                         <div className="text-gray-600 font-semibold">
                             {creations.length} {creations.length === 1 ? 'creación' : 'creaciones'}
                         </div>
                     </div>
                 </div>
 
-                {/* Lista de creaciones */}
                 {creations.length === 0 ? (
                     <div className="bg-white rounded-lg shadow-lg p-12 text-center">
                         <div className="mb-4">
@@ -194,9 +230,11 @@ export default function MyCreationsPage() {
                                 key={creation.creationId}
                                 className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden"
                             >
-                                {/* Header de la card */}
+
                                 <div className={`p-4 ${
-                                    creation.productType === 'PIZZA' ? 'bg-red-500' : 'bg-amber-500'
+                                    creation.productType === 'PIZZA'
+                                        ? 'bg-red-500'
+                                        : 'bg-amber-500'
                                 }`}>
                                     <div className="flex justify-between items-start">
                                         <div className="flex items-center gap-3">
@@ -212,8 +250,9 @@ export default function MyCreationsPage() {
                                                 </p>
                                             </div>
                                         </div>
+
                                         <button
-                                            onClick={() => toggleFavorite(creation.creationId)}
+                                            onClick={() => toggleFavorite(creation.creationId, creation.favourite)}
                                             className="text-3xl transition-transform hover:scale-110"
                                         >
                                             {creation.favourite ? '⭐' : '☆'}
@@ -221,40 +260,39 @@ export default function MyCreationsPage() {
                                     </div>
                                 </div>
 
-                                {/* Contenido de la card */}
                                 <div className="p-4">
-                                    {/* Ingredientes base */}
+
                                     <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                                         {creation.productType === 'PIZZA' ? (
                                             <div className="space-y-1 text-sm">
                                                 <div className="flex justify-between">
                                                     <span className="font-semibold text-gray-600">Tamaño:</span>
-                                                    <span className="text-gray-800">{creation.size}</span>
+                                                    <span>{creation.size}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="font-semibold text-gray-600">Masa:</span>
-                                                    <span className="text-gray-800">{creation.dough}</span>
+                                                    <span>{creation.dough}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="font-semibold text-gray-600">Salsa:</span>
-                                                    <span className="text-gray-800">{creation.sauce}</span>
+                                                    <span>{creation.sauce}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="font-semibold text-gray-600">Queso:</span>
-                                                    <span className="text-gray-800">{creation.cheese}</span>
+                                                    <span>{creation.cheese}</span>
                                                 </div>
                                             </div>
                                         ) : (
                                             <div className="space-y-1 text-sm">
                                                 <div className="flex justify-between">
                                                     <span className="font-semibold text-gray-600">Pan:</span>
-                                                    <span className="text-gray-800">{creation.bread}</span>
+                                                    <span>{creation.bread}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="font-semibold text-gray-600">Carne:</span>
-                                                    <span className="text-gray-800">
-                                                                          {creation.meat}
-                                                        {creation.meatQuantity && creation.meatQuantity > 1 && (
+                                                    <span>
+                                                        {creation.meat}
+                                                        {creation.meatQuantity > 1 && (
                                                             <span className="ml-2 px-2 py-1 bg-amber-200 text-amber-800 text-xs rounded-full">
                                                                 x{creation.meatQuantity}
                                                             </span>
@@ -264,52 +302,43 @@ export default function MyCreationsPage() {
                                                 {creation.cheese && (
                                                     <div className="flex justify-between">
                                                         <span className="font-semibold text-gray-600">Queso:</span>
-                                                        <span className="text-gray-800">{creation.cheese}</span>
+                                                        <span>{creation.cheese}</span>
                                                     </div>
                                                 )}
                                             </div>
                                         )}
                                     </div>
 
-                                    {/* Toppings */}
-                                    {creation.toppings && creation.toppings.length > 0 && (
+                                    {creation.toppings?.length > 0 && (
                                         <div className="mb-3">
                                             <h4 className="font-semibold text-green-700 text-sm mb-2">
                                                 ✨ Toppings:
                                             </h4>
                                             <div className="flex flex-wrap gap-2">
-                                                {creation.toppings.map((topping, idx) => (
-                                                    <span
-                                                        key={idx}
-                                                        className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                                                    >
-                                                        {topping}
+                                                {creation.toppings.map((t, i) => (
+                                                    <span key={i} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                                        {t}
                                                     </span>
                                                 ))}
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* Dressings */}
-                                    {creation.dressings && creation.dressings.length > 0 && (
+                                    {creation.dressings?.length > 0 && (
                                         <div className="mb-3">
                                             <h4 className="font-semibold text-yellow-700 text-sm mb-2">
                                                 🧂 Aderezos:
                                             </h4>
                                             <div className="flex flex-wrap gap-2">
-                                                {creation.dressings.map((dressing, idx) => (
-                                                    <span
-                                                        key={idx}
-                                                        className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full"
-                                                    >
-                                                        {dressing}
+                                                {creation.dressings.map((d, i) => (
+                                                    <span key={i} className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                                                        {d}
                                                     </span>
                                                 ))}
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* Información adicional */}
                                     <div className="flex items-center justify-between pt-3 border-t">
                                         <div className="text-sm text-gray-600">
                                             Pedida {creation.orderCount} {creation.orderCount === 1 ? 'vez' : 'veces'}
@@ -319,7 +348,6 @@ export default function MyCreationsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Botón agregar al carrito */}
                                     <button
                                         onClick={() => addToCart(creation.creationId)}
                                         className="w-full mt-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -329,6 +357,7 @@ export default function MyCreationsPage() {
                                         </svg>
                                         Agregar al Carrito
                                     </button>
+
                                 </div>
                             </div>
                         ))}
