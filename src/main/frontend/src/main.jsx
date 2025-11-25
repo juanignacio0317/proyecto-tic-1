@@ -15,6 +15,7 @@ import PaymentMethodsPage from "./components/PaymentMethodPage.jsx";
 import AddressesPage from "./components/AddressPage.jsx";
 import PersonalizaPizzaPage from "./components/PersonalizaPizzaPage.jsx";
 import MisDatos from './components/MisDatos';
+import CreationPage from "./components/CreationPage.jsx";
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -32,6 +33,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 <Route path="/personaliza" element={<PersonalizaPage />} />
                 <Route path="/personalizapizza" element={<PersonalizaPizzaPage />} />
                 <Route path="/carrito" element={<CartPage />} />
+                <Route path="/elige-tipo" element={<CreationPage/>} />
+
 
                 {/* Panel de administración */}
                 <Route

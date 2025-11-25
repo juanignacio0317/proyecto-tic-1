@@ -48,7 +48,7 @@ export default function ProductosDestacados() {
                             title="Hamburguesas personalizadas"
                             subtitle="Probá nuestra increíble personalización: elegí panes, carnes, toppings y salsas."
                             cta="Personalizar hamburguesa"
-                            href="#personalización"
+                            href="/personaliza"
                             img={BurgerSVG}
                         />
                     </div>
@@ -57,7 +57,7 @@ export default function ProductosDestacados() {
                             title="Pizzas personalizadas"
                             subtitle="Armá tu pizza a medida: tamaño, masa, queso y toppings al gusto."
                             cta="Personalizar pizza"
-                            href="#personalización"
+                            href="/personalizapizza"
                             img={PizzaSVG}
                         />
                     </div>

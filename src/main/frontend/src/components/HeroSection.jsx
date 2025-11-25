@@ -33,7 +33,7 @@ export default function HeroSection() {
               {/* Botones */}
               <div className="d-flex gap-3">
                 <Link
-                    to="/personaliza"
+                    to="/elige-tipo"
                     className="btn fw-semibold btn-lg text-[#1B7F79] border-0 shadow-sm"
                     style={{
                       backgroundColor: '#F2C94C',
