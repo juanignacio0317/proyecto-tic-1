@@ -6,8 +6,8 @@ import { pizzaService } from '../services/pizzaService';
 
 export default function PersonalizaPizzaPage() {
     const navigate = useNavigate();
-    const [carrito, setCarrito] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingData, setLoadingData] = useState(true);
 
     // Estado para la construcción de la pizza
     const [pizza, setPizza] = useState({
@@ -18,59 +18,177 @@ export default function PersonalizaPizzaPage() {
         toppings: []
     });
 
-    // Opciones disponibles
-    const opciones = {
-        sizes: [
-            { id: '201', nombre: 'Pequeña (20 cm)', precio: 180 },
-            { id: '202', nombre: 'Mediana (30 cm)', precio: 260 },
-            { id: '203', nombre: 'Grande (40 cm)', precio: 340 }
-        ],
-        doughs: [
-            { id: '211', nombre: 'Clásica', precio: 80, color: '#F5DEB3' },
-            { id: '212', nombre: 'A la piedra', precio: 90, color: '#E6C28B' },
-            { id: '213', nombre: 'Pan tipo napolitana', precio: 100, color: '#D2A679' },
-            { id: '214', nombre: 'Integral', precio: 95, color: '#C49A6C' }
-        ],
-        sauces: [
-            { id: '221', nombre: 'Salsa de Tomate', precio: 40, color: '#C0392B' },
-            { id: '222', nombre: 'Pomodoro rústica', precio: 50, color: '#D35400' },
-            { id: '223', nombre: 'Salsa Blanca', precio: 55, color: '#FDF5E6' },
-            { id: '224', nombre: 'BBQ', precio: 50, color: '#8B4513' }
-        ],
-        cheeses: [
-            { id: '231', nombre: 'Muzzarella', precio: 70, color: '#F8F1B8' },
-            { id: '232', nombre: '4 Quesos', precio: 90, color: '#F7E7A9' },
-            { id: '233', nombre: 'Cheddar', precio: 80, color: '#F4B350' },
-            { id: '234', nombre: 'Parmesano', precio: 85, color: '#F5E0A3' }
-        ],
-        toppings: [
-            { id: '241', nombre: 'Pepperoni', precio: 40, color: '#B22222' },
-            { id: '242', nombre: 'Jamón', precio: 35, color: '#F5A9B8' },
-            { id: '243', nombre: 'Champiñones', precio: 30, color: '#D3D3D3' },
-            { id: '244', nombre: 'Aceitunas', precio: 25, color: '#556B2F' },
-            { id: '245', nombre: 'Morrones', precio: 30, color: '#FF6347' },
-            { id: '246', nombre: 'Cebolla Morada', precio: 25, color: '#BA55D3' },
-            { id: '247', nombre: 'Ananá', precio: 35, color: '#FFE066' }
-        ]
+    // Opciones disponibles (ahora se cargarán del backend)
+    const [opciones, setOpciones] = useState({
+        sizes: [],
+        doughs: [],
+        sauces: [],
+        cheeses: [],
+        toppings: []
+    });
+
+    // Colores por defecto
+    const coloresPorDefecto = {
+        size: '#E8E8E8',
+        dough: '#F5DEB3',
+        sauce: '#C0392B',
+        cheese: '#F8F1B8',
+        topping: '#90EE90'
+    };
+
+    const asignarColor = (nombre, tipo) => {
+        if (!nombre) {
+            return coloresPorDefecto[tipo] || '#CCCCCC';
+        }
+
+        const nombreLower = nombre.toLowerCase();
+
+        // Colores para masas
+        if (tipo === 'dough') {
+            if (nombreLower.includes('clásica') || nombreLower.includes('clasica')) return '#F5DEB3';
+            if (nombreLower.includes('piedra')) return '#E6C28B';
+            if (nombreLower.includes('napolitana')) return '#D2A679';
+            if (nombreLower.includes('integral')) return '#C49A6C';
+            return '#F5DEB3';
+        }
+
+        // Colores para salsas
+        if (tipo === 'sauce') {
+            if (nombreLower.includes('tomate')) return '#C0392B';
+            if (nombreLower.includes('pomodoro')) return '#D35400';
+            if (nombreLower.includes('blanca')) return '#FDF5E6';
+            if (nombreLower.includes('bbq')) return '#8B4513';
+            if (nombreLower.includes('4 quesos')) return '#F5E0A3';
+            return '#C0392B';
+        }
+
+        // Colores para quesos
+        if (tipo === 'cheese') {
+            if (nombreLower.includes('muzzarella') || nombreLower.includes('mozza')) return '#F8F1B8';
+            if (nombreLower.includes('4 quesos')) return '#F7E7A9';
+            if (nombreLower.includes('cheddar')) return '#F4B350';
+            if (nombreLower.includes('parmesano')) return '#F5E0A3';
+            if (nombreLower.includes('roquefort')) return '#E6E6FA';
+            return '#F8F1B8';
+        }
+
+        // Colores para toppings
+        if (tipo === 'topping') {
+            if (nombreLower.includes('pepperoni')) return '#B22222';
+            if (nombreLower.includes('jamón') || nombreLower.includes('jamon')) return '#F5A9B8';
+            if (nombreLower.includes('champiñon') || nombreLower.includes('champignon')) return '#D3D3D3';
+            if (nombreLower.includes('aceituna')) return '#556B2F';
+            if (nombreLower.includes('morrón') || nombreLower.includes('morron') || nombreLower.includes('pimiento')) return '#FF6347';
+            if (nombreLower.includes('cebolla')) return '#BA55D3';
+            if (nombreLower.includes('ananá') || nombreLower.includes('piña')) return '#FFE066';
+            if (nombreLower.includes('tomate')) return '#FF6347';
+            if (nombreLower.includes('albahaca')) return '#228B22';
+            return '#90EE90';
+        }
+
+        return coloresPorDefecto[tipo] || '#CCCCCC';
+    };
+
+    // Cargar datos del backend al montar el componente
+    useEffect(() => {
+        cargarDatosIniciales();
+    }, []);
+
+    const cargarDatosIniciales = async () => {
+        try {
+            setLoadingData(true);
+            console.log('🍕 Iniciando carga de ingredientes de pizza...');
+
+            const [sizes, doughs, sauces, cheeses, toppings] = await Promise.all([
+                pizzaService.getAllSizes(),
+                pizzaService.getAllDoughs(),
+                pizzaService.getAllSauces(),
+                pizzaService.getAllCheeses(),
+                pizzaService.getAllToppings()
+            ]);
+
+            console.log('✅ Datos cargados:', { sizes, doughs, sauces, cheeses, toppings });
+
+            // Formatear los datos para el frontend
+            setOpciones({
+                sizes: Array.isArray(sizes) ? sizes
+                    .filter(size => size.available)
+                    .map(size => ({
+                        id: size.id?.toString() || '',
+                        nombre: size.type || 'Sin nombre',
+                        precio: parseFloat(size.price) || 0,
+                        color: asignarColor(size.type || '', 'size')
+                    })) : [],
+
+                doughs: Array.isArray(doughs) ? doughs
+                    .filter(dough => dough.available)
+                    .map(dough => ({
+                        id: dough.id?.toString() || '',
+                        nombre: dough.type || 'Sin nombre',
+                        precio: parseFloat(dough.price) || 0,
+                        color: asignarColor(dough.type || '', 'dough')
+                    })) : [],
+
+                sauces: Array.isArray(sauces) ? sauces
+                    .filter(sauce => sauce.available)
+                    .map(sauce => ({
+                        id: sauce.id?.toString() || '',
+                        nombre: sauce.type || 'Sin nombre',
+                        precio: parseFloat(sauce.price) || 0,
+                        color: asignarColor(sauce.type || '', 'sauce')
+                    })) : [],
+
+                cheeses: Array.isArray(cheeses) ? cheeses
+                    .filter(cheese => cheese.available)
+                    .map(cheese => ({
+                        id: cheese.id?.toString() || '',
+                        nombre: cheese.type || 'Sin nombre',
+                        precio: parseFloat(cheese.price) || 0,
+                        color: asignarColor(cheese.type || '', 'cheese')
+                    })) : [],
+
+                toppings: Array.isArray(toppings) ? toppings
+                    .filter(topping => topping.available)
+                    .map(topping => ({
+                        id: topping.id?.toString() || '',
+                        nombre: topping.type || 'Sin nombre',
+                        precio: parseFloat(topping.price) || 0,
+                        color: asignarColor(topping.type || '', 'topping')
+                    })) : []
+            });
+
+            console.log('✅ Opciones formateadas correctamente');
+
+        } catch (error) {
+            console.error('❌ Error al cargar ingredientes:', error);
+            alert('Error al cargar los ingredientes. Por favor, recarga la página.');
+        } finally {
+            setLoadingData(false);
+        }
     };
 
     const calcularPrecio = () => {
         let total = 0;
 
         if (pizza.size) {
-            total += opciones.sizes.find(s => s.id === pizza.size).precio;
+            const size = opciones.sizes.find(s => s.id === pizza.size);
+            if (size) total += size.precio;
         }
         if (pizza.dough) {
-            total += opciones.doughs.find(d => d.id === pizza.dough).precio;
+            const dough = opciones.doughs.find(d => d.id === pizza.dough);
+            if (dough) total += dough.precio;
         }
         if (pizza.sauce) {
-            total += opciones.sauces.find(s => s.id === pizza.sauce).precio;
+            const sauce = opciones.sauces.find(s => s.id === pizza.sauce);
+            if (sauce) total += sauce.precio;
         }
         if (pizza.cheese) {
-            total += opciones.cheeses.find(c => c.id === pizza.cheese).precio;
+            const cheese = opciones.cheeses.find(c => c.id === pizza.cheese);
+            if (cheese) total += cheese.precio;
         }
         pizza.toppings.forEach(t => {
-            total += opciones.toppings.find(top => top.id === t).precio;
+            const topping = opciones.toppings.find(top => top.id === t);
+            if (topping) total += topping.precio;
         });
 
         return total;
@@ -95,18 +213,72 @@ export default function PersonalizaPizzaPage() {
         try {
             setLoading(true);
 
+            const userId = authService.getUserId();
+            console.log('===== DEBUG USERID =====');
+            console.log('userId obtenido:', userId);
+            console.log('========================');
+
+            if (!userId) {
+                alert('No se pudo obtener tu ID de usuario. Por favor, inicia sesión nuevamente.');
+                navigate('/login');
+                return;
+            }
+
+            // Obtener los objetos completos de las selecciones
+            const sizeSeleccionado = opciones.sizes.find(s => s.id === pizza.size);
+            const doughSeleccionado = opciones.doughs.find(d => d.id === pizza.dough);
+            const sauceSeleccionado = opciones.sauces.find(s => s.id === pizza.sauce);
+            const cheeseSeleccionado = pizza.cheese ? opciones.cheeses.find(c => c.id === pizza.cheese) : null;
+
+            // Validar que se encontraron todos los ingredientes
+            if (!sizeSeleccionado) {
+                alert('Error: No se encontró el tamaño seleccionado');
+                return;
+            }
+            if (!doughSeleccionado) {
+                alert('Error: No se encontró la masa seleccionada');
+                return;
+            }
+            if (!sauceSeleccionado) {
+                alert('Error: No se encontró la salsa seleccionada');
+                return;
+            }
+
+            console.log('===== INGREDIENTES SELECCIONADOS =====');
+            console.log('Size:', sizeSeleccionado);
+            console.log('Dough:', doughSeleccionado);
+            console.log('Sauce:', sauceSeleccionado);
+            console.log('Cheese:', cheeseSeleccionado);
+            console.log('======================================');
+
+            // Obtener nombres de toppings
+            const toppingNombres = pizza.toppings
+                .map(id => {
+                    const topping = opciones.toppings.find(t => t.id === id);
+                    return topping ? topping.nombre : null;
+                })
+                .filter(nombre => nombre !== null);
+
+            console.log('Topping nombres:', toppingNombres);
+
+            // Preparar datos enviando los nombres exactos (type) de la BD
             const pizzaData = {
-                sizeId: parseInt(pizza.size),
-                doughId: parseInt(pizza.dough),
-                sauceId: parseInt(pizza.sauce),
-                cheeseId: pizza.cheese ? parseInt(pizza.cheese) : null,
-                toppingIds: pizza.toppings.map(id => parseInt(id))
+                userId: parseInt(userId),
+                size: sizeSeleccionado.nombre,        // Nombre del tamaño
+                dough: doughSeleccionado.nombre,      // Nombre de la masa
+                sauce: sauceSeleccionado.nombre,      // Nombre de la salsa
+                cheese: cheeseSeleccionado ? cheeseSeleccionado.nombre : null,
+                toppings: toppingNombres,             // Array de nombres
+                orderDate: new Date().toISOString()
             };
 
-            console.log('Enviando pizza:', pizzaData);
+            console.log('===== DATOS A ENVIAR AL BACKEND =====');
+            console.log(JSON.stringify(pizzaData, null, 2));
+            console.log('=====================================');
 
             const response = await pizzaService.createPizza(pizzaData);
 
+            // Limpiar formulario
             setPizza({
                 size: null,
                 dough: null,
@@ -115,11 +287,20 @@ export default function PersonalizaPizzaPage() {
                 toppings: []
             });
 
-            alert(`¡Pizza guardada exitosamente! 🍕\nPrecio total: $${response.price}`);
+            alert(`¡Pizza guardada exitosamente! 🍕`);
 
         } catch (error) {
+            console.error('===== ERROR COMPLETO =====');
             console.error('Error:', error);
-            alert('Error al guardar la pizza: ' + error.message);
+            console.error('Message:', error.message);
+            console.error('==========================');
+
+            // Mensaje más informativo
+            if (error.message.includes('not found')) {
+                alert('Error: Alguno de los ingredientes seleccionados no existe en la base de datos.\n\nPor favor, verifica que los ingredientes estén creados correctamente en el panel de administración.');
+            } else {
+                alert('Error al guardar la pizza: ' + error.message);
+            }
         } finally {
             setLoading(false);
         }
@@ -140,17 +321,31 @@ export default function PersonalizaPizzaPage() {
         }
     };
 
-    // 🔥 NUEVO: función para repartir toppings alrededor del círculo
+    // Función para repartir toppings alrededor del círculo
     const getToppingPosition = (index, total) => {
-        const radius = 40; // qué tan lejos del centro van los toppings
-        const center = 65; // centro del círculo (130 / 2)
+        const radius = 40;
+        const center = 65;
         const angle = (2 * Math.PI * index) / total;
 
         return {
-            left: center + radius * Math.cos(angle) - 7, // 7 = radio del chip (14/2)
+            left: center + radius * Math.cos(angle) - 7,
             top: center + radius * Math.sin(angle) - 7
         };
     };
+
+    // Mostrar loading mientras se cargan los datos
+    if (loadingData) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-[#1D7B74] to-[#166863] d-flex justify-content-center align-items-center">
+                <div className="text-center text-white">
+                    <div className="spinner-border" role="status" style={{ width: '3rem', height: '3rem' }}>
+                        <span className="visually-hidden">Cargando...</span>
+                    </div>
+                    <p className="mt-3 h5">Cargando ingredientes...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#1D7B74] to-[#166863]">
@@ -167,6 +362,7 @@ export default function PersonalizaPizzaPage() {
                             <div className="mb-4">
                                 <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
                                     1. Elegí el Tamaño
+                                    {opciones.sizes.length === 0 && <span className="small text-muted ms-2">(No hay tamaños disponibles)</span>}
                                 </h3>
                                 <div className="row g-3">
                                     {opciones.sizes.map(size => (
@@ -198,6 +394,7 @@ export default function PersonalizaPizzaPage() {
                             <div className="mb-4">
                                 <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
                                     2. Elegí la Masa
+                                    {opciones.doughs.length === 0 && <span className="small text-muted ms-2">(No hay masas disponibles)</span>}
                                 </h3>
                                 <div className="row g-3">
                                     {opciones.doughs.map(dough => (
@@ -236,6 +433,7 @@ export default function PersonalizaPizzaPage() {
                             <div className="mb-4">
                                 <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
                                     3. Elegí la Salsa
+                                    {opciones.sauces.length === 0 && <span className="small text-muted ms-2">(No hay salsas disponibles)</span>}
                                 </h3>
                                 <div className="row g-3">
                                     {opciones.sauces.map(sauce => (
@@ -274,6 +472,7 @@ export default function PersonalizaPizzaPage() {
                             <div className="mb-4">
                                 <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
                                     4. Agregá Queso (opcional)
+                                    {opciones.cheeses.length === 0 && <span className="small text-muted ms-2">(No hay quesos disponibles)</span>}
                                 </h3>
                                 <div className="row g-3">
                                     {opciones.cheeses.map(cheese => (
@@ -309,42 +508,44 @@ export default function PersonalizaPizzaPage() {
                             </div>
 
                             {/* 5. Toppings */}
-                            <div className="mb-4">
-                                <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
-                                    5. Agregá Toppings
-                                </h3>
-                                <div className="row g-3">
-                                    {opciones.toppings.map(topping => (
-                                        <div key={topping.id} className="col-6 col-md-4">
-                                            <button
-                                                onClick={() => toggleItem('toppings', topping.id)}
-                                                className={`w-100 p-3 rounded-3 border-2 transition-all ${
-                                                    pizza.toppings.includes(topping.id)
-                                                        ? 'border-success bg-light'
-                                                        : 'border-secondary bg-white'
-                                                }`}
-                                                style={{
-                                                    borderStyle: 'solid',
-                                                    borderColor: pizza.toppings.includes(topping.id) ? '#1B7F79' : '#dee2e6'
-                                                }}
-                                                disabled={loading}
-                                            >
-                                                <div
-                                                    className="w-100 rounded-2 mb-2"
+                            {opciones.toppings.length > 0 && (
+                                <div className="mb-4">
+                                    <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
+                                        5. Agregá Toppings
+                                    </h3>
+                                    <div className="row g-3">
+                                        {opciones.toppings.map(topping => (
+                                            <div key={topping.id} className="col-6 col-md-4">
+                                                <button
+                                                    onClick={() => toggleItem('toppings', topping.id)}
+                                                    className={`w-100 p-3 rounded-3 border-2 transition-all ${
+                                                        pizza.toppings.includes(topping.id)
+                                                            ? 'border-success bg-light'
+                                                            : 'border-secondary bg-white'
+                                                    }`}
                                                     style={{
-                                                        backgroundColor: topping.color,
-                                                        height: '40px'
+                                                        borderStyle: 'solid',
+                                                        borderColor: pizza.toppings.includes(topping.id) ? '#1B7F79' : '#dee2e6'
                                                     }}
-                                                ></div>
-                                                <p className="fw-semibold small mb-1">{topping.nombre}</p>
-                                                <p className="small mb-0" style={{ color: '#1B7F79' }}>
-                                                    ${topping.precio}
-                                                </p>
-                                            </button>
-                                        </div>
-                                    ))}
+                                                    disabled={loading}
+                                                >
+                                                    <div
+                                                        className="w-100 rounded-2 mb-2"
+                                                        style={{
+                                                            backgroundColor: topping.color,
+                                                            height: '40px'
+                                                        }}
+                                                    ></div>
+                                                    <p className="fw-semibold small mb-1">{topping.nombre}</p>
+                                                    <p className="small mb-0" style={{ color: '#1B7F79' }}>
+                                                        ${topping.precio}
+                                                    </p>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
 
@@ -362,7 +563,7 @@ export default function PersonalizaPizzaPage() {
                                     style={{ width: '180px', height: '180px' }}
                                 >
                                     {/* Masa */}
-                                    {pizza.dough && (
+                                    {pizza.dough && opciones.doughs.find(d => d.id === pizza.dough) && (
                                         <div
                                             style={{
                                                 position: 'absolute',
@@ -374,7 +575,7 @@ export default function PersonalizaPizzaPage() {
                                         ></div>
                                     )}
                                     {/* Salsa */}
-                                    {pizza.sauce && (
+                                    {pizza.sauce && opciones.sauces.find(s => s.id === pizza.sauce) && (
                                         <div
                                             style={{
                                                 position: 'absolute',
@@ -387,7 +588,7 @@ export default function PersonalizaPizzaPage() {
                                         ></div>
                                     )}
                                     {/* Queso */}
-                                    {pizza.cheese && (
+                                    {pizza.cheese && opciones.cheeses.find(c => c.id === pizza.cheese) && (
                                         <div
                                             style={{
                                                 position: 'absolute',
@@ -406,13 +607,14 @@ export default function PersonalizaPizzaPage() {
                                                 position: 'absolute',
                                                 width: '130px',
                                                 height: '130px',
-                                                top: '25px',  // (180 - 130) / 2
+                                                top: '25px',
                                                 left: '25px'
                                             }}
                                         >
                                             {pizza.toppings.map((t, index) => {
                                                 const pos = getToppingPosition(index, pizza.toppings.length);
-                                                const color = opciones.toppings.find(top => top.id === t).color;
+                                                const topping = opciones.toppings.find(top => top.id === t);
+                                                if (!topping) return null;
 
                                                 return (
                                                     <div
@@ -422,7 +624,7 @@ export default function PersonalizaPizzaPage() {
                                                             width: '14px',
                                                             height: '14px',
                                                             borderRadius: '50%',
-                                                            backgroundColor: color,
+                                                            backgroundColor: topping.color,
                                                             top: `${pos.top}px`,
                                                             left: `${pos.left}px`
                                                         }}
@@ -436,7 +638,7 @@ export default function PersonalizaPizzaPage() {
 
                             {/* Detalles de selección */}
                             <div className="mb-4">
-                                {pizza.size && (
+                                {pizza.size && opciones.sizes.find(s => s.id === pizza.size) && (
                                     <div className="d-flex justify-content-between mb-2 small">
                                         <span>Tamaño: {opciones.sizes.find(s => s.id === pizza.size).nombre}</span>
                                         <span className="fw-semibold">
@@ -444,7 +646,7 @@ export default function PersonalizaPizzaPage() {
                                         </span>
                                     </div>
                                 )}
-                                {pizza.dough && (
+                                {pizza.dough && opciones.doughs.find(d => d.id === pizza.dough) && (
                                     <div className="d-flex justify-content-between mb-2 small">
                                         <span>Masa: {opciones.doughs.find(d => d.id === pizza.dough).nombre}</span>
                                         <span className="fw-semibold">
@@ -452,7 +654,7 @@ export default function PersonalizaPizzaPage() {
                                         </span>
                                     </div>
                                 )}
-                                {pizza.sauce && (
+                                {pizza.sauce && opciones.sauces.find(s => s.id === pizza.sauce) && (
                                     <div className="d-flex justify-content-between mb-2 small">
                                         <span>Salsa: {opciones.sauces.find(s => s.id === pizza.sauce).nombre}</span>
                                         <span className="fw-semibold">
@@ -460,7 +662,7 @@ export default function PersonalizaPizzaPage() {
                                         </span>
                                     </div>
                                 )}
-                                {pizza.cheese && (
+                                {pizza.cheese && opciones.cheeses.find(c => c.id === pizza.cheese) && (
                                     <div className="d-flex justify-content-between mb-2 small">
                                         <span>Queso: {opciones.cheeses.find(c => c.id === pizza.cheese).nombre}</span>
                                         <span className="fw-semibold">
@@ -468,14 +670,17 @@ export default function PersonalizaPizzaPage() {
                                         </span>
                                     </div>
                                 )}
-                                {pizza.toppings.map(t => (
-                                    <div key={t} className="d-flex justify-content-between mb-2 small">
-                                        <span>{opciones.toppings.find(top => top.id === t).nombre}</span>
-                                        <span className="fw-semibold">
-                                            ${opciones.toppings.find(top => top.id === t).precio}
-                                        </span>
-                                    </div>
-                                ))}
+                                {pizza.toppings.map(t => {
+                                    const topping = opciones.toppings.find(top => top.id === t);
+                                    return topping ? (
+                                        <div key={t} className="d-flex justify-content-between mb-2 small">
+                                            <span>{topping.nombre}</span>
+                                            <span className="fw-semibold">
+                                                ${topping.precio}
+                                            </span>
+                                        </div>
+                                    ) : null;
+                                })}
                             </div>
 
                             <div className="border-top pt-3 mb-4">
@@ -487,13 +692,13 @@ export default function PersonalizaPizzaPage() {
 
                             <button
                                 onClick={agregarAlCarrito}
-                                disabled={loading}
+                                disabled={loading || !pizza.size || !pizza.dough || !pizza.sauce}
                                 className="btn btn-lg w-100 fw-bold shadow"
                                 style={{
-                                    backgroundColor: loading ? '#ccc' : '#F2C94C',
+                                    backgroundColor: (loading || !pizza.size || !pizza.dough || !pizza.sauce) ? '#ccc' : '#F2C94C',
                                     color: '#1B7F79',
                                     border: 'none',
-                                    cursor: loading ? 'not-allowed' : 'pointer'
+                                    cursor: (loading || !pizza.size || !pizza.dough || !pizza.sauce) ? 'not-allowed' : 'pointer'
                                 }}
                             >
                                 {loading ? (

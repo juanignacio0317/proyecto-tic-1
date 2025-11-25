@@ -9,14 +9,53 @@ export const pizzaService = {
             body: JSON.stringify(pizzaData),
         });
 
-        const text = await response.text(); // leemos siempre el cuerpo
+        const text = await response.text();
 
         if (!response.ok) {
             console.error('Error backend pizza:', response.status, text);
             throw new Error(text || `Error al crear la pizza (status ${response.status})`);
         }
 
-        // si el backend devuelve JSON:
         return text ? JSON.parse(text) : {};
     },
+
+    async getAllSizes() {
+        const response = await fetch(`${API_URL}/sizes`);
+        if (!response.ok) {
+            throw new Error('Error al obtener tamaños');
+        }
+        return await response.json();
+    },
+
+    async getAllDoughs() {
+        const response = await fetch(`${API_URL}/doughs`);
+        if (!response.ok) {
+            throw new Error('Error al obtener masas');
+        }
+        return await response.json();
+    },
+
+    async getAllSauces() {
+        const response = await fetch(`${API_URL}/sauces`);
+        if (!response.ok) {
+            throw new Error('Error al obtener salsas');
+        }
+        return await response.json();
+    },
+
+    async getAllCheeses() {
+        const response = await fetch(`${API_URL}/cheeses`);
+        if (!response.ok) {
+            throw new Error('Error al obtener quesos');
+        }
+        return await response.json();
+    },
+
+    async getAllToppings() {
+        const response = await fetch(`${API_URL}/toppings`);
+        if (!response.ok) {
+            throw new Error('Error al obtener toppings');
+        }
+        return await response.json();
+    }
 };

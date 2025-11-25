@@ -17,6 +17,15 @@ export default function AdminPage() {
     const [toppings, setToppings] = useState([]);
     const [dressings, setDressings] = useState([]);
 
+    // Estados para ingredientes de pizza
+    const [sizes, setSizes] = useState([]);
+    const [doughs, setDoughs] = useState([]);
+    const [sauces, setSauces] = useState([]);
+
+    // Estados para productos extras
+    const [beverages, setBeverages] = useState([]);
+    const [sideOrders, setSideOrders] = useState([]);
+
     // Estados para pedidos
     const [orders, setOrders] = useState([]);
     const [statusFilter, setStatusFilter] = useState('all');
@@ -233,6 +242,26 @@ export default function AdminPage() {
                     const dressingsData = await ingredientService.getAllDressings();
                     setDressings(dressingsData);
                     break;
+                case 'sizes':
+                    const sizesData = await ingredientService.getAllSizes();
+                    setSizes(sizesData);
+                    break;
+                case 'doughs':
+                    const doughsData = await ingredientService.getAllDoughs();
+                    setDoughs(doughsData);
+                    break;
+                case 'sauces':
+                    const saucesData = await ingredientService.getAllSauces();
+                    setSauces(saucesData);
+                    break;
+                case 'beverages':
+                    const beveragesData = await ingredientService.getAllBeverages();
+                    setBeverages(beveragesData);
+                    break;
+                case 'sideorders':
+                    const sideOrdersData = await ingredientService.getAllSideOrders();
+                    setSideOrders(sideOrdersData);
+                    break;
             }
         } catch (error) {
             console.error('Error al cargar ingredientes:', error);
@@ -274,6 +303,21 @@ export default function AdminPage() {
                 case 'dressings':
                     await ingredientService.createDressing(data);
                     break;
+                case 'sizes':
+                    await ingredientService.createSize(data);
+                    break;
+                case 'doughs':
+                    await ingredientService.createDough(data);
+                    break;
+                case 'sauces':
+                    await ingredientService.createSauce(data);
+                    break;
+                case 'beverages':
+                    await ingredientService.createBeverage(data);
+                    break;
+                case 'sideorders':
+                    await ingredientService.createSideOrder(data);
+                    break;
             }
 
             alert('¡Ingrediente creado exitosamente!');
@@ -286,7 +330,6 @@ export default function AdminPage() {
             setLoading(false);
         }
     };
-
     const toggleAvailability = async (type, currentAvailability) => {
         try {
             switch (activeTab) {
@@ -304,6 +347,21 @@ export default function AdminPage() {
                     break;
                 case 'dressings':
                     await ingredientService.updateDressingAvailability(type, !currentAvailability);
+                    break;
+                case 'sizes':
+                    await ingredientService.updateSizeAvailability(type, !currentAvailability);
+                    break;
+                case 'doughs':
+                    await ingredientService.updateDoughAvailability(type, !currentAvailability);
+                    break;
+                case 'sauces':
+                    await ingredientService.updateSauceAvailability(type, !currentAvailability);
+                    break;
+                case 'beverages':
+                    await ingredientService.updateBeverageAvailability(type, !currentAvailability);
+                    break;
+                case 'sideorders':
+                    await ingredientService.updateSideOrderAvailability(type, !currentAvailability);
                     break;
             }
             loadIngredients();
@@ -333,6 +391,21 @@ export default function AdminPage() {
                 case 'dressings':
                     await ingredientService.updateDressingPrice(type, parseFloat(newPrice));
                     break;
+                case 'sizes':
+                    await ingredientService.updateSizePrice(type, parseFloat(newPrice));
+                    break;
+                case 'doughs':
+                    await ingredientService.updateDoughPrice(type, parseFloat(newPrice));
+                    break;
+                case 'sauces':
+                    await ingredientService.updateSaucePrice(type, parseFloat(newPrice));
+                    break;
+                case 'beverages':
+                    await ingredientService.updateBeveragePrice(type, parseFloat(newPrice));
+                    break;
+                case 'sideorders':
+                    await ingredientService.updateSideOrderPrice(type, parseFloat(newPrice));
+                    break;
             }
             loadIngredients();
         } catch (error) {
@@ -347,6 +420,11 @@ export default function AdminPage() {
             case 'cheeses': return cheeses;
             case 'toppings': return toppings;
             case 'dressings': return dressings;
+            case 'sizes': return sizes;
+            case 'doughs': return doughs;
+            case 'sauces': return sauces;
+            case 'beverages': return beverages;
+            case 'sideorders': return sideOrders;
             default: return [];
         }
     };
@@ -358,7 +436,12 @@ export default function AdminPage() {
             meats: 'Carnes',
             cheeses: 'Quesos',
             toppings: 'Toppings',
-            dressings: 'Salsas',
+            dressings: 'Aderezos',
+            sizes: 'Tamaños',
+            doughs: 'Masas',
+            sauces: 'Salsas',
+            beverages: 'Bebidas',
+            sideorders: 'Acompañamientos',
             administrators: 'Administradores'
         };
         return labels[tab];
@@ -383,10 +466,10 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {/* Sección COCINA */}
+                {/* Sección COCINA - INGREDIENTES DE HAMBURGUESAS */}
                 <div className="bg-white rounded-3 shadow-lg p-3 mb-4">
                     <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
-                        🍽️ COCINA
+                        🍔 INGREDIENTES DE HAMBURGUESAS
                     </h3>
                     <div className="d-flex gap-2 flex-wrap">
                         <button
@@ -400,6 +483,50 @@ export default function AdminPage() {
                             📦 {getTabLabel('orders')}
                         </button>
                         {['breads', 'meats', 'cheeses', 'toppings', 'dressings'].map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                style={activeTab === tab ? {
+                                    backgroundColor: '#1B7F79',
+                                    borderColor: '#1B7F79'
+                                } : {}}
+                            >
+                                {getTabLabel(tab)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Sección COCINA - INGREDIENTES DE PIZZAS */}
+                <div className="bg-white rounded-3 shadow-lg p-3 mb-4">
+                    <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
+                        🍕 INGREDIENTES DE PIZZAS
+                    </h3>
+                    <div className="d-flex gap-2 flex-wrap">
+                        {['sizes', 'doughs', 'sauces'].map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                style={activeTab === tab ? {
+                                    backgroundColor: '#1B7F79',
+                                    borderColor: '#1B7F79'
+                                } : {}}
+                            >
+                                {getTabLabel(tab)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Sección COCINA - EXTRAS */}
+                <div className="bg-white rounded-3 shadow-lg p-3 mb-4">
+                    <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
+                        ➕ EXTRAS
+                    </h3>
+                    <div className="d-flex gap-2 flex-wrap">
+                        {['beverages', 'sideorders'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}

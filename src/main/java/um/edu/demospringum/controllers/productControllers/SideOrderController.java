@@ -15,9 +15,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sideOrders")
+@RequestMapping("/api/sideOrders")
+@CrossOrigin(origins = "*")
 public class SideOrderController {
 
+    @Autowired
     private ProductService productService;
 
     @Autowired
@@ -25,7 +27,7 @@ public class SideOrderController {
         this.productService = productService;
     }
 
-    @GetMapping("/")
+    @GetMapping()
     public ResponseEntity<List<IngredientsDto>> listSideOrders() {
         return ResponseEntity.ok(productService.listSideOrders());
     }

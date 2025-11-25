@@ -241,4 +241,245 @@ export const ingredientService = {
         );
         if (!response.ok) throw new Error('Error al actualizar precio');
     },
+
+
+    // ==================== SIZES (TAMAÑOS) ====================
+    async getAllSizes() {
+        const response = await fetch(`${API_URL}/sizes`);
+        if (!response.ok) throw new Error('Error al obtener tamaños');
+        return response.json();
+    },
+
+    async createSize(data) {
+        const response = await fetch(`${API_URL}/sizes/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Error al crear tamaño');
+        }
+        return response.json();
+    },
+
+    async updateSizeAvailability(type, available) {
+        const response = await fetch(
+            `${API_URL}/sizes/${encodeURIComponent(type)}/availability?available=${available}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar disponibilidad');
+    },
+
+    async updateSizePrice(type, price) {
+        const response = await fetch(
+            `${API_URL}/sizes/${encodeURIComponent(type)}/price?price=${price}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar precio');
+    },
+
+// ==================== DOUGHS (MASAS) ====================
+    async getAllDoughs() {
+        const response = await fetch(`${API_URL}/doughs`);
+        if (!response.ok) throw new Error('Error al obtener masas');
+        return response.json();
+    },
+
+    async createDough(data) {
+        const response = await fetch(`${API_URL}/doughs/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Error al crear masa');
+        }
+        return response.json();
+    },
+
+    async updateDoughAvailability(type, available) {
+        const response = await fetch(
+            `${API_URL}/doughs/${encodeURIComponent(type)}/availability?available=${available}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar disponibilidad');
+    },
+
+    async updateDoughPrice(type, price) {
+        const response = await fetch(
+            `${API_URL}/doughs/${encodeURIComponent(type)}/price?price=${price}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar precio');
+    },
+
+// ==================== SAUCES (SALSAS) ====================
+    async getAllSauces() {
+        const response = await fetch(`${API_URL}/sauces`);
+        if (!response.ok) throw new Error('Error al obtener salsas');
+        return response.json();
+    },
+
+    async createSauce(data) {
+        const response = await fetch(`${API_URL}/sauces/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Error al crear salsa');
+        }
+        return response.json();
+    },
+
+    async updateSauceAvailability(type, available) {
+        const response = await fetch(
+            `${API_URL}/sauces/${encodeURIComponent(type)}/availability?available=${available}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar disponibilidad');
+    },
+
+    async updateSaucePrice(type, price) {
+        const response = await fetch(
+            `${API_URL}/sauces/${encodeURIComponent(type)}/price?price=${price}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar precio');
+    },
+
+// ==================== BEVERAGES (BEBIDAS) ====================
+    async getAllBeverages() {
+        const response = await fetch(`${API_URL}/beverages`);
+        if (!response.ok) throw new Error('Error al obtener bebidas');
+        return response.json();
+    },
+
+    async createBeverage(data) {
+        const response = await fetch(`${API_URL}/beverages/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Error al crear bebida');
+        }
+        return response.json();
+    },
+
+    async updateBeverageAvailability(type, available) {
+        const response = await fetch(
+            `${API_URL}/beverages/${encodeURIComponent(type)}/availability?available=${available}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar disponibilidad');
+    },
+
+    async updateBeveragePrice(type, price) {
+        const response = await fetch(
+            `${API_URL}/beverages/${encodeURIComponent(type)}/price?price=${price}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar precio');
+    },
+
+// ==================== SIDE ORDERS (ACOMPAÑAMIENTOS) ====================
+    async getAllSideOrders() {
+        const response = await fetch(`${API_URL}/sideOrders`);
+        if (!response.ok) throw new Error('Error al obtener acompañamientos');
+        return response.json();
+    },
+
+    async createSideOrder(data) {
+        const response = await fetch(`${API_URL}/sideOrders/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Error al crear acompañamiento');
+        }
+        return response.json();
+    },
+
+    async updateSideOrderAvailability(type, available) {
+        const response = await fetch(
+            `${API_URL}/sideOrders/${encodeURIComponent(type)}/availability?available=${available}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar disponibilidad');
+    },
+
+    async updateSideOrderPrice(type, price) {
+        const response = await fetch(
+            `${API_URL}/sideOrders/${encodeURIComponent(type)}/price?price=${price}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }
+        );
+        if (!response.ok) throw new Error('Error al actualizar precio');
+    },
 };
