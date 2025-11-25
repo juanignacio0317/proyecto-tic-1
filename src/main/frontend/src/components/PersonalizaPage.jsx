@@ -81,21 +81,26 @@ export default function PersonalizaPage() {
             if (nombreLower.includes('lechuga')) return '#90EE90';
             if (nombreLower.includes('tomate')) return '#FF6347';
             if (nombreLower.includes('cebolla')) return '#F5F5DC';
-            if (nombreLower.includes('pepinillo')) return '#8FBC8F';
-            if (nombreLower.includes('morrón') || nombreLower.includes('morron') || nombreLower.includes('pimiento')) return '#228B22';
-            if (nombreLower.includes('palta') || nombreLower.includes('aguacate')) return '#7CFC00';
+            if (nombreLower.includes('pepino')) return '#8FBC8F';
+            if (nombreLower.includes('bacon')) return '#8B4513';
+            if (nombreLower.includes('huevo')) return '#FFD700';
             if (nombreLower.includes('champiñon') || nombreLower.includes('champignon')) return '#D2B48C';
+            if (nombreLower.includes('jalapeño') || nombreLower.includes('jalapeno')) return '#228B22';
+            if (nombreLower.includes('cebolla caramelizada')) return '#D2691E';
+            if (nombreLower.includes('aguacate') || nombreLower.includes('palta')) return '#7CFC00';
             return '#90EE90';
         }
 
         // Colores para salsas
         if (tipo === 'salsa') {
+            if (nombreLower.includes('mayonesa')) return '#FFFACD';
             if (nombreLower.includes('ketchup')) return '#DC143C';
             if (nombreLower.includes('mostaza')) return '#FFD700';
-            if (nombreLower.includes('mayo')) return '#FFFACD';
             if (nombreLower.includes('bbq')) return '#8B4513';
             if (nombreLower.includes('alioli')) return '#F5F5DC';
-            if (nombreLower.includes('picante')) return '#FF4500';
+            if (nombreLower.includes('especial')) return '#FF6347';
+            if (nombreLower.includes('ranch')) return '#F0E68C';
+            if (nombreLower.includes('chimichurri')) return '#228B22';
             return '#DC143C';
         }
 
@@ -351,16 +356,6 @@ export default function PersonalizaPage() {
                             <h2 className="h3 fw-bold mb-4" style={{ color: '#1B7F79' }}>
                                 Armá tu Hamburguesa
                             </h2>
-                            {/* 🔍 DEBUG - Eliminar después */}
-                            <div className="alert alert-info">
-                                <strong>Estado actual:</strong>
-                                <div>Quesos en estado: {opciones.quesos.length}</div>
-                                <div>¿Array válido?: {Array.isArray(opciones.quesos) ? 'Sí' : 'No'}</div>
-                                {opciones.quesos.length > 0 && (
-                                    <div>Primer queso: {JSON.stringify(opciones.quesos[0])}</div>
-                                )}
-                            </div>
-
                             {/* Selección de Pan */}
                             <div className="mb-4">
                                 <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>

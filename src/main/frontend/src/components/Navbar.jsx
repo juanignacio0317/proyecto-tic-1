@@ -233,6 +233,7 @@ export default function Navbar() {
                               </button>
                             </li>
 
+                            {/* Opciones solo para usuarios (no admins) */}
                             {!authService.isAdmin() && (
                                 <>
                                   <li>
