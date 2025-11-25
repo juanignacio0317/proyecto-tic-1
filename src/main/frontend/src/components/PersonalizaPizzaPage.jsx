@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-
 import { useNavigate } from 'react-router-dom';
+
+import { authService } from '../services/authService';
+import { pizzaService } from '../services/pizzaService';
 
 export default function PersonalizaPizzaPage() {
     const navigate = useNavigate();
@@ -136,6 +138,18 @@ export default function PersonalizaPizzaPage() {
             // size, dough, sauce, cheese: selección única
             setPizza({ ...pizza, [campo]: pizza[campo] === id ? null : id });
         }
+    };
+
+    // 🔥 NUEVO: función para repartir toppings alrededor del círculo
+    const getToppingPosition = (index, total) => {
+        const radius = 40; // qué tan lejos del centro van los toppings
+        const center = 65; // centro del círculo (130 / 2)
+        const angle = (2 * Math.PI * index) / total;
+
+        return {
+            left: center + radius * Math.cos(angle) - 7, // 7 = radio del chip (14/2)
+            top: center + radius * Math.sin(angle) - 7
+        };
     };
 
     return (
@@ -385,28 +399,36 @@ export default function PersonalizaPizzaPage() {
                                             }}
                                         ></div>
                                     )}
-                                    {/* Toppings: chips alrededor */}
+                                    {/* Toppings repartidos */}
                                     {pizza.toppings.length > 0 && (
                                         <div
-                                            className="position-absolute d-flex flex-wrap justify-content-center align-items-center"
                                             style={{
+                                                position: 'absolute',
                                                 width: '130px',
                                                 height: '130px',
-                                                borderRadius: '50%',
-                                                gap: '4px'
+                                                top: '25px',  // (180 - 130) / 2
+                                                left: '25px'
                                             }}
                                         >
-                                            {pizza.toppings.map(t => (
-                                                <div
-                                                    key={t}
-                                                    style={{
-                                                        width: '14px',
-                                                        height: '14px',
-                                                        borderRadius: '50%',
-                                                        backgroundColor: opciones.toppings.find(top => top.id === t).color
-                                                    }}
-                                                ></div>
-                                            ))}
+                                            {pizza.toppings.map((t, index) => {
+                                                const pos = getToppingPosition(index, pizza.toppings.length);
+                                                const color = opciones.toppings.find(top => top.id === t).color;
+
+                                                return (
+                                                    <div
+                                                        key={t + '-' + index}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            width: '14px',
+                                                            height: '14px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: color,
+                                                            top: `${pos.top}px`,
+                                                            left: `${pos.left}px`
+                                                        }}
+                                                    ></div>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
