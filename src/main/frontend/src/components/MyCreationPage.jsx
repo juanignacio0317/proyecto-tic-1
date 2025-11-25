@@ -217,7 +217,7 @@ export default function MyCreationsPage() {
                                 : '¡Empieza a crear tu pizza o hamburguesa perfecta!'}
                         </p>
                         <button
-                            onClick={() => navigate("/creaciones")}
+                            onClick={() => navigate("/")}
                             className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg transition-colors"
                         >
                             Crear ahora
