@@ -51,8 +51,12 @@ export default function AdminPage() {
     // Verificar que sea admin
     useEffect(() => {
         if (!authService.isAdmin()) {
-            alert('No tienes permisos para acceder a esta página');
-            navigate('/');
+            Swal.fire({
+                icon: 'error',
+                title: 'Acceso denegado',
+                text: 'No tienes permisos para acceder a esta página.',
+                confirmButtonColor: '#1B7F79'
+            }).then(() => navigate('/'));
         }
     }, [navigate]);
 
@@ -83,20 +87,33 @@ export default function AdminPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            console.log('Pedidos cargados:', response.data);
             setOrders(response.data);
         } catch (error) {
             console.error('Error al cargar pedidos:', error);
-            alert('Error al cargar pedidos: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al cargar pedidos',
+                text: error.message || 'Intenta nuevamente más tarde.',
+                confirmButtonColor: '#1B7F79'
+            });
         } finally {
             setLoading(false);
         }
     };
 
     const loadDefaultData = async () => {
-        if (!window.confirm(`¿Cargar datos predeterminados para ${getTabLabel(activeTab)}? Esto no borrará los existentes.`)) {
-            return;
-        }
+        const result = await Swal.fire({
+            icon: 'question',
+            title: `¿Cargar datos predeterminados?`,
+            text: `Se cargarán datos para ${getTabLabel(activeTab)}. Esto NO borrará los existentes.`,
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cargar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#1B7F79',
+            cancelButtonColor: '#6b7280'
+        });
+
+        if (!result.isConfirmed) return;
 
         setLoading(true);
         try {
@@ -107,20 +124,44 @@ export default function AdminPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            alert(`${response.data.message}\n\nCreados: ${response.data.created}\nTotal: ${response.data.total}`);
+            const data = response.data || {};
+            Swal.fire({
+                icon: 'success',
+                title: 'Datos cargados',
+                html: `
+                    <p>${data.message || 'Operación realizada correctamente.'}</p>
+                    <p><strong>Creados:</strong> ${data.created ?? '-'}</p>
+                    <p><strong>Total:</strong> ${data.total ?? '-'}</p>
+                `,
+                confirmButtonColor: '#1B7F79'
+            });
             loadIngredients();
         } catch (error) {
             console.error('Error al cargar datos predeterminados:', error);
-            alert('Error: ' + (error.response?.data || error.message));
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.response?.data || error.message || 'No se pudieron cargar los datos.',
+                confirmButtonColor: '#1B7F79'
+            });
         } finally {
             setLoading(false);
         }
     };
 
     const advanceOrderStatus = async (orderId) => {
-        if (!window.confirm('¿Avanzar este pedido al siguiente estado?')) {
-            return;
-        }
+        const result = await Swal.fire({
+            icon: 'question',
+            title: 'Avanzar estado del pedido',
+            text: '¿Quieres avanzar este pedido al siguiente estado?',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, avanzar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#1B7F79',
+            cancelButtonColor: '#6b7280'
+        });
+
+        if (!result.isConfirmed) return;
 
         try {
             const token = authService.getToken();
@@ -130,11 +171,21 @@ export default function AdminPage() {
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
 
-            alert('Estado actualizado exitosamente');
+            Swal.fire({
+                icon: 'success',
+                title: 'Estado actualizado',
+                text: 'El pedido fue actualizado correctamente.',
+                confirmButtonColor: '#1B7F79'
+            });
             loadOrders();
         } catch (error) {
             console.error('Error al actualizar estado:', error);
-            alert('Error: ' + (error.response?.data || error.message));
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.response?.data || error.message || 'No se pudo actualizar el pedido.',
+                confirmButtonColor: '#1B7F79'
+            });
         }
     };
 
@@ -193,7 +244,12 @@ export default function AdminPage() {
             setAdministrators(admins);
         } catch (error) {
             console.error('Error al cargar administradores:', error);
-            alert('Error al cargar administradores: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al cargar administradores',
+                text: error.message || 'Intenta nuevamente.',
+                confirmButtonColor: '#1B7F79'
+            });
         } finally {
             setLoading(false);
         }
@@ -203,40 +259,79 @@ export default function AdminPage() {
         e.preventDefault();
 
         if (!adminFormData.name || !adminFormData.surname || !adminFormData.email || !adminFormData.password) {
-            alert('Por favor completa todos los campos');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos incompletos',
+                text: 'Por favor completa todos los campos.',
+                confirmButtonColor: '#1B7F79'
+            });
             return;
         }
 
         if (adminFormData.password.length < 6) {
-            alert('La contraseña debe tener al menos 6 caracteres');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Contraseña muy corta',
+                text: 'La contraseña debe tener al menos 6 caracteres.',
+                confirmButtonColor: '#1B7F79'
+            });
             return;
         }
 
         setLoading(true);
         try {
             await administratorService.createAdministrator(adminFormData);
-            alert('¡Administrador creado exitosamente!');
+            Swal.fire({
+                icon: 'success',
+                title: 'Administrador creado',
+                text: 'El administrador fue creado exitosamente.',
+                confirmButtonColor: '#1B7F79'
+            });
             setAdminFormData({ name: '', surname: '', email: '', password: '' });
             loadAdministrators();
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al crear administrador: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al crear administrador',
+                text: error.message || 'Intenta nuevamente.',
+                confirmButtonColor: '#1B7F79'
+            });
         } finally {
             setLoading(false);
         }
     };
 
     const deleteAdmin = async (id, email) => {
-        if (!window.confirm(`¿Estás seguro de eliminar al administrador ${email}?`)) {
-            return;
-        }
+        const result = await Swal.fire({
+            icon: 'warning',
+            title: 'Eliminar administrador',
+            text: `¿Estás seguro de eliminar al administrador ${email}?`,
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6b7280'
+        });
+
+        if (!result.isConfirmed) return;
 
         try {
             await administratorService.deleteAdministrator(id);
-            alert('Administrador eliminado exitosamente');
+            Swal.fire({
+                icon: 'success',
+                title: 'Administrador eliminado',
+                text: 'El administrador fue eliminado correctamente.',
+                confirmButtonColor: '#1B7F79'
+            });
             loadAdministrators();
         } catch (error) {
-            alert('Error al eliminar administrador: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al eliminar',
+                text: error.message || 'No se pudo eliminar el administrador.',
+                confirmButtonColor: '#1B7F79'
+            });
         }
     };
 
@@ -247,49 +342,46 @@ export default function AdminPage() {
         try {
             switch (activeTab) {
                 case 'breads':
-                    const breadsData = await ingredientService.getAllBreads();
-                    setBreads(breadsData);
+                    setBreads(await ingredientService.getAllBreads());
                     break;
                 case 'meats':
-                    const meatsData = await ingredientService.getAllMeats();
-                    setMeats(meatsData);
+                    setMeats(await ingredientService.getAllMeats());
                     break;
                 case 'cheeses':
-                    const cheesesData = await ingredientService.getAllCheeses();
-                    setCheeses(cheesesData);
+                    setCheeses(await ingredientService.getAllCheeses());
                     break;
                 case 'toppings':
-                    const toppingsData = await ingredientService.getAllToppings();
-                    setToppings(toppingsData);
+                    setToppings(await ingredientService.getAllToppings());
                     break;
                 case 'dressings':
-                    const dressingsData = await ingredientService.getAllDressings();
-                    setDressings(dressingsData);
+                    setDressings(await ingredientService.getAllDressings());
                     break;
                 case 'sizes':
-                    const sizesData = await ingredientService.getAllSizes();
-                    setSizes(sizesData);
+                    setSizes(await ingredientService.getAllSizes());
                     break;
                 case 'doughs':
-                    const doughsData = await ingredientService.getAllDoughs();
-                    setDoughs(doughsData);
+                    setDoughs(await ingredientService.getAllDoughs());
                     break;
                 case 'sauces':
-                    const saucesData = await ingredientService.getAllSauces();
-                    setSauces(saucesData);
+                    setSauces(await ingredientService.getAllSauces());
                     break;
                 case 'beverages':
-                    const beveragesData = await ingredientService.getAllBeverages();
-                    setBeverages(beveragesData);
+                    setBeverages(await ingredientService.getAllBeverages());
                     break;
                 case 'sideorders':
-                    const sideOrdersData = await ingredientService.getAllSideOrders();
-                    setSideOrders(sideOrdersData);
+                    setSideOrders(await ingredientService.getAllSideOrders());
+                    break;
+                default:
                     break;
             }
         } catch (error) {
             console.error('Error al cargar ingredientes:', error);
-            alert('Error al cargar ingredientes: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al cargar ingredientes',
+                text: error.message || 'Intenta nuevamente.',
+                confirmButtonColor: '#1B7F79'
+            });
         } finally {
             setLoading(false);
         }
@@ -299,7 +391,12 @@ export default function AdminPage() {
         e.preventDefault();
 
         if (!formData.type || !formData.price) {
-            alert('Por favor completa todos los campos');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos incompletos',
+                text: 'Por favor completa todos los campos.',
+                confirmButtonColor: '#1B7F79'
+            });
             return;
         }
 
@@ -342,18 +439,31 @@ export default function AdminPage() {
                 case 'sideorders':
                     await ingredientService.createSideOrder(data);
                     break;
+                default:
+                    break;
             }
 
-            alert('¡Ingrediente creado exitosamente!');
+            Swal.fire({
+                icon: 'success',
+                title: 'Ingrediente creado',
+                text: 'El ingrediente fue creado exitosamente.',
+                confirmButtonColor: '#1B7F79'
+            });
             setFormData({ type: '', price: '', available: true });
             loadIngredients();
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al crear ingrediente: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al crear ingrediente',
+                text: error.message || 'Intenta nuevamente.',
+                confirmButtonColor: '#1B7F79'
+            });
         } finally {
             setLoading(false);
         }
     };
+
     const toggleAvailability = async (type, currentAvailability) => {
         try {
             switch (activeTab) {
@@ -387,53 +497,99 @@ export default function AdminPage() {
                 case 'sideorders':
                     await ingredientService.updateSideOrderAvailability(type, !currentAvailability);
                     break;
+                default:
+                    break;
             }
             loadIngredients();
         } catch (error) {
-            alert('Error al actualizar disponibilidad: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al actualizar disponibilidad',
+                text: error.message || 'Intenta nuevamente.',
+                confirmButtonColor: '#1B7F79'
+            });
         }
     };
 
     const updatePrice = async (type) => {
-        const newPrice = prompt('Ingresa el nuevo precio:');
-        if (!newPrice || isNaN(newPrice)) return;
+        const { value, isConfirmed } = await Swal.fire({
+            title: 'Actualizar precio',
+            text: `Ingresa el nuevo precio para "${type}":`,
+            input: 'number',
+            inputAttributes: {
+                min: '0',
+                step: '0.01'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Guardar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#1B7F79',
+            cancelButtonColor: '#6b7280'
+        });
+
+        if (!isConfirmed) return;
+        const newPrice = parseFloat(value);
+
+        if (isNaN(newPrice)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Precio inválido',
+                text: 'Debes ingresar un número válido.',
+                confirmButtonColor: '#1B7F79'
+            });
+            return;
+        }
 
         try {
             switch (activeTab) {
                 case 'breads':
-                    await ingredientService.updateBreadPrice(type, parseFloat(newPrice));
+                    await ingredientService.updateBreadPrice(type, newPrice);
                     break;
                 case 'meats':
-                    await ingredientService.updateMeatPrice(type, parseFloat(newPrice));
+                    await ingredientService.updateMeatPrice(type, newPrice);
                     break;
                 case 'cheeses':
-                    await ingredientService.updateCheesePrice(type, parseFloat(newPrice));
+                    await ingredientService.updateCheesePrice(type, newPrice);
                     break;
                 case 'toppings':
-                    await ingredientService.updateToppingPrice(type, parseFloat(newPrice));
+                    await ingredientService.updateToppingPrice(type, newPrice);
                     break;
                 case 'dressings':
-                    await ingredientService.updateDressingPrice(type, parseFloat(newPrice));
+                    await ingredientService.updateDressingPrice(type, newPrice);
                     break;
                 case 'sizes':
-                    await ingredientService.updateSizePrice(type, parseFloat(newPrice));
+                    await ingredientService.updateSizePrice(type, newPrice);
                     break;
                 case 'doughs':
-                    await ingredientService.updateDoughPrice(type, parseFloat(newPrice));
+                    await ingredientService.updateDoughPrice(type, newPrice);
                     break;
                 case 'sauces':
-                    await ingredientService.updateSaucePrice(type, parseFloat(newPrice));
+                    await ingredientService.updateSaucePrice(type, newPrice);
                     break;
                 case 'beverages':
-                    await ingredientService.updateBeveragePrice(type, parseFloat(newPrice));
+                    await ingredientService.updateBeveragePrice(type, newPrice);
                     break;
                 case 'sideorders':
-                    await ingredientService.updateSideOrderPrice(type, parseFloat(newPrice));
+                    await ingredientService.updateSideOrderPrice(type, newPrice);
+                    break;
+                default:
                     break;
             }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Precio actualizado',
+                text: 'El precio se actualizó correctamente.',
+                confirmButtonColor: '#1B7F79'
+            });
             loadIngredients();
         } catch (error) {
-            alert('Error al actualizar precio: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al actualizar precio',
+                text: error.message || 'Intenta nuevamente.',
+                confirmButtonColor: '#1B7F79'
+            });
         }
     };
 
@@ -471,6 +627,8 @@ export default function AdminPage() {
         return labels[tab];
     };
 
+    // ------------- JSX (sin cambios salvo la lógica de arriba) -------------
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#1D7B74] to-[#166863]">
             <div className="container mx-auto px-4 py-8">
@@ -499,22 +657,24 @@ export default function AdminPage() {
                         <button
                             onClick={() => setActiveTab('orders')}
                             className={`btn ${activeTab === 'orders' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            style={activeTab === 'orders' ? {
-                                backgroundColor: '#1B7F79',
-                                borderColor: '#1B7F79'
-                            } : {}}
+                            style={
+                                activeTab === 'orders'
+                                    ? { backgroundColor: '#1B7F79', borderColor: '#1B7F79' }
+                                    : {}
+                            }
                         >
                             📦 {getTabLabel('orders')}
                         </button>
-                        {['breads', 'meats', 'cheeses', 'toppings', 'dressings'].map(tab => (
+                        {['breads', 'meats', 'cheeses', 'toppings', 'dressings'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                style={activeTab === tab ? {
-                                    backgroundColor: '#1B7F79',
-                                    borderColor: '#1B7F79'
-                                } : {}}
+                                style={
+                                    activeTab === tab
+                                        ? { backgroundColor: '#1B7F79', borderColor: '#1B7F79' }
+                                        : {}
+                                }
                             >
                                 {getTabLabel(tab)}
                             </button>
@@ -528,15 +688,16 @@ export default function AdminPage() {
                         🍕 INGREDIENTES DE PIZZAS
                     </h3>
                     <div className="d-flex gap-2 flex-wrap">
-                        {['sizes', 'doughs', 'sauces'].map(tab => (
+                        {['sizes', 'doughs', 'sauces'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                style={activeTab === tab ? {
-                                    backgroundColor: '#1B7F79',
-                                    borderColor: '#1B7F79'
-                                } : {}}
+                                style={
+                                    activeTab === tab
+                                        ? { backgroundColor: '#1B7F79', borderColor: '#1B7F79' }
+                                        : {}
+                                }
                             >
                                 {getTabLabel(tab)}
                             </button>
@@ -550,15 +711,16 @@ export default function AdminPage() {
                         ➕ EXTRAS
                     </h3>
                     <div className="d-flex gap-2 flex-wrap">
-                        {['beverages', 'sideorders'].map(tab => (
+                        {['beverages', 'sideorders'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`btn ${activeTab === tab ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                style={activeTab === tab ? {
-                                    backgroundColor: '#1B7F79',
-                                    borderColor: '#1B7F79'
-                                } : {}}
+                                style={
+                                    activeTab === tab
+                                        ? { backgroundColor: '#1B7F79', borderColor: '#1B7F79' }
+                                        : {}
+                                }
                             >
                                 {getTabLabel(tab)}
                             </button>
@@ -574,11 +736,14 @@ export default function AdminPage() {
                     <div className="d-flex gap-2 flex-wrap">
                         <button
                             onClick={() => setActiveTab('administrators')}
-                            className={`btn ${activeTab === 'administrators' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            style={activeTab === 'administrators' ? {
-                                backgroundColor: '#1B7F79',
-                                borderColor: '#1B7F79'
-                            } : {}}
+                            className={`btn ${
+                                activeTab === 'administrators' ? 'btn-primary' : 'btn-outline-secondary'
+                            }`}
+                            style={
+                                activeTab === 'administrators'
+                                    ? { backgroundColor: '#1B7F79', borderColor: '#1B7F79' }
+                                    : {}
+                            }
                         >
                             👥 {getTabLabel('administrators')}
                         </button>
@@ -602,7 +767,9 @@ export default function AdminPage() {
                                             type="text"
                                             className="form-control"
                                             value={adminFormData.name}
-                                            onChange={(e) => setAdminFormData({ ...adminFormData, name: e.target.value })}
+                                            onChange={(e) =>
+                                                setAdminFormData({ ...adminFormData, name: e.target.value })
+                                            }
                                             placeholder="Ej: Juan"
                                             required
                                         />
@@ -614,7 +781,9 @@ export default function AdminPage() {
                                             type="text"
                                             className="form-control"
                                             value={adminFormData.surname}
-                                            onChange={(e) => setAdminFormData({ ...adminFormData, surname: e.target.value })}
+                                            onChange={(e) =>
+                                                setAdminFormData({ ...adminFormData, surname: e.target.value })
+                                            }
                                             placeholder="Ej: Pérez"
                                             required
                                         />
@@ -626,7 +795,9 @@ export default function AdminPage() {
                                             type="email"
                                             className="form-control"
                                             value={adminFormData.email}
-                                            onChange={(e) => setAdminFormData({ ...adminFormData, email: e.target.value })}
+                                            onChange={(e) =>
+                                                setAdminFormData({ ...adminFormData, email: e.target.value })
+                                            }
                                             placeholder="admin@pizzumburgum.com"
                                             required
                                         />
@@ -638,7 +809,9 @@ export default function AdminPage() {
                                             type="password"
                                             className="form-control"
                                             value={adminFormData.password}
-                                            onChange={(e) => setAdminFormData({ ...adminFormData, password: e.target.value })}
+                                            onChange={(e) =>
+                                                setAdminFormData({ ...adminFormData, password: e.target.value })
+                                            }
                                             placeholder="Mínimo 6 caracteres"
                                             required
                                             minLength="6"
@@ -675,7 +848,11 @@ export default function AdminPage() {
 
                                 {loading ? (
                                     <div className="text-center py-5">
-                                        <div className="spinner-border" style={{ color: '#1B7F79' }} role="status">
+                                        <div
+                                            className="spinner-border"
+                                            style={{ color: '#1B7F79' }}
+                                            role="status"
+                                        >
                                             <span className="visually-hidden">Cargando...</span>
                                         </div>
                                     </div>
@@ -695,7 +872,10 @@ export default function AdminPage() {
                                             <tbody>
                                             {administrators.length === 0 ? (
                                                 <tr>
-                                                    <td colSpan="6" className="text-center py-4 text-muted">
+                                                    <td
+                                                        colSpan="6"
+                                                        className="text-center py-4 text-muted"
+                                                    >
                                                         No hay administradores registrados
                                                     </td>
                                                 </tr>
@@ -713,7 +893,12 @@ export default function AdminPage() {
                                                         </td>
                                                         <td>
                                                             <button
-                                                                onClick={() => deleteAdmin(admin.userId, admin.email)}
+                                                                onClick={() =>
+                                                                    deleteAdmin(
+                                                                        admin.userId,
+                                                                        admin.email
+                                                                    )
+                                                                }
                                                                 className="btn btn-sm btn-outline-danger"
                                                                 title="Eliminar administrador"
                                                             >
@@ -763,7 +948,11 @@ export default function AdminPage() {
 
                         {loading ? (
                             <div className="text-center py-5">
-                                <div className="spinner-border" style={{ color: '#1B7F79' }} role="status">
+                                <div
+                                    className="spinner-border"
+                                    style={{ color: '#1B7F79' }}
+                                    role="status"
+                                >
                                     <span className="visually-hidden">Cargando...</span>
                                 </div>
                             </div>
@@ -792,90 +981,159 @@ export default function AdminPage() {
                                             <td className="fw-bold">#{order.orderId}</td>
                                             <td>
                                                 <div>{order.clientName}</div>
-                                                <small className="text-muted">{order.clientEmail}</small>
+                                                <small className="text-muted">
+                                                    {order.clientEmail}
+                                                </small>
                                             </td>
                                             <td>
-                                                    <span className="badge" style={{
-                                                        backgroundColor: order.productType === 'PIZZA' ? '#ef4444' : '#f59e0b'
-                                                    }}>
-                                                        {order.productType === 'PIZZA' ? '🍕 Pizza' : '🍔 Hamburguesa'}
-                                                    </span>
+                                                <span
+                                                    className="badge"
+                                                    style={{
+                                                        backgroundColor:
+                                                            order.productType === 'PIZZA'
+                                                                ? '#ef4444'
+                                                                : '#f59e0b'
+                                                    }}
+                                                >
+                                                    {order.productType === 'PIZZA'
+                                                        ? '🍕 Pizza'
+                                                        : '🍔 Hamburguesa'}
+                                                </span>
                                             </td>
                                             <td>
-                                                <div className="small" style={{ lineHeight: '1.6' }}>
+                                                <div
+                                                    className="small"
+                                                    style={{ lineHeight: '1.6' }}
+                                                >
                                                     {/* Ingredientes base */}
                                                     <div className="mb-2 p-2 bg-light rounded">
                                                         {order.productType === 'PIZZA' ? (
                                                             <>
-                                                                <div><strong>🍕 Tamaño:</strong> {order.size}</div>
-                                                                <div><strong>🥖 Masa:</strong> {order.dough}</div>
-                                                                <div><strong>🍅 Salsa:</strong> {order.sauce}</div>
-                                                                <div><strong>🧀 Queso:</strong> {order.cheese}</div>
+                                                                <div>
+                                                                    <strong>🍕 Tamaño:</strong>{' '}
+                                                                    {order.size}
+                                                                </div>
+                                                                <div>
+                                                                    <strong>🥖 Masa:</strong>{' '}
+                                                                    {order.dough}
+                                                                </div>
+                                                                <div>
+                                                                    <strong>🍅 Salsa:</strong>{' '}
+                                                                    {order.sauce}
+                                                                </div>
+                                                                <div>
+                                                                    <strong>🧀 Queso:</strong>{' '}
+                                                                    {order.cheese}
+                                                                </div>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <div><strong>🥖 Pan:</strong> {order.bread}</div>
-                                                                {/* En la tabla de pedidos, sección de hamburguesa: */}
-                                                                <div><strong>🥩 Carne:</strong> {order.meat}
-                                                                    {order.meatQuantity && order.meatQuantity > 1 && (
-                                                                        <span style={{
-                                                                            marginLeft: '8px',
-                                                                            padding: '2px 8px',
-                                                                            backgroundColor: '#fef3c7',
-                                                                            color: '#92400e',
-                                                                            borderRadius: '12px',
-                                                                            fontSize: '11px',
-                                                                            fontWeight: 'bold'
-                                                                        }}>
-                                                                        x{order.meatQuantity}
-                                                                         </span>
-                                                                    )}
+                                                                <div>
+                                                                    <strong>🥖 Pan:</strong>{' '}
+                                                                    {order.bread}
+                                                                </div>
+                                                                <div>
+                                                                    <strong>🥩 Carne:</strong>{' '}
+                                                                    {order.meat}
+                                                                    {order.meatQuantity &&
+                                                                        order.meatQuantity > 1 && (
+                                                                            <span
+                                                                                style={{
+                                                                                    marginLeft:
+                                                                                        '8px',
+                                                                                    padding:
+                                                                                        '2px 8px',
+                                                                                    backgroundColor:
+                                                                                        '#fef3c7',
+                                                                                    color:
+                                                                                        '#92400e',
+                                                                                    borderRadius:
+                                                                                        '12px',
+                                                                                    fontSize:
+                                                                                        '11px',
+                                                                                    fontWeight:
+                                                                                        'bold'
+                                                                                }}
+                                                                            >
+                                                                                x
+                                                                                {
+                                                                                    order.meatQuantity
+                                                                                }
+                                                                            </span>
+                                                                        )}
                                                                 </div>
                                                                 {order.cheese && (
-                                                                    <div><strong>🧀 Queso:</strong> {order.cheese}</div>
+                                                                    <div>
+                                                                        <strong>🧀 Queso:</strong>{' '}
+                                                                        {order.cheese}
+                                                                    </div>
                                                                 )}
                                                             </>
                                                         )}
                                                     </div>
 
                                                     {/* Toppings */}
-                                                    {order.toppings && order.toppings.length > 0 && (
-                                                        <div className="mb-2 p-2 bg-success bg-opacity-10 rounded border border-success border-opacity-25">
-                                                            <strong className="text-success d-block mb-1">✨ Toppings:</strong>
-                                                            <div className="ps-2">
-                                                                {order.toppings.map((topping, idx) => (
-                                                                    <div key={idx} className="text-success">
-                                                                        ✓ {topping}
-                                                                    </div>
-                                                                ))}
+                                                    {order.toppings &&
+                                                        order.toppings.length > 0 && (
+                                                            <div className="mb-2 p-2 bg-success bg-opacity-10 rounded border border-success border-opacity-25">
+                                                                <strong className="text-success d-block mb-1">
+                                                                    ✨ Toppings:
+                                                                </strong>
+                                                                <div className="ps-2">
+                                                                    {order.toppings.map(
+                                                                        (topping, idx) => (
+                                                                            <div
+                                                                                key={idx}
+                                                                                className="text-success"
+                                                                            >
+                                                                                ✓ {topping}
+                                                                            </div>
+                                                                        )
+                                                                    )}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    )}
+                                                        )}
 
                                                     {/* Dressings */}
-                                                    {order.dressings && order.dressings.length > 0 && (
-                                                        <div className="mb-2 p-2 bg-warning bg-opacity-10 rounded border border-warning border-opacity-25">
-                                                            <strong className="text-warning d-block mb-1">🧂 Aderezos:</strong>
-                                                            <div className="ps-2">
-                                                                {order.dressings.map((dressing, idx) => (
-                                                                    <div key={idx} className="text-warning">
-                                                                        ✓ {dressing}
-                                                                    </div>
-                                                                ))}
+                                                    {order.dressings &&
+                                                        order.dressings.length > 0 && (
+                                                            <div className="mb-2 p-2 bg-warning bg-opacity-10 rounded border border-warning border-opacity-25">
+                                                                <strong className="text-warning d-block mb-1">
+                                                                    🧂 Aderezos:
+                                                                </strong>
+                                                                <div className="ps-2">
+                                                                    {order.dressings.map(
+                                                                        (dressing, idx) => (
+                                                                            <div
+                                                                                key={idx}
+                                                                                className="text-warning"
+                                                                            >
+                                                                                ✓ {dressing}
+                                                                            </div>
+                                                                        )
+                                                                    )}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    )}
+                                                        )}
 
                                                     {/* Extras */}
                                                     {(order.beverage || order.sideOrder) && (
                                                         <div className="p-2 bg-info bg-opacity-10 rounded border border-info border-opacity-25">
-                                                            <strong className="text-info d-block mb-1">➕ Extras:</strong>
+                                                            <strong className="text-info d-block mb-1">
+                                                                ➕ Extras:
+                                                            </strong>
                                                             <div className="ps-2">
                                                                 {order.beverage && (
-                                                                    <div className="text-info">✓ Bebida: {order.beverage}</div>
+                                                                    <div className="text-info">
+                                                                        ✓ Bebida:{' '}
+                                                                        {order.beverage}
+                                                                    </div>
                                                                 )}
                                                                 {order.sideOrder && (
-                                                                    <div className="text-info">✓ Acompañamiento: {order.sideOrder}</div>
+                                                                    <div className="text-info">
+                                                                        ✓ Acompañamiento:{' '}
+                                                                        {order.sideOrder}
+                                                                    </div>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -883,28 +1141,42 @@ export default function AdminPage() {
                                                 </div>
                                             </td>
                                             <td>
-                                                <small>{order.orderAddress || 'No especificada'}</small>
+                                                <small>
+                                                    {order.orderAddress || 'No especificada'}
+                                                </small>
                                             </td>
-                                            <td className="fw-bold">${order.totalPrice}</td>
-                                            <td>
-                                                    <span className={`badge ${getStatusBadgeClass(order.orderStatus)}`}>
-                                                        {getStatusText(order.orderStatus)}
-                                                    </span>
+                                            <td className="fw-bold">
+                                                ${order.totalPrice}
                                             </td>
                                             <td>
-                                                {order.orderStatus.toLowerCase() !== 'delivered' && (
-                                                    <button
-                                                        onClick={() => advanceOrderStatus(order.orderId)}
-                                                        className="btn btn-sm"
-                                                        style={{
-                                                            backgroundColor: '#F2C94C',
-                                                            color: '#1B7F79',
-                                                            fontWeight: 'bold'
-                                                        }}
-                                                    >
-                                                        ▶ {getNextStatusText(order.orderStatus)}
-                                                    </button>
-                                                )}
+                                                <span
+                                                    className={`badge ${getStatusBadgeClass(
+                                                        order.orderStatus
+                                                    )}`}
+                                                >
+                                                    {getStatusText(order.orderStatus)}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {order.orderStatus.toLowerCase() !==
+                                                    'delivered' && (
+                                                        <button
+                                                            onClick={() =>
+                                                                advanceOrderStatus(order.orderId)
+                                                            }
+                                                            className="btn btn-sm"
+                                                            style={{
+                                                                backgroundColor: '#F2C94C',
+                                                                color: '#1B7F79',
+                                                                fontWeight: 'bold'
+                                                            }}
+                                                        >
+                                                            ▶{' '}
+                                                            {getNextStatusText(
+                                                                order.orderStatus
+                                                            )}
+                                                        </button>
+                                                    )}
                                             </td>
                                         </tr>
                                     ))}
@@ -932,20 +1204,32 @@ export default function AdminPage() {
                                             type="text"
                                             className="form-control"
                                             value={formData.type}
-                                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    type: e.target.value
+                                                })
+                                            }
                                             placeholder="Ej: Pan Integral"
                                             required
                                         />
                                     </div>
 
                                     <div className="mb-3">
-                                        <label className="form-label fw-semibold">Precio ($)</label>
+                                        <label className="form-label fw-semibold">
+                                            Precio ($)
+                                        </label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             className="form-control"
                                             value={formData.price}
-                                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    price: e.target.value
+                                                })
+                                            }
                                             placeholder="Ej: 50"
                                             required
                                         />
@@ -957,9 +1241,17 @@ export default function AdminPage() {
                                             className="form-check-input"
                                             id="available"
                                             checked={formData.available}
-                                            onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    available: e.target.checked
+                                                })
+                                            }
                                         />
-                                        <label className="form-check-label" htmlFor="available">
+                                        <label
+                                            className="form-check-label"
+                                            htmlFor="available"
+                                        >
                                             Disponible
                                         </label>
                                     </div>
@@ -967,7 +1259,10 @@ export default function AdminPage() {
                                     <button
                                         type="submit"
                                         className="btn w-100 fw-bold"
-                                        style={{ backgroundColor: '#F2C94C', color: '#1B7F79' }}
+                                        style={{
+                                            backgroundColor: '#F2C94C',
+                                            color: '#1B7F79'
+                                        }}
                                         disabled={loading}
                                     >
                                         {loading ? 'Guardando...' : 'Agregar Ingrediente'}
@@ -999,8 +1294,14 @@ export default function AdminPage() {
 
                                 {loading ? (
                                     <div className="text-center py-5">
-                                        <div className="spinner-border" style={{ color: '#1B7F79' }} role="status">
-                                            <span className="visually-hidden">Cargando...</span>
+                                        <div
+                                            className="spinner-border"
+                                            style={{ color: '#1B7F79' }}
+                                            role="status"
+                                        >
+                                        <span className="visually-hidden">
+                                            Cargando...
+                                        </span>
                                         </div>
                                     </div>
                                 ) : (
@@ -1017,40 +1318,66 @@ export default function AdminPage() {
                                             <tbody>
                                             {getCurrentIngredients().length === 0 ? (
                                                 <tr>
-                                                    <td colSpan="4" className="text-center py-4 text-muted">
+                                                    <td
+                                                        colSpan="4"
+                                                        className="text-center py-4 text-muted"
+                                                    >
                                                         No hay ingredientes registrados
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                getCurrentIngredients().map((ingredient, index) => (
-                                                    <tr key={index}>
-                                                        <td className="fw-semibold">{ingredient.type}</td>
-                                                        <td>${ingredient.price}</td>
-                                                        <td>
-                                                                <span className={`badge ${ingredient.available ? 'bg-success' : 'bg-secondary'}`}>
-                                                                    {ingredient.available ? 'Disponible' : 'No disponible'}
+                                                getCurrentIngredients().map(
+                                                    (ingredient, index) => (
+                                                        <tr key={index}>
+                                                            <td className="fw-semibold">
+                                                                {ingredient.type}
+                                                            </td>
+                                                            <td>${ingredient.price}</td>
+                                                            <td>
+                                                                <span
+                                                                    className={`badge ${
+                                                                        ingredient.available
+                                                                            ? 'bg-success'
+                                                                            : 'bg-secondary'
+                                                                    }`}
+                                                                >
+                                                                    {ingredient.available
+                                                                        ? 'Disponible'
+                                                                        : 'No disponible'}
                                                                 </span>
-                                                        </td>
-                                                        <td>
-                                                            <div className="d-flex gap-2">
-                                                                <button
-                                                                    onClick={() => toggleAvailability(ingredient.type, ingredient.available)}
-                                                                    className="btn btn-sm btn-outline-primary"
-                                                                    title="Cambiar disponibilidad"
-                                                                >
-                                                                    {ingredient.available ? '🔒' : '✅'}
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => updatePrice(ingredient.type)}
-                                                                    className="btn btn-sm btn-outline-warning"
-                                                                    title="Cambiar precio"
-                                                                >
-                                                                    💲
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
+                                                            </td>
+                                                            <td>
+                                                                <div className="d-flex gap-2">
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            toggleAvailability(
+                                                                                ingredient.type,
+                                                                                ingredient.available
+                                                                            )
+                                                                        }
+                                                                        className="btn btn-sm btn-outline-primary"
+                                                                        title="Cambiar disponibilidad"
+                                                                    >
+                                                                        {ingredient.available
+                                                                            ? '🔒'
+                                                                            : '✅'}
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            updatePrice(
+                                                                                ingredient.type
+                                                                            )
+                                                                        }
+                                                                        className="btn btn-sm btn-outline-warning"
+                                                                        title="Cambiar precio"
+                                                                    >
+                                                                        💲
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )
                                             )}
                                             </tbody>
                                         </table>
