@@ -32,8 +32,9 @@ public class DGIService {
         // Obtener todas las órdenes de ese día
         List<ClientOrder> orders = clientOrderRepository.findByOrderDateBetween(startOfDay, endOfDay);
 
-        // Convertir cada orden a TicketVentaDTO
+        // Filtrar solo órdenes confirmadas (con método de pago, no en basket)
         return orders.stream()
+                .filter(order -> order.getPaymentMethod() != null)  // ← LÍNEA AGREGADA
                 .map(this::convertToTicketVentaDTO)
                 .collect(Collectors.toList());
     }
@@ -180,15 +181,13 @@ public class DGIService {
 
 
     private String getLastFourDigitsOfCard(ClientOrder order) {
-        if (order.getClient() != null &&
-                order.getClient().getPaymentMethods() != null &&
-                !order.getClient().getPaymentMethods().isEmpty()) {
+        // Ya sabemos que paymentMethod no es null por el filtro
+        PaymentMethod paymentMethod = order.getPaymentMethod();
 
-
-            PaymentMethod paymentMethod = order.getPaymentMethod();
+        if (paymentMethod != null && paymentMethod.getCardNumber() != null) {
             String cardNumber = paymentMethod.getCardNumber();
 
-            if (cardNumber != null && cardNumber.length() >= 4) {
+            if (cardNumber.length() >= 4) {
                 return "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
             }
         }
