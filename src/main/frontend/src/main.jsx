@@ -14,6 +14,8 @@ import MyOrdersPage from "./components/MyOrderPage.jsx";
 import PaymentMethodsPage from "./components/PaymentMethodPage.jsx";
 import AddressesPage from "./components/AddressPage.jsx";
 import PersonalizaPizzaPage from "./components/PersonalizaPizzaPage.jsx";
+import MisDatos from './components/MisDatos';
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
@@ -44,6 +46,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 <Route path="/mis-pedidos" element={<MyOrdersPage />} />
                 <Route path="/mis-tarjetas" element={<PaymentMethodsPage />} />
                 <Route path="/mis-direcciones" element={<AddressesPage />} />
+                <Route path="/mis-datos" element={<MisDatos />} />
+
+
+
             </Routes>
         </BrowserRouter>
     </React.StrictMode>

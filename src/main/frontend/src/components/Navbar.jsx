@@ -167,21 +167,24 @@ export default function Navbar() {
                                border: '1px solid #e5e7eb'
                              }}>
                           <ul className="list-unstyled m-0 py-2">
+                            {/* Mis Datos - PARA TODOS (admins y usuarios) */}
+                            <li>
+                              <button
+                                  onClick={() => {
+                                    navigate('/mis-datos');
+                                    setShowUserMenu(false);
+                                  }}
+                                  className="w-100 text-start px-4 py-2 border-0 bg-transparent d-flex align-items-center gap-2 text-gray-700 hover:bg-gray-100"
+                                  style={{ cursor: 'pointer' }}
+                              >
+                                <span className="material-icons" style={{ fontSize: '20px' }}>account_circle</span>
+                                <span>Mis Datos</span>
+                              </button>
+                            </li>
+
+                            {/* Opciones solo para usuarios (no admins) */}
                             {!authService.isAdmin() && (
                                 <>
-                                  <li>
-                                    <button
-                                        onClick={() => {
-                                          navigate('/mis-datos');
-                                          setShowUserMenu(false);
-                                        }}
-                                        className="w-100 text-start px-4 py-2 border-0 bg-transparent d-flex align-items-center gap-2 text-gray-700 hover:bg-gray-100"
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                      <span className="material-icons" style={{ fontSize: '20px' }}>account_circle</span>
-                                      <span>Mis Datos</span>
-                                    </button>
-                                  </li>
                                   <li>
                                     <button
                                         onClick={() => {
@@ -208,9 +211,11 @@ export default function Navbar() {
                                       <span>Mis Direcciones</span>
                                     </button>
                                   </li>
-                                  <li className="border-top my-1"></li>
                                 </>
                             )}
+
+                            <li className="border-top my-1"></li>
+
                             <li>
                               <button
                                   onClick={handleLogout}

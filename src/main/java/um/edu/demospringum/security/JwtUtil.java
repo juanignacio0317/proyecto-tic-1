@@ -53,6 +53,10 @@ public class JwtUtil {
                 .getBody();
     }
 
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
@@ -65,14 +69,15 @@ public class JwtUtil {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         claims.put("role", user.getRole());
+        claims.put("userId", user.getUserId());
 
         return createToken(claims, username);
     }
 
-    // NUEVO: Método alternativo si ya tienes el UserData
     public String generateTokenWithUser(UserData user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole());
+        claims.put("userId", user.getUserId());
         return createToken(claims, user.getEmail());
     }
 
