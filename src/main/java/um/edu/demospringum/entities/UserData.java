@@ -32,7 +32,7 @@ public class UserData implements Serializable {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private String role = "USER"; // Nuevo campo para roles
 }
 

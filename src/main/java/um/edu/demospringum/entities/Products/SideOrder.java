@@ -4,10 +4,12 @@ package um.edu.demospringum.entities.Products;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import um.edu.demospringum.entities.ClientOrder;
 import um.edu.demospringum.servicies.Ingredient;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "side_order")
@@ -28,6 +30,10 @@ public class SideOrder implements Serializable, Ingredient {
 
     @Column(nullable = false, scale = 2)
     private BigDecimal sideOrderPrice;
+
+    @OneToMany
+    @JoinColumn(name = "sideOrderId")
+    private List<ClientOrder> clientOrders;
 
     @Override
     public int getId() {
