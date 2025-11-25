@@ -14,9 +14,11 @@ export default function CartPage() {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [clientAddresses, setClientAddresses] = useState([]);
+    const [availableBeverages, setAvailableBeverages] = useState([]);
+    const [availableSideOrders, setAvailableSideOrders] = useState([]);
+    const [itemExtras, setItemExtras] = useState({});
 
     useEffect(() => {
-        // Verificar autenticación
         if (!authService.isAuthenticated()) {
             alert("Debes iniciar sesión para ver tu carrito.");
             navigate("/login");
@@ -29,7 +31,6 @@ export default function CartPage() {
             return;
         }
 
-        // Obtener userId
         const userId = authService.getUserId();
         console.log('🛒 CartPage - userId obtenido:', userId);
 
@@ -43,7 +44,9 @@ export default function CartPage() {
         loadCart(userId);
         loadAddress(userId);
         loadPaymentMethods(userId);
+        loadAvailableExtras(); // ← AGREGAR ESTA LÍNEA
     }, [navigate]);
+
 
 
     const loadPaymentMethods = async (userId) => {
@@ -79,6 +82,17 @@ export default function CartPage() {
 
             console.log('✅ Carrito cargado:', response.data);
             setCartItems(response.data);
+
+
+            const extrasMap = {};
+            response.data.forEach(item => {
+                extrasMap[item.orderId] = {
+                    beverage: item.beverage || "",
+                    sideOrder: item.sideOrder || ""
+                };
+            });
+            setItemExtras(extrasMap);
+
         } catch (error) {
             console.error("❌ Error al cargar el carrito:", error);
             if (error.response?.status === 401) {
@@ -120,12 +134,33 @@ export default function CartPage() {
         }
     };
 
+    const loadAvailableExtras = async () => {
+        try {
+            const token = authService.getToken();
+
+            // Cargar bebidas
+            const beveragesResponse = await axios.get('http://localhost:8080/api/beverages', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            console.log('✅ Bebidas cargadas:', beveragesResponse.data);
+            setAvailableBeverages(beveragesResponse.data.filter(b => b.available));
+
+            // Cargar acompañamientos
+            const sideOrdersResponse = await axios.get('http://localhost:8080/api/sideOrders', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            console.log('✅ Acompañamientos cargados:', sideOrdersResponse.data);
+            setAvailableSideOrders(sideOrdersResponse.data.filter(s => s.available));
+        } catch (error) {
+            console.error("❌ Error al cargar extras:", error);
+        }
+    };
+
     const handleProcessCart = async () => {
         if (!selectedAddress || selectedAddress.trim() === "") {
             alert("Por favor, ingresa una dirección de entrega");
             return;
         }
-
 
         if (!selectedPaymentMethod) {
             alert("Por favor, selecciona un método de pago");
@@ -143,6 +178,31 @@ export default function CartPage() {
         try {
             console.log('🚀 Procesando carrito para userId:', userId);
             const token = authService.getToken();
+
+
+            for (const item of cartItems) {
+                const extras = itemExtras[item.orderId] || {};
+
+                // Agregar bebida si fue seleccionada
+                if (extras.beverage && extras.beverage !== item.beverage) {
+                    console.log(`🥤 Agregando bebida ${extras.beverage} a orden ${item.orderId}`);
+                    await axios.post(
+                        `http://localhost:8080/api/cart/${userId}/item/${item.orderId}/beverage?beverage=${encodeURIComponent(extras.beverage)}`,
+                        {},
+                        { headers: { 'Authorization': `Bearer ${token}` } }
+                    );
+                }
+
+                // Agregar acompañamiento si fue seleccionado
+                if (extras.sideOrder && extras.sideOrder !== item.sideOrder) {
+                    console.log(`🍟 Agregando acompañamiento ${extras.sideOrder} a orden ${item.orderId}`);
+                    await axios.post(
+                        `http://localhost:8080/api/cart/${userId}/item/${item.orderId}/sideorder?sideOrder=${encodeURIComponent(extras.sideOrder)}`,
+                        {},
+                        { headers: { 'Authorization': `Bearer ${token}` } }
+                    );
+                }
+            }
 
             await axios.post(
                 `http://localhost:8080/api/cart/${userId}/process`,
@@ -163,7 +223,7 @@ export default function CartPage() {
             navigate("/mis-pedidos");
         } catch (error) {
             console.error("❌ Error al procesar el carrito:", error);
-            alert("Error al procesar el pedido. Intenta nuevamente.");
+            alert("Error al procesar el pedido: " + (error.response?.data || error.message));
         } finally {
             setProcessing(false);
         }
@@ -199,17 +259,73 @@ export default function CartPage() {
         }
     };
 
-    const calculateTotal = () => {
-        return cartItems.reduce((sum, item) => sum + parseFloat(item.totalPrice || 0), 0).toFixed(2);
+    const handleSelectBeverage = (orderId, beverageType) => {
+        console.log('🥤 Seleccionando bebida:', beverageType, 'para orden:', orderId);
+        setItemExtras(prev => ({
+            ...prev,
+            [orderId]: {
+                ...prev[orderId],
+                beverage: beverageType
+            }
+        }));
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-teal-700 flex items-center justify-center">
-                <p className="text-white text-xl">Cargando carrito...</p>
-            </div>
-        );
-    }
+    const handleSelectSideOrder = (orderId, sideOrderType) => {
+        console.log('🍟 Seleccionando acompañamiento:', sideOrderType, 'para orden:', orderId);
+        setItemExtras(prev => ({
+            ...prev,
+            [orderId]: {
+                ...prev[orderId],
+                sideOrder: sideOrderType
+            }
+        }));
+    };
+
+    const handleRemoveBeverage = (orderId) => {
+        setItemExtras(prev => ({
+            ...prev,
+            [orderId]: {
+                ...prev[orderId],
+                beverage: ""
+            }
+        }));
+    };
+
+    const handleRemoveSideOrder = (orderId) => {
+        setItemExtras(prev => ({
+            ...prev,
+            [orderId]: {
+                ...prev[orderId],
+                sideOrder: ""
+            }
+        }));
+    };
+
+    const calculateTotal = () => {
+        return cartItems.reduce((sum, item) => {
+            let itemTotal = parseFloat(item.totalPrice || 0);
+
+            // ✅ Agregar precio de bebida seleccionada (si es diferente a la que ya tiene)
+            const selectedBeverage = itemExtras[item.orderId]?.beverage;
+            if (selectedBeverage && selectedBeverage !== item.beverage) {
+                const beverageObj = availableBeverages.find(b => b.type === selectedBeverage);
+                if (beverageObj) {
+                    itemTotal += parseFloat(beverageObj.price || 0);
+                }
+            }
+
+            // ✅ Agregar precio de acompañamiento seleccionado (si es diferente al que ya tiene)
+            const selectedSideOrder = itemExtras[item.orderId]?.sideOrder;
+            if (selectedSideOrder && selectedSideOrder !== item.sideOrder) {
+                const sideOrderObj = availableSideOrders.find(s => s.type === selectedSideOrder);
+                if (sideOrderObj) {
+                    itemTotal += parseFloat(sideOrderObj.price || 0);
+                }
+            }
+
+            return sum + itemTotal;
+        }, 0).toFixed(2);
+    };
 
     return (
         <div className="min-h-screen bg-teal-700 py-8 px-4">
@@ -348,29 +464,101 @@ export default function CartPage() {
                                         </div>
                                     )}
 
-                                    {/* Extras */}
-                                    {(item.beverage || item.sideOrder) && (
-                                        <div className="border-t pt-3 mt-3 space-y-1">
-                                            {item.beverage && (
-                                                <div className="text-sm">
-                                                    <span className="font-semibold text-teal-700">Bebida:</span>
-                                                    <span className="ml-2 text-gray-700">{item.beverage}</span>
+                                    {/* Extras - VERSIÓN CON SELECCIÓN LOCAL */}
+                                    <div className="border-t pt-4 mt-4 space-y-4">
+                                        {/* Bebida */}
+                                        <div>
+                                            <label className="block text-sm font-semibold text-teal-700 mb-2">
+                                                🥤 Bebida:
+                                            </label>
+                                            {itemExtras[item.orderId]?.beverage ? (
+                                                <div className="flex items-center justify-between bg-teal-50 px-4 py-3 rounded-lg">
+                                                    <span className="text-gray-700 font-medium">
+                                                        {itemExtras[item.orderId].beverage}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => handleRemoveBeverage(item.orderId)}
+                                                        className="text-red-500 hover:text-red-700 text-sm font-semibold"
+                                                    >
+                                                        ✕ Quitar
+                                                    </button>
                                                 </div>
-                                            )}
-                                            {item.sideOrder && (
-                                                <div className="text-sm">
-                                                    <span className="font-semibold text-teal-700">Acompañamiento:</span>
-                                                    <span className="ml-2 text-gray-700">{item.sideOrder}</span>
-                                                </div>
+                                            ) : (
+                                                <select
+                                                    value={itemExtras[item.orderId]?.beverage || ""}
+                                                    onChange={(e) => handleSelectBeverage(item.orderId, e.target.value)}
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                                                >
+                                                    <option value="">Seleccionar bebida (opcional)</option>
+                                                    {availableBeverages.map((beverage) => (
+                                                        <option key={beverage.type} value={beverage.type}>
+                                                            {beverage.type} - ${beverage.price}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             )}
                                         </div>
-                                    )}
+
+                                        {/* Acompañamiento */}
+                                        <div>
+                                            <label className="block text-sm font-semibold text-teal-700 mb-2">
+                                                🍟 Acompañamiento:
+                                            </label>
+                                            {itemExtras[item.orderId]?.sideOrder ? (
+                                                <div className="flex items-center justify-between bg-teal-50 px-4 py-3 rounded-lg">
+                                                    <span className="text-gray-700 font-medium">
+                                                        {itemExtras[item.orderId].sideOrder}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => handleRemoveSideOrder(item.orderId)}
+                                                        className="text-red-500 hover:text-red-700 text-sm font-semibold"
+                                                    >
+                                                        ✕ Quitar
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <select
+                                                    value={itemExtras[item.orderId]?.sideOrder || ""}
+                                                    onChange={(e) => handleSelectSideOrder(item.orderId, e.target.value)}
+                                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
+                                                >
+                                                    <option value="">Seleccionar acompañamiento (opcional)</option>
+                                                    {availableSideOrders.map((sideOrder) => (
+                                                        <option key={sideOrder.type} value={sideOrder.type}>
+                                                            {sideOrder.type} - ${sideOrder.price}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            )}
+                                        </div>
+                                    </div>
 
                                     {/* Precio */}
+                                    {/* Precio - CON CÁLCULO DINÁMICO */}
                                     <div className="border-t pt-3 mt-3 flex justify-end">
-                                        <span className="text-2xl font-bold text-teal-700">
-                                            ${item.totalPrice}
-                                        </span>
+                                                <span className="text-2xl font-bold text-teal-700">
+                                                    ${(() => {
+                                                    let itemTotal = parseFloat(item.totalPrice || 0);
+
+                                                    const selectedBeverage = itemExtras[item.orderId]?.beverage;
+                                                    if (selectedBeverage && selectedBeverage !== item.beverage) {
+                                                        const beverageObj = availableBeverages.find(b => b.type === selectedBeverage);
+                                                        if (beverageObj) {
+                                                            itemTotal += parseFloat(beverageObj.price || 0);
+                                                        }
+                                                    }
+
+                                                    const selectedSideOrder = itemExtras[item.orderId]?.sideOrder;
+                                                    if (selectedSideOrder && selectedSideOrder !== item.sideOrder) {
+                                                        const sideOrderObj = availableSideOrders.find(s => s.type === selectedSideOrder);
+                                                        if (sideOrderObj) {
+                                                            itemTotal += parseFloat(sideOrderObj.price || 0);
+                                                        }
+                                                    }
+
+                                                    return itemTotal.toFixed(2);
+                                                })()}
+                                                </span>
                                     </div>
                                 </div>
                             ))}
@@ -383,7 +571,6 @@ export default function CartPage() {
                                     Resumen del Pedido
                                 </h2>
 
-                                {/* ✅ SECCIÓN DE MÉTODO DE PAGO AGREGADA */}
                                 <div className="mb-6">
                                     <div className="flex justify-between items-center mb-2">
                                         <label className="block text-sm font-semibold text-gray-700">

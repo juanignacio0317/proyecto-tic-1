@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import um.edu.demospringum.dto.CartItemDTO;
 import um.edu.demospringum.exceptions.ClientNotFound;
+import um.edu.demospringum.exceptions.IngredientNotFound;
 import um.edu.demospringum.exceptions.OrderNotFound;
 import um.edu.demospringum.servicies.CartService;
 
@@ -144,6 +145,40 @@ public class CartController {
 
         public void setAddresses(List<String> addresses) {
             this.addresses = addresses;
+        }
+    }
+
+    @PostMapping("/{clientId}/item/{orderId}/beverage")
+    public ResponseEntity<?> addBeverageToCartItem(
+            @PathVariable Long clientId,
+            @PathVariable Long orderId,
+            @RequestParam String beverage) {
+        try {
+            cartService.addBeverageToOrder(orderId, beverage);
+            return ResponseEntity.ok("Bebida agregada exitosamente");
+        } catch (OrderNotFound e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (IngredientNotFound e) {
+            return ResponseEntity.status(404).body("Bebida no encontrada: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al agregar bebida: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{clientId}/item/{orderId}/sideorder")
+    public ResponseEntity<?> addSideOrderToCartItem(
+            @PathVariable Long clientId,
+            @PathVariable Long orderId,
+            @RequestParam String sideOrder) {
+        try {
+            cartService.addSideOrderToOrder(orderId, sideOrder);
+            return ResponseEntity.ok("Acompañamiento agregado exitosamente");
+        } catch (OrderNotFound e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (IngredientNotFound e) {
+            return ResponseEntity.status(404).body("Acompañamiento no encontrado: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al agregar acompañamiento: " + e.getMessage());
         }
     }
 }

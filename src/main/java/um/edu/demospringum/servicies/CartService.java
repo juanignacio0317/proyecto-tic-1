@@ -7,10 +7,13 @@ import um.edu.demospringum.dto.CartItemDTO;
 import um.edu.demospringum.entities.*;
 import um.edu.demospringum.entities.Products.*;
 import um.edu.demospringum.exceptions.ClientNotFound;
+import um.edu.demospringum.exceptions.IngredientNotFound;
 import um.edu.demospringum.exceptions.OrderNotFound;
 import um.edu.demospringum.repositories.ClientOrderRepository;
 import um.edu.demospringum.repositories.ClientRepository;
 import um.edu.demospringum.repositories.PaymentMethodRepository;
+import um.edu.demospringum.servicies.CreationService;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,6 +24,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class CartService {
+
+    @Autowired
+    private CreationService creationService;
 
     @Autowired
     private ClientOrderRepository clientOrderRepository;
@@ -209,5 +215,39 @@ public class CartService {
         Client client = optionalClient.get();
 
         return client.getAddresses() != null ? client.getAddresses() : new ArrayList<>();
+    }
+
+    @Transactional
+    public void addBeverageToOrder(Long orderId, String beverageType) throws OrderNotFound, IngredientNotFound {
+        Optional<ClientOrder> optionalOrder = clientOrderRepository.findById(orderId);
+
+        if (optionalOrder.isEmpty()) {
+            throw new OrderNotFound("Order not found");
+        }
+
+        ClientOrder order = optionalOrder.get();
+
+        if (!"in basket".equalsIgnoreCase(order.getOrderStatus())) {
+            throw new RuntimeException("Order is not in cart");
+        }
+
+        creationService.addBeverage(orderId, beverageType);
+    }
+
+    @Transactional
+    public void addSideOrderToOrder(Long orderId, String sideOrderType) throws OrderNotFound, IngredientNotFound {
+        Optional<ClientOrder> optionalOrder = clientOrderRepository.findById(orderId);
+
+        if (optionalOrder.isEmpty()) {
+            throw new OrderNotFound("Order not found");
+        }
+
+        ClientOrder order = optionalOrder.get();
+
+        if (!"in basket".equalsIgnoreCase(order.getOrderStatus())) {
+            throw new RuntimeException("Order is not in cart");
+        }
+
+        creationService.addSideOrder(orderId, sideOrderType);
     }
 }
