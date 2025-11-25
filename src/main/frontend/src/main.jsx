@@ -13,6 +13,7 @@ import MyCreationsPage from "./components/MyCreationPage.jsx";
 import MyOrdersPage from "./components/MyOrderPage.jsx";
 import PaymentMethodsPage from "./components/PaymentMethodPage.jsx";
 import AddressesPage from "./components/AddressPage.jsx";
+import PersonalizaPizzaPage from "./components/PersonalizaPizzaPage.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
@@ -27,6 +28,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
                 {/* Otras páginas */}
                 <Route path="/personaliza" element={<PersonalizaPage />} />
+                <Route path="/personalizapizza" element={<PersonalizaPizzaPage />} />
                 <Route path="/carrito" element={<CartPage />} />
 
                 {/* Panel de administración */}
