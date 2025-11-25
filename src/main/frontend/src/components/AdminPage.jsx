@@ -10,6 +10,8 @@ export default function AdminPage() {
     const [activeTab, setActiveTab] = useState('orders');
     const [loading, setLoading] = useState(false);
 
+    const [placeholder, setPlaceholder] = useState("");
+
     // Estados para ingredientes
     const [breads, setBreads] = useState([]);
     const [meats, setMeats] = useState([]);
@@ -65,6 +67,7 @@ export default function AdminPage() {
         } else {
             loadIngredients();
         }
+            loadIngredientsPlaceHolder();
     }, [activeTab, statusFilter]);
 
     // ==================== PEDIDOS ====================
@@ -239,7 +242,42 @@ export default function AdminPage() {
             alert('Error al eliminar administrador: ' + error.message);
         }
     };
+    const loadIngredientsPlaceHolder = async () => {
 
+                switch (activeTab) {
+                    case 'breads':
+                        setPlaceholder("Ej: Pan Integral")
+                        break;
+                    case 'meats':
+                        setPlaceholder("Ej: Carne de Vaca")
+                        break;
+                    case 'cheeses':
+                        setPlaceholder("Ej: Cheddar")
+
+                        break;
+                    case 'toppings':
+                        setPlaceholder("Ej: Lechuga")
+                        break;
+                    case 'dressings':
+                        setPlaceholder("Ej: Mayonesa")
+                        break;
+                    case 'sizes':
+                        setPlaceholder("Ej: Pequeñas")
+                        break;
+                    case 'doughs':
+                        setPlaceholder("Ej: Napolitana")
+                        break;
+                    case 'sauces':
+                        setPlaceholder("Ej: Tomate")
+                        break;
+                    case 'beverages':
+                        setPlaceholder("Ej: Coca Cola")
+                        break;
+                    case 'sideorders':
+                        setPlaceholder("Ej: Papas fritas")
+                        break;
+                }
+            }
     // ==================== INGREDIENTES ====================
 
     const loadIngredients = async () => {
@@ -933,7 +971,7 @@ export default function AdminPage() {
                                             className="form-control"
                                             value={formData.type}
                                             onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                            placeholder="Ej: Pan Integral"
+                                            placeholder={placeholder}
                                             required
                                         />
                                     </div>
