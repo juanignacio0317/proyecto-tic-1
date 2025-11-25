@@ -113,7 +113,7 @@ export default function PersonalizaPage() {
 
             console.log('Iniciando carga de datos...');
 
-            // ✅ MODIFICAR: Cargar quesos desde su propio endpoint
+
             const [panes, carnes, quesos, toppings, salsas] = await Promise.all([
                 burgerService.getAllBreads(),
                 burgerService.getAllMeats(),
@@ -133,7 +133,7 @@ export default function PersonalizaPage() {
             // Formatear los datos para el frontend
             setOpciones({
                 panes: Array.isArray(panes) ? panes
-                    .filter(pan => pan.available)
+                    // .filter(pan => pan.available)
                     .map(pan => ({
                         id: pan.id?.toString() || '',
                         nombre: pan.type || pan.name || 'Sin nombre',

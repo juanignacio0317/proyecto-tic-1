@@ -147,6 +147,10 @@ export default function Register() {
             setError("Las contraseñas no coinciden.");
             return;
         }
+        if (password.length<8){
+            setError("La contraseña no es válida (al menos 8 caracteres).");
+            return;
+        }
         if (!pmSaved) {
             setError("Agregá un método de pago para continuar.");
             return;
