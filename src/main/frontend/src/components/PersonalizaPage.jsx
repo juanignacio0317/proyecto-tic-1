@@ -3,15 +3,21 @@ import { burgerService } from '../services/burgerService';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 
+
 export default function PersonalizaPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
 
     if (authService.isAdmin()) {
-        alert("Debes iniciar sesión como cliente para crear tu propia hamburguesa");
-        navigate("/login");
-        return;
+        Swal.fire({
+            icon: 'warning',
+            title: 'Solo clientes',
+            text: 'Debes iniciar sesión como cliente para crear tu propia hamburguesa'
+        }).then(() => {
+            navigate('/login');
+        });
+        return null;
     }
 
     // Estado para la construcción de la hamburguesa
@@ -31,6 +37,7 @@ export default function PersonalizaPage() {
         toppings: [],
         salsas: []
     });
+
     const coloresPorDefecto = {
         pan: '#D4A574',
         carne: '#8B4513',
@@ -38,7 +45,6 @@ export default function PersonalizaPage() {
         topping: '#90EE90',
         salsa: '#DC143C'
     };
-
 
     const asignarColor = (nombre, tipo) => {
         // Manejar valores undefined o null
@@ -116,8 +122,7 @@ export default function PersonalizaPage() {
         try {
             setLoadingData(true);
 
-
-
+            console.log('Iniciando carga de datos...');
 
             const [panes, carnes, quesos, toppings, salsas] = await Promise.all([
                 burgerService.getAllBreads(),
@@ -127,11 +132,12 @@ export default function PersonalizaPage() {
                 burgerService.getAllDressings()
             ]);
 
-
+            console.log('Datos cargados del backend:', { panes, carnes, quesos, toppings, salsas });
 
             const vegetales = toppings;
 
-
+            console.log('Quesos cargados:', quesos);
+            console.log('Vegetales (toppings):', vegetales);
 
             // Formatear los datos para el frontend
             setOpciones({
@@ -152,7 +158,6 @@ export default function PersonalizaPage() {
                         precio: parseFloat(carne.price) || 0,
                         color: asignarColor(carne.type || carne.name || '', 'carne')
                     })) : [],
-
 
                 quesos: Array.isArray(quesos) ? quesos
                     .filter(queso => queso.available)
@@ -182,11 +187,15 @@ export default function PersonalizaPage() {
                     })) : []
             });
 
-
+            console.log('Opciones formateadas correctamente');
 
         } catch (error) {
             console.error('Error al cargar datos:', error);
-            alert('Error al cargar los ingredientes. Por favor, recarga la página.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al cargar los ingredientes. Por favor, recarga la página.'
+            });
         } finally {
             setLoadingData(false);
         }
@@ -219,16 +228,26 @@ export default function PersonalizaPage() {
 
     const agregarAlCarrito = async () => {
         if (!burger.pan || !burger.carne) {
-            alert('Debes seleccionar al menos un pan y una carne');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Faltan ingredientes',
+                text: 'Debes seleccionar al menos un pan y una carne'
+            });
             return;
         }
 
         // Verificar autenticación
         if (!authService.isAuthenticated()) {
-            const confirmLogin = window.confirm(
-                'Debes iniciar sesión para guardar tu creación. ¿Deseas ir al login?'
-            );
-            if (confirmLogin) {
+            const result = await Swal.fire({
+                icon: 'info',
+                title: 'Inicia sesión',
+                text: 'Debes iniciar sesión para guardar tu creación. ¿Deseas ir al login?',
+                showCancelButton: true,
+                confirmButtonText: 'Ir al login',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
                 navigate('/login');
             }
             return;
@@ -239,11 +258,21 @@ export default function PersonalizaPage() {
 
             // OBTENER EL USER ID CON LOGS DE DEBUG
             const userId = authService.getUserId();
-
+            console.log('===== DEBUG USERID =====');
+            console.log('userId obtenido:', userId);
+            console.log('tipo de userId:', typeof userId);
+            console.log('token:', localStorage.getItem('token'));
+            console.log('userId en localStorage:', localStorage.getItem('userId'));
+            console.log('========================');
 
             if (!userId) {
-                alert('No se pudo obtener tu ID de usuario. Por favor, inicia sesión nuevamente.');
-                navigate('/login');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de sesión',
+                    text: 'No se pudo obtener tu ID de usuario. Por favor, inicia sesión nuevamente.'
+                }).then(() => {
+                    navigate('/login');
+                });
                 return;
             }
 
@@ -252,6 +281,9 @@ export default function PersonalizaPage() {
             const carneSeleccionada = opciones.carnes.find(c => c.id === burger.carne);
             const quesoSeleccionado = burger.queso ? opciones.quesos.find(q => q.id === burger.queso) : null;
 
+            console.log('Pan seleccionado:', panSeleccionado);
+            console.log('Carne seleccionada:', carneSeleccionada);
+            console.log('Queso seleccionado:', quesoSeleccionado);
 
             // Obtener nombres de toppings (vegetales)
             const toppingNombres = burger.toppings.map(id => {
@@ -282,10 +314,12 @@ export default function PersonalizaPage() {
                 orderDate: new Date().toISOString()
             };
 
-
+            console.log('===== DATOS A ENVIAR =====');
+            console.log('burgerData completo:', JSON.stringify(burgerData, null, 2));
+            console.log('==========================');
 
             // Enviar al backend
-            const response = await burgerService.createBurger(burgerData);
+            await burgerService.createBurger(burgerData);
 
             // Limpiar el formulario
             setBurger({
@@ -297,11 +331,19 @@ export default function PersonalizaPage() {
                 salsas: []
             });
 
-            alert(`¡Hamburguesa guardada exitosamente! 🍔`);
+            Swal.fire({
+                icon: 'success',
+                title: '¡Listo!',
+                text: '¡Hamburguesa guardada exitosamente! 🍔'
+            });
 
         } catch (error) {
             console.error('Error completo:', error);
-            alert('Error al guardar la hamburguesa: ' + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al guardar la hamburguesa: ' + error.message
+            });
         } finally {
             setLoading(false);
         }
@@ -688,7 +730,7 @@ export default function PersonalizaPage() {
                                                     <span className="badge bg-secondary ms-2">x{burger.meatQuantity}</span>
                                                 )}
                                             </span>
-                                                                            <span className="fw-semibold">
+                                        <span className="fw-semibold">
                                                 ${(opciones.carnes.find(c => c.id === burger.carne).precio * burger.meatQuantity).toFixed(2)}
                                             </span>
                                     </div>

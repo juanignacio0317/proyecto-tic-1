@@ -4,15 +4,21 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { pizzaService } from '../services/pizzaService';
 
+
 export default function PersonalizaPizzaPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
 
     if (authService.isAdmin()) {
-        alert("Debes iniciar sesión como cliente para crear tu propia hamburguesa");
-        navigate("/login");
-        return;
+        Swal.fire({
+            icon: 'warning',
+            title: 'Solo clientes',
+            text: 'Debes iniciar sesión como cliente para crear tu propia pizza'
+        }).then(() => {
+            navigate('/login');
+        });
+        return null;
     }
 
     // Estado para la construcción de la pizza
@@ -104,6 +110,7 @@ export default function PersonalizaPizzaPage() {
     const cargarDatosIniciales = async () => {
         try {
             setLoadingData(true);
+            console.log('🍕 Iniciando carga de ingredientes de pizza...');
 
             const [sizes, doughs, sauces, cheeses, toppings] = await Promise.all([
                 pizzaService.getAllSizes(),
@@ -113,6 +120,7 @@ export default function PersonalizaPizzaPage() {
                 pizzaService.getAllToppings()
             ]);
 
+            console.log('✅ Datos cargados:', { sizes, doughs, sauces, cheeses, toppings });
 
             // Formatear los datos para el frontend
             setOpciones({
@@ -162,10 +170,15 @@ export default function PersonalizaPizzaPage() {
                     })) : []
             });
 
+            console.log('✅ Opciones formateadas correctamente');
 
         } catch (error) {
-            console.error('Error al cargar ingredientes:', error);
-            alert('Error al cargar los ingredientes. Por favor, recarga la página.');
+            console.error('❌ Error al cargar ingredientes:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al cargar los ingredientes. Por favor, recarga la página.'
+            });
         } finally {
             setLoadingData(false);
         }
@@ -200,15 +213,25 @@ export default function PersonalizaPizzaPage() {
 
     const agregarAlCarrito = async () => {
         if (!pizza.size || !pizza.dough || !pizza.sauce) {
-            alert('Debes seleccionar al menos tamaño, masa y salsa');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Faltan ingredientes',
+                text: 'Debes seleccionar al menos tamaño, masa y salsa'
+            });
             return;
         }
 
         if (!authService.isAuthenticated()) {
-            const confirmLogin = window.confirm(
-                'Debes iniciar sesión para guardar tu pizza. ¿Deseas ir al login?'
-            );
-            if (confirmLogin) {
+            const result = await Swal.fire({
+                icon: 'info',
+                title: 'Inicia sesión',
+                text: 'Debes iniciar sesión para guardar tu pizza. ¿Deseas ir al login?',
+                showCancelButton: true,
+                confirmButtonText: 'Ir al login',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
                 navigate('/login');
             }
             return;
@@ -218,10 +241,16 @@ export default function PersonalizaPizzaPage() {
             setLoading(true);
 
             const userId = authService.getUserId();
-
+            console.log('===== DEBUG USERID =====');
+            console.log('userId obtenido:', userId);
+            console.log('========================');
 
             if (!userId) {
-                alert('No se pudo obtener tu ID de usuario. Por favor, inicia sesión nuevamente.');
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error de sesión',
+                    text: 'No se pudo obtener tu ID de usuario. Por favor, inicia sesión nuevamente.'
+                });
                 navigate('/login');
                 return;
             }
@@ -234,18 +263,36 @@ export default function PersonalizaPizzaPage() {
 
             // Validar que se encontraron todos los ingredientes
             if (!sizeSeleccionado) {
-                alert('Error: No se encontró el tamaño seleccionado');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error: No se encontró el tamaño seleccionado'
+                });
                 return;
             }
             if (!doughSeleccionado) {
-                alert('Error: No se encontró la masa seleccionada');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error: No se encontró la masa seleccionada'
+                });
                 return;
             }
             if (!sauceSeleccionado) {
-                alert('Error: No se encontró la salsa seleccionada');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error: No se encontró la salsa seleccionada'
+                });
                 return;
             }
 
+            console.log('===== INGREDIENTES SELECCIONADOS =====');
+            console.log('Size:', sizeSeleccionado);
+            console.log('Dough:', doughSeleccionado);
+            console.log('Sauce:', sauceSeleccionado);
+            console.log('Cheese:', cheeseSeleccionado);
+            console.log('======================================');
 
             // Obtener nombres de toppings
             const toppingNombres = pizza.toppings
@@ -255,20 +302,24 @@ export default function PersonalizaPizzaPage() {
                 })
                 .filter(nombre => nombre !== null);
 
+            console.log('Topping nombres:', toppingNombres);
 
             // Preparar datos enviando los nombres exactos (type) de la BD
             const pizzaData = {
                 userId: parseInt(userId),
-                size: sizeSeleccionado.nombre,        // Nombre del tamaño
-                dough: doughSeleccionado.nombre,      // Nombre de la masa
-                sauce: sauceSeleccionado.nombre,      // Nombre de la salsa
+                size: sizeSeleccionado.nombre,
+                dough: doughSeleccionado.nombre,
+                sauce: sauceSeleccionado.nombre,
                 cheese: cheeseSeleccionado ? cheeseSeleccionado.nombre : null,
-                toppings: toppingNombres,             // Array de nombres
+                toppings: toppingNombres,
                 orderDate: new Date().toISOString()
             };
 
+            console.log('===== DATOS A ENVIAR AL BACKEND =====');
+            console.log(JSON.stringify(pizzaData, null, 2));
+            console.log('=====================================');
 
-            const response = await pizzaService.createPizza(pizzaData);
+            await pizzaService.createPizza(pizzaData);
 
             // Limpiar formulario
             setPizza({
@@ -279,7 +330,11 @@ export default function PersonalizaPizzaPage() {
                 toppings: []
             });
 
-            alert(`¡Pizza guardada exitosamente! 🍕`);
+            Swal.fire({
+                icon: 'success',
+                title: '¡Listo!',
+                text: '¡Pizza guardada exitosamente! 🍕'
+            });
 
         } catch (error) {
             console.error('===== ERROR COMPLETO =====');
@@ -287,11 +342,18 @@ export default function PersonalizaPizzaPage() {
             console.error('Message:', error.message);
             console.error('==========================');
 
-            // Mensaje más informativo
-            if (error.message.includes('not found')) {
-                alert('Error: Alguno de los ingredientes seleccionados no existe en la base de datos.\n\nPor favor, verifica que los ingredientes estén creados correctamente en el panel de administración.');
+            if (error.message && error.message.includes('not found')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Alguno de los ingredientes seleccionados no existe en la base de datos. Verifica que estén creados correctamente en el panel de administración.'
+                });
             } else {
-                alert('Error al guardar la pizza: ' + error.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al guardar la pizza: ' + error.message
+                });
             }
         } finally {
             setLoading(false);
