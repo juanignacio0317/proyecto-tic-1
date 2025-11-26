@@ -14,7 +14,6 @@ public class DataInitializer {
     CommandLineRunner initAdminUser(AdministratorRepository administratorRepository,
                                     PasswordEncoder passwordEncoder) {
         return args -> {
-            // Verificar si ya existe un administrador
             if (administratorRepository.findByEmail("admin@pizzumburgum.com").isEmpty()) {
                 Administrator admin = new Administrator();
                 admin.setName("Administrador");

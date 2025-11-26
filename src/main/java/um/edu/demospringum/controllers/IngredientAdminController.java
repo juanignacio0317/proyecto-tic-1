@@ -34,7 +34,6 @@ public class IngredientAdminController {
     @Autowired
     private ProductService productService;
 
-    // ==================== BREADS ====================
 
     @GetMapping("/breads")
     public ResponseEntity<List<IngredientsDto>> getAllBreads() {
@@ -85,7 +84,6 @@ public class IngredientAdminController {
         }
     }
 
-    // ==================== MEATS ====================
 
     @GetMapping("/meats")
     public ResponseEntity<List<IngredientsDto>> getAllMeats() {
@@ -136,7 +134,6 @@ public class IngredientAdminController {
         }
     }
 
-    // ==================== CHEESES ====================
 
     @GetMapping("/cheeses")
     public ResponseEntity<List<IngredientsDto>> getAllCheeses() {
@@ -187,7 +184,6 @@ public class IngredientAdminController {
         }
     }
 
-    // ==================== TOPPINGS ====================
 
     @GetMapping("/toppings")
     public ResponseEntity<List<IngredientsDto>> getAllToppings() {
@@ -238,7 +234,6 @@ public class IngredientAdminController {
         }
     }
 
-    // ==================== DRESSINGS (SALSAS) ====================
 
     @GetMapping("/dressings")
     public ResponseEntity<List<IngredientsDto>> getAllDressings() {
@@ -289,7 +284,6 @@ public class IngredientAdminController {
         }
     }
 
-    // ==================== SIZES (TAMAÑOS) ====================
 
     @GetMapping("/sizes")
     public ResponseEntity<List<IngredientsDto>> getAllSizes() {
@@ -340,7 +334,6 @@ public class IngredientAdminController {
         }
     }
 
-// ==================== DOUGHS (MASAS) ====================
 
     @GetMapping("/doughs")
     public ResponseEntity<List<IngredientsDto>> getAllDoughs() {
@@ -391,7 +384,6 @@ public class IngredientAdminController {
         }
     }
 
-// ==================== SAUCES (SALSAS DE PIZZA) ====================
 
     @GetMapping("/sauces")
     public ResponseEntity<List<IngredientsDto>> getAllSauces() {
@@ -442,7 +434,6 @@ public class IngredientAdminController {
         }
     }
 
-// ==================== BEVERAGES (BEBIDAS) ====================
 
     @GetMapping("/beverages")
     public ResponseEntity<List<IngredientsDto>> getAllBeverages() {
@@ -493,7 +484,6 @@ public class IngredientAdminController {
         }
     }
 
-// ==================== SIDE ORDERS (ACOMPAÑAMIENTOS) ====================
 
     @GetMapping("/sideorders")
     public ResponseEntity<List<IngredientsDto>> getAllSideOrders() {

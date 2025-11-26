@@ -21,7 +21,6 @@ public class ClientOrderController {
         this.productsDataService = productsDataService;
     }
 
-    // --- CLIENTE ---
     @GetMapping("/client/{clientId}")
     public ResponseEntity<?> listOrders(@PathVariable Long clientId) {
         return ResponseEntity.ok(productsDataService.listOrders(clientId));
@@ -38,7 +37,6 @@ public class ClientOrderController {
         );
     }
 
-    // --- ADMIN ---
     @GetMapping("/all")
     public ResponseEntity<?> listClientOrders() {
         return ResponseEntity.ok(productsDataService.listClientOrders());

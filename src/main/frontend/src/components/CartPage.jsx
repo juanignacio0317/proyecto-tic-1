@@ -31,10 +31,9 @@ export default function CartPage() {
         }
 
         const userId = authService.getUserId();
-        console.log('🛒 CartPage - userId obtenido:', userId);
 
         if (!userId) {
-            console.error('❌ No se pudo obtener userId');
+            console.error('No se pudo obtener userId');
             Swal.fire({
                 icon: "error",
                 title: "Error de sesión",
@@ -71,7 +70,7 @@ export default function CartPage() {
 
     const loadCart = async (userId) => {
         try {
-            console.log('🛒 Cargando carrito para userId:', userId);
+
             const token = authService.getToken();
 
             const response = await axios.get(`http://localhost:8080/api/cart/${userId}`, {
@@ -80,7 +79,7 @@ export default function CartPage() {
                 }
             });
 
-            console.log('✅ Carrito cargado:', response.data);
+
             setCartItems(response.data);
 
             const extrasMap = {};
@@ -93,7 +92,7 @@ export default function CartPage() {
             setItemExtras(extrasMap);
 
         } catch (error) {
-            console.error("❌ Error al cargar el carrito:", error);
+            console.error(" Error al cargar el carrito:", error);
             if (error.response?.status === 401) {
                 Swal.fire({
                     icon: "warning",
@@ -122,7 +121,7 @@ export default function CartPage() {
 
     const loadAddress = async (userId) => {
         try {
-            console.log('📍 Cargando direcciones para userId:', userId);
+
             const token = authService.getToken();
 
             const response = await axios.get(`http://localhost:8080/api/addresses/${userId}`, {
@@ -131,7 +130,7 @@ export default function CartPage() {
                 }
             });
 
-            console.log('✅ Direcciones cargadas:', response.data);
+
             const addresses = response.data.addresses || [];
             setClientAddresses(addresses);
 
@@ -139,7 +138,7 @@ export default function CartPage() {
                 setSelectedAddress(addresses[0]);
             }
         } catch (error) {
-            console.error("❌ Error al cargar las direcciones:", error);
+            console.error(" Error al cargar las direcciones:", error);
         }
     };
 
@@ -150,16 +149,16 @@ export default function CartPage() {
             const beveragesResponse = await axios.get('http://localhost:8080/api/beverages', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            console.log('✅ Bebidas cargadas:', beveragesResponse.data);
+
             setAvailableBeverages(beveragesResponse.data.filter(b => b.available));
 
             const sideOrdersResponse = await axios.get('http://localhost:8080/api/sideOrders', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            console.log('✅ Acompañamientos cargados:', sideOrdersResponse.data);
+
             setAvailableSideOrders(sideOrdersResponse.data.filter(s => s.available));
         } catch (error) {
-            console.error("❌ Error al cargar extras:", error);
+            console.error(" Error al cargar extras:", error);
         }
     };
 
@@ -198,14 +197,13 @@ export default function CartPage() {
         setProcessing(true);
 
         try {
-            console.log('🚀 Procesando carrito para userId:', userId);
             const token = authService.getToken();
 
             for (const item of cartItems) {
                 const extras = itemExtras[item.orderId] || {};
 
                 if (extras.beverage && extras.beverage !== item.beverage) {
-                    console.log(`🥤 Agregando bebida ${extras.beverage} a orden ${item.orderId}`);
+
                     await axios.post(
                         `http://localhost:8080/api/cart/${userId}/item/${item.orderId}/beverage?beverage=${encodeURIComponent(extras.beverage)}`,
                         {},
@@ -214,7 +212,7 @@ export default function CartPage() {
                 }
 
                 if (extras.sideOrder && extras.sideOrder !== item.sideOrder) {
-                    console.log(`🍟 Agregando acompañamiento ${extras.sideOrder} a orden ${item.orderId}`);
+
                     await axios.post(
                         `http://localhost:8080/api/cart/${userId}/item/${item.orderId}/sideorder?sideOrder=${encodeURIComponent(extras.sideOrder)}`,
                         {},
@@ -237,7 +235,7 @@ export default function CartPage() {
                 }
             );
 
-            console.log('✅ Pedido procesado exitosamente');
+
             Swal.fire({
                 icon: "success",
                 title: "¡Pedido confirmado!",
@@ -248,7 +246,7 @@ export default function CartPage() {
             });
 
         } catch (error) {
-            console.error("❌ Error al procesar el carrito:", error);
+            console.error(" Error al procesar el carrito:", error);
             Swal.fire({
                 icon: "error",
                 title: "Error al procesar el pedido",
@@ -283,7 +281,6 @@ export default function CartPage() {
                     }
                 });
 
-                console.log('✅ Item eliminado');
 
                 const userId = authService.getUserId();
                 if (userId) {
@@ -300,7 +297,7 @@ export default function CartPage() {
                     timerProgressBar: true
                 });
             } catch (error) {
-                console.error("❌ Error al eliminar item:", error);
+                console.error("Error al eliminar item:", error);
                 Swal.fire({
                     icon: "error",
                     title: "Error al eliminar",

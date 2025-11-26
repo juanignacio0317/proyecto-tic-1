@@ -34,8 +34,6 @@ export default function AddressesPage() {
             const userId = authService.getUserId();
             const token = authService.getToken();
 
-            console.log("🔍 UserId:", userId);
-            console.log("🔍 Token existe:", !!token);
 
             if (!token || !userId) {
                 Swal.fire({
@@ -60,10 +58,9 @@ export default function AddressesPage() {
                 }
             );
 
-            console.log("✅ Direcciones cargadas:", response.data);
             setAddresses(response.data.addresses || []);
         } catch (error) {
-            console.error("❌ Error al cargar direcciones:", error);
+            console.error("Error al cargar direcciones:", error);
 
             if (error.response?.status === 403 || error.response?.status === 401) {
                 Swal.fire({
@@ -102,7 +99,7 @@ export default function AddressesPage() {
             return;
         }
 
-        // 🚫 Evitar direcciones duplicadas (ignorando mayúsculas/minúsculas y espacios)
+        // evitar direcciones duplicadas
         const normalizedNew = trimmed.toLowerCase();
         const alreadyExists = addresses.some(
             (addr) => (addr || "").trim().toLowerCase() === normalizedNew
@@ -277,7 +274,7 @@ export default function AddressesPage() {
             return;
         }
 
-        // 🚫 Evitar que edite a una dirección que ya existe
+        // evitar que edite a una dirección que ya existe
         const normalizedNew = trimmed.toLowerCase();
         const alreadyExists = addresses.some(
             (addr) =>

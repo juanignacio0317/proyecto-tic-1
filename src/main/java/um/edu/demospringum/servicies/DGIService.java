@@ -25,14 +25,11 @@ public class DGIService {
 
 
     public List<TicketSaleDTO> getTicketsByDate(LocalDate fecha) {
-        // Convertir LocalDate a rango de LocalDateTime
         LocalDateTime startOfDay = fecha.atStartOfDay();
         LocalDateTime endOfDay = fecha.plusDays(1).atStartOfDay();
 
-        // Obtener todas las órdenes de ese día
         List<ClientOrder> orders = clientOrderRepository.findByOrderDateBetween(startOfDay, endOfDay);
 
-        // Filtrar solo órdenes confirmadas (con método de pago, no en basket)
         return orders.stream()
                 .filter(order -> order.getPaymentMethod() != null)  // ← LÍNEA AGREGADA
                 .map(this::convertToTicketVentaDTO)
@@ -46,7 +43,6 @@ public class DGIService {
         ticket.setOrderId(order.getId());
         ticket.setFechaVenta(order.getOrderDate());
 
-        // Calcular detalle y monto total
         List<TicketItemDTO> detalle = new ArrayList<>();
         BigDecimal montoTotal = BigDecimal.ZERO;
 
@@ -54,7 +50,6 @@ public class DGIService {
         if (creation != null) {
             Product product = creation.getProduct();
 
-            // Agregar el producto base (Pizza o Burger)
             if (product != null) {
                 String productName = getProductDetailedName(product);
                 TicketItemDTO productItem = new TicketItemDTO(
@@ -67,7 +62,6 @@ public class DGIService {
                 montoTotal = montoTotal.add(product.getPrice());
             }
 
-            // Agregar toppings
             if (creation.getToppings() != null) {
                 for (Topping topping : creation.getToppings()) {
                     TicketItemDTO toppingItem = new TicketItemDTO(
@@ -81,7 +75,6 @@ public class DGIService {
                 }
             }
 
-            // Agregar dressings
             if (creation.getDressings() != null) {
                 for (Dressing dressing : creation.getDressings()) {
                     TicketItemDTO dressingItem = new TicketItemDTO(
@@ -96,7 +89,6 @@ public class DGIService {
             }
         }
 
-        // Agregar beverage si existe
         if (order.getBeverage() != null) {
             Beverage beverage = order.getBeverage();
             TicketItemDTO beverageItem = new TicketItemDTO(
@@ -109,7 +101,6 @@ public class DGIService {
             montoTotal = montoTotal.add(beverage.getPrice());
         }
 
-        // Agregar side order si existe
         if (order.getSideOrder() != null) {
             SideOrder sideOrder = order.getSideOrder();
             TicketItemDTO sideOrderItem = new TicketItemDTO(
@@ -125,15 +116,12 @@ public class DGIService {
         ticket.setDetalle(detalle);
         ticket.setMontoTotal(montoTotal);
 
-        // Información del cliente
         if (order.getClient() != null) {
             ticket.setNombreCliente(order.getClient().getName() + " " + order.getClient().getSurname());
         }
 
-        // Dirección de entrega
         ticket.setDireccionEntrega(order.getOrderAddress());
 
-        // Número de tarjeta (últimos 4 dígitos)
         ticket.setNumeroTarjeta(getLastFourDigitsOfCard(order));
 
         return ticket;
@@ -181,7 +169,6 @@ public class DGIService {
 
 
     private String getLastFourDigitsOfCard(ClientOrder order) {
-        // Ya sabemos que paymentMethod no es null por el filtro
         PaymentMethod paymentMethod = order.getPaymentMethod();
 
         if (paymentMethod != null && paymentMethod.getCardNumber() != null) {

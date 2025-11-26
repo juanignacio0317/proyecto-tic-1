@@ -28,12 +28,10 @@ public class AdministratorService {
 
     @Transactional
     public AdminResponse createAdministrator(CreateAdminRequest request) {
-        // Validar que no exista el email
         if (userDataRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Ya existe un usuario con ese email");
         }
 
-        // Validar datos básicos
         if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new RuntimeException("El nombre es requerido");
         }
@@ -57,7 +55,7 @@ public class AdministratorService {
 
         Administrator savedAdmin = administratorRepository.save(admin);
 
-        // Retornar DTO
+
         return mapToResponse(savedAdmin);
     }
 

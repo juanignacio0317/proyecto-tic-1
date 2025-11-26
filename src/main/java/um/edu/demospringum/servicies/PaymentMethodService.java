@@ -133,7 +133,6 @@ public class PaymentMethodService {
         PaymentMethodResponseDto dto = new PaymentMethodResponseDto();
         dto.setIdPM(paymentMethod.getIdPM());
         dto.setCardHolderName(paymentMethod.getCardHolderName());
-        // Solo mostrar los últimos 4 dígitos por seguridad
         dto.setCardNumber(maskCardNumber(paymentMethod.getCardNumber()));
         dto.setExpirationDate(paymentMethod.getExpirationDate());
         dto.setCardBrand(paymentMethod.getCardBrand());

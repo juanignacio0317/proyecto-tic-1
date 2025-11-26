@@ -40,7 +40,6 @@ public class OrderHistoryService {
 
         List<ClientOrder> orders = clientOrderRepository.findByClient(optionalClient.get());
 
-        // Filtrar pedidos que NO están en el carrito, ordenar por fecha descendente
         return orders.stream()
                 .filter(order -> !"in basket".equalsIgnoreCase(order.getOrderStatus()))
                 .sorted((o1, o2) -> o2.getOrderDate().compareTo(o1.getOrderDate()))

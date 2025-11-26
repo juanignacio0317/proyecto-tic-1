@@ -104,7 +104,6 @@ export default function PersonalizaPizzaPage() {
     const cargarDatosIniciales = async () => {
         try {
             setLoadingData(true);
-            console.log('🍕 Iniciando carga de ingredientes de pizza...');
 
             const [sizes, doughs, sauces, cheeses, toppings] = await Promise.all([
                 pizzaService.getAllSizes(),
@@ -114,7 +113,6 @@ export default function PersonalizaPizzaPage() {
                 pizzaService.getAllToppings()
             ]);
 
-            console.log('✅ Datos cargados:', { sizes, doughs, sauces, cheeses, toppings });
 
             // Formatear los datos para el frontend
             setOpciones({
@@ -164,10 +162,9 @@ export default function PersonalizaPizzaPage() {
                     })) : []
             });
 
-            console.log('✅ Opciones formateadas correctamente');
 
         } catch (error) {
-            console.error('❌ Error al cargar ingredientes:', error);
+            console.error('Error al cargar ingredientes:', error);
             alert('Error al cargar los ingredientes. Por favor, recarga la página.');
         } finally {
             setLoadingData(false);
@@ -221,9 +218,7 @@ export default function PersonalizaPizzaPage() {
             setLoading(true);
 
             const userId = authService.getUserId();
-            console.log('===== DEBUG USERID =====');
-            console.log('userId obtenido:', userId);
-            console.log('========================');
+
 
             if (!userId) {
                 alert('No se pudo obtener tu ID de usuario. Por favor, inicia sesión nuevamente.');
@@ -251,12 +246,6 @@ export default function PersonalizaPizzaPage() {
                 return;
             }
 
-            console.log('===== INGREDIENTES SELECCIONADOS =====');
-            console.log('Size:', sizeSeleccionado);
-            console.log('Dough:', doughSeleccionado);
-            console.log('Sauce:', sauceSeleccionado);
-            console.log('Cheese:', cheeseSeleccionado);
-            console.log('======================================');
 
             // Obtener nombres de toppings
             const toppingNombres = pizza.toppings
@@ -266,7 +255,6 @@ export default function PersonalizaPizzaPage() {
                 })
                 .filter(nombre => nombre !== null);
 
-            console.log('Topping nombres:', toppingNombres);
 
             // Preparar datos enviando los nombres exactos (type) de la BD
             const pizzaData = {
@@ -279,9 +267,6 @@ export default function PersonalizaPizzaPage() {
                 orderDate: new Date().toISOString()
             };
 
-            console.log('===== DATOS A ENVIAR AL BACKEND =====');
-            console.log(JSON.stringify(pizzaData, null, 2));
-            console.log('=====================================');
 
             const response = await pizzaService.createPizza(pizzaData);
 

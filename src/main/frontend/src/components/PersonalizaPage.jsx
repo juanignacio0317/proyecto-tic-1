@@ -116,7 +116,7 @@ export default function PersonalizaPage() {
         try {
             setLoadingData(true);
 
-            console.log('Iniciando carga de datos...');
+
 
 
             const [panes, carnes, quesos, toppings, salsas] = await Promise.all([
@@ -127,13 +127,11 @@ export default function PersonalizaPage() {
                 burgerService.getAllDressings()
             ]);
 
-            console.log('Datos cargados del backend:', { panes, carnes, quesos, toppings, salsas });
 
 
             const vegetales = toppings;
 
-            console.log('Quesos cargados:', quesos);
-            console.log('Vegetales (toppings):', vegetales);
+
 
             // Formatear los datos para el frontend
             setOpciones({
@@ -184,7 +182,7 @@ export default function PersonalizaPage() {
                     })) : []
             });
 
-            console.log('Opciones formateadas correctamente');
+
 
         } catch (error) {
             console.error('Error al cargar datos:', error);
@@ -241,12 +239,7 @@ export default function PersonalizaPage() {
 
             // OBTENER EL USER ID CON LOGS DE DEBUG
             const userId = authService.getUserId();
-            console.log('===== DEBUG USERID =====');
-            console.log('userId obtenido:', userId);
-            console.log('tipo de userId:', typeof userId);
-            console.log('token:', localStorage.getItem('token'));
-            console.log('userId en localStorage:', localStorage.getItem('userId'));
-            console.log('========================');
+
 
             if (!userId) {
                 alert('No se pudo obtener tu ID de usuario. Por favor, inicia sesión nuevamente.');
@@ -259,9 +252,6 @@ export default function PersonalizaPage() {
             const carneSeleccionada = opciones.carnes.find(c => c.id === burger.carne);
             const quesoSeleccionado = burger.queso ? opciones.quesos.find(q => q.id === burger.queso) : null;
 
-            console.log('Pan seleccionado:', panSeleccionado);
-            console.log('Carne seleccionada:', carneSeleccionada);
-            console.log('Queso seleccionado:', quesoSeleccionado);
 
             // Obtener nombres de toppings (vegetales)
             const toppingNombres = burger.toppings.map(id => {
@@ -292,9 +282,7 @@ export default function PersonalizaPage() {
                 orderDate: new Date().toISOString()
             };
 
-            console.log('===== DATOS A ENVIAR =====');
-            console.log('burgerData completo:', JSON.stringify(burgerData, null, 2));
-            console.log('==========================');
+
 
             // Enviar al backend
             const response = await burgerService.createBurger(burgerData);

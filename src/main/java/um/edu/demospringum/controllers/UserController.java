@@ -28,23 +28,19 @@ public class UserController {
 
     @PostMapping
     public void createUser(@RequestBody UserData user){
-        System.out.println(user.getName() + user.getSurname() + user.getPassword() + user.getEmail());
         userDataRepository.save(user);
     }
 
     @GetMapping("/profile")
     public ResponseEntity<UserDTO> getUserProfile(@RequestHeader("Authorization") String token) {
         try {
-            System.out.println("🔍 Token recibido: " + token);
             Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
-            System.out.println("🔍 UserId extraído: " + userId);
 
             UserData user = userService.getUserById(userId);
-            System.out.println("🔍 Usuario encontrado: " + user.getEmail());
 
             return ResponseEntity.ok(UserDTO.fromEntity(user));
         } catch (Exception e) {
-            System.err.println("❌ Error en getUserProfile: " + e.getMessage());
+            System.err.println("Error en getUserProfile: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }

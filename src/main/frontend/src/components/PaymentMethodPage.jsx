@@ -31,11 +31,9 @@ export default function PaymentMethodsPage() {
             const userId = authService.getUserId();
             const token = authService.getToken();
 
-            console.log("🔍 UserId:", userId);
-            console.log("🔍 Token existe:", !!token);
 
             if (!token) {
-                console.error("❌ No hay token disponible");
+                console.error("No hay token disponible");
                 Swal.fire({
                     icon: "warning",
                     title: "Sesión expirada",
@@ -49,7 +47,7 @@ export default function PaymentMethodsPage() {
             }
 
             if (!userId) {
-                console.error("❌ No se pudo obtener userId");
+                console.error("No se pudo obtener userId");
                 Swal.fire({
                     icon: "error",
                     title: "Error de sesión",
@@ -72,10 +70,9 @@ export default function PaymentMethodsPage() {
                 }
             );
 
-            console.log("✅ Payment methods cargados:", response.data);
             setPaymentMethods(response.data);
         } catch (error) {
-            console.error("❌ Error al cargar métodos de pago:", error);
+            console.error(" Error al cargar métodos de pago:", error);
 
             if (error.response?.status === 403) {
                 Swal.fire({
@@ -117,7 +114,7 @@ export default function PaymentMethodsPage() {
 
     const getCardNumberDigits = (value) => value.replace(/\s/g, "");
 
-    // 🔍 Detectar marca automáticamente según los dígitos
+    // detectar marca automaticamente segun los digitos
     const detectCardBrand = (digits) => {
         if (!digits) return "";
 
@@ -190,7 +187,7 @@ export default function PaymentMethodsPage() {
             return;
         }
 
-        // 🧠 Detectar marca al enviar (por si acaso)
+        // detectar marca al enviar
         const detectedBrand = detectCardBrand(cleanCardNumber);
         if (!detectedBrand) {
             Swal.fire({
@@ -202,7 +199,7 @@ export default function PaymentMethodsPage() {
             return;
         }
 
-        // 🚫 Evitar tarjetas repetidas
+        // evitar tarjetas repetidas
         const alreadyExists = paymentMethods.some((pm) => {
             const existingClean = getCardNumberDigits(pm.cardNumber || "");
             return existingClean === cleanCardNumber;

@@ -10,37 +10,37 @@ export default function AdminPage() {
     const [activeTab, setActiveTab] = useState('orders');
     const [loading, setLoading] = useState(false);
 
-    // Estados para ingredientes
+    // estados para ingredientes
     const [breads, setBreads] = useState([]);
     const [meats, setMeats] = useState([]);
     const [cheeses, setCheeses] = useState([]);
     const [toppings, setToppings] = useState([]);
     const [dressings, setDressings] = useState([]);
 
-    // Estados para ingredientes de pizza
+    // estados para ingredientes de pizza
     const [sizes, setSizes] = useState([]);
     const [doughs, setDoughs] = useState([]);
     const [sauces, setSauces] = useState([]);
 
-    // Estados para productos extras
+    // estados para productos extras
     const [beverages, setBeverages] = useState([]);
     const [sideOrders, setSideOrders] = useState([]);
 
-    // Estados para pedidos
+    // estados para pedidos
     const [orders, setOrders] = useState([]);
     const [statusFilter, setStatusFilter] = useState('all');
 
-    // Estados para administradores
+    // estados para administradores
     const [administrators, setAdministrators] = useState([]);
 
-    // Estado del formulario de ingredientes
+    // estado del formulario de ingredientes
     const [formData, setFormData] = useState({
         type: '',
         price: '',
         available: true
     });
 
-    // Estado del formulario de administradores
+    // estado del formulario de administradores
     const [adminFormData, setAdminFormData] = useState({
         name: '',
         surname: '',
@@ -48,7 +48,7 @@ export default function AdminPage() {
         password: ''
     });
 
-    // Verificar que sea admin
+    // verificar que sea admin
     useEffect(() => {
         if (!authService.isAdmin()) {
             Swal.fire({
@@ -60,7 +60,7 @@ export default function AdminPage() {
         }
     }, [navigate]);
 
-    // Cargar datos según la pestaña activa
+    // cargar datos segun pestaña activa
     useEffect(() => {
         if (activeTab === 'orders') {
             loadOrders();
@@ -71,7 +71,7 @@ export default function AdminPage() {
         }
     }, [activeTab, statusFilter]);
 
-    // ==================== PEDIDOS ====================
+    //PEDIDOS
 
     const loadOrders = async () => {
         setLoading(true);
@@ -235,7 +235,7 @@ export default function AdminPage() {
         }
     };
 
-    // ==================== ADMINISTRADORES ====================
+    // ADMINISTRADORES
 
     const loadAdministrators = async () => {
         setLoading(true);
@@ -335,7 +335,7 @@ export default function AdminPage() {
         }
     };
 
-    // ==================== INGREDIENTES ====================
+    //INGREDIENTES
 
     const loadIngredients = async () => {
         setLoading(true);
@@ -627,7 +627,7 @@ export default function AdminPage() {
         return labels[tab];
     };
 
-    // ------------- JSX (sin cambios salvo la lógica de arriba) -------------
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#1D7B74] to-[#166863]">
@@ -648,7 +648,7 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {/* Sección COCINA - INGREDIENTES DE HAMBURGUESAS */}
+                {/* Sección COCINA INGREDIENTES DE HAMBURGUESAS */}
                 <div className="bg-white rounded-3 shadow-lg p-3 mb-4">
                     <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
                         🍔 INGREDIENTES DE HAMBURGUESAS
@@ -682,7 +682,7 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {/* Sección COCINA - INGREDIENTES DE PIZZAS */}
+                {/* Sección COCINA INGREDIENTES DE PIZZAS */}
                 <div className="bg-white rounded-3 shadow-lg p-3 mb-4">
                     <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
                         🍕 INGREDIENTES DE PIZZAS
@@ -705,7 +705,7 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {/* Sección COCINA - EXTRAS */}
+                {/* Sección COCINA EXTRAS */}
                 <div className="bg-white rounded-3 shadow-lg p-3 mb-4">
                     <h3 className="h5 fw-bold mb-3" style={{ color: '#1B7F79' }}>
                         ➕ EXTRAS
@@ -750,7 +750,7 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                {/* ==================== CONTENIDO: ADMINISTRADORES ==================== */}
+                {/* ADMINISTRADORES*/}
                 {activeTab === 'administrators' && (
                     <div className="row g-4">
                         {/* Formulario para crear admin */}
@@ -917,7 +917,7 @@ export default function AdminPage() {
                     </div>
                 )}
 
-                {/* ==================== CONTENIDO: PEDIDOS ==================== */}
+                {/*PEDIDOS */}
                 {activeTab === 'orders' && (
                     <div className="bg-white rounded-3 shadow-lg p-4">
                         {/* Filtros de estado */}

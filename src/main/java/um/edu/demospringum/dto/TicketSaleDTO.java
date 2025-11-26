@@ -20,5 +20,5 @@ public class TicketSaleDTO {
     private List<TicketItemDTO> detalle;
     private String nombreCliente;
     private String direccionEntrega;
-    private String numeroTarjeta; // Solo últimos 4 dígitos
+    private String numeroTarjeta;
 }

@@ -20,27 +20,24 @@ public class AddressController {
             @PathVariable Long clientId,
             @RequestBody AddressRequestDto requestDto) {
 
-        System.out.println("🔍 POST /api/addresses/" + clientId);
-        System.out.println("🔍 Address: " + requestDto.getAddress());
 
         try {
             AddressResponseDto response = addressService.addAddress(clientId, requestDto);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            System.err.println("❌ Error: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
 
     @GetMapping("/{clientId}")
     public ResponseEntity<AddressResponseDto> getClientAddresses(@PathVariable Long clientId) {
-        System.out.println("🔍 GET /api/addresses/" + clientId);
 
         try {
             AddressResponseDto response = addressService.getClientAddresses(clientId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            System.err.println("❌ Error: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -50,14 +47,13 @@ public class AddressController {
             @PathVariable Long clientId,
             @RequestBody AddressRequestDto requestDto) {
 
-        System.out.println("🔍 DELETE /api/addresses/" + clientId);
-        System.out.println("🔍 Address to delete: " + requestDto.getAddress());
+
 
         try {
             addressService.deleteAddress(clientId, requestDto.getAddress());
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            System.err.println("❌ Error: " + e.getMessage());
+            System.err.println(" Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -68,15 +64,12 @@ public class AddressController {
             @RequestParam String oldAddress,
             @RequestBody AddressRequestDto requestDto) {
 
-        System.out.println("🔍 PUT /api/addresses/" + clientId);
-        System.out.println("🔍 Old address: " + oldAddress);
-        System.out.println("🔍 New address: " + requestDto.getAddress());
 
         try {
             AddressResponseDto response = addressService.updateAddress(clientId, oldAddress, requestDto.getAddress());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            System.err.println("❌ Error: " + e.getMessage());
+            System.err.println(" Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

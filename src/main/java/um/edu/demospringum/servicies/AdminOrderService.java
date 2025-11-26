@@ -28,7 +28,6 @@ public class AdminOrderService {
     public List<AdminOrderDTO> getActiveOrders() {
         List<ClientOrder> allOrders = clientOrderRepository.findAll();
 
-        // Filtrar solo pedidos activos (no entregados ni en carrito)
         return allOrders.stream()
                 .filter(order -> {
                     String status = order.getOrderStatus().toLowerCase();
@@ -59,16 +58,13 @@ public class AdminOrderService {
 
         ClientOrder order = optionalOrder.get();
 
-        // Validar transiciones de estado
         String currentStatus = order.getOrderStatus().toLowerCase();
         String targetStatus = newStatus.toLowerCase();
 
-        // No permitir cambiar desde estados finales
         if (currentStatus.equals("delivered") || currentStatus.equals("in basket")) {
             throw new OrderNotFound("Cannot change status from " + currentStatus);
         }
 
-        // Validar transición válida
         if (!isValidTransition(currentStatus, targetStatus)) {
             throw new OrderNotFound("Invalid status transition from " + currentStatus + " to " + targetStatus);
         }
@@ -119,7 +115,6 @@ public class AdminOrderService {
         // Calcular precio total
         BigDecimal totalPrice = product.getPrice();
 
-        // Procesar según el tipo de producto
         if (product instanceof Pizza) {
             Pizza pizza = (Pizza) product;
             dto.setDough(pizza.getDough().getTypeDough());

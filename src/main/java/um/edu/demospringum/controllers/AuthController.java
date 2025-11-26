@@ -60,10 +60,9 @@ public class AuthController {
             client.setPassword(passwordEncoder.encode(request.getPassword()));
             client.setRole("USER");
 
-            // Inicializar la lista de payment methods ANTES de guardar
             client.setPaymentMethods(new ArrayList<>());
 
-            // Crear método de pago
+            // crear metodo de pago
             PaymentMethod pm = new PaymentMethod();
             pm.setCardHolderName(request.getPaymentMethod().getCardHolderName());
 
@@ -74,14 +73,11 @@ public class AuthController {
             pm.setCardBrand(request.getPaymentMethod().getCardBrand());
             pm.setExpirationDate(request.getPaymentMethod().getExpirationDate());
 
-            // Establecer la relación bidireccional
             pm.setClient(client);
             client.getPaymentMethods().add(pm);
 
-            // Guardar UNA SOLA VEZ (cascade se encarga del resto)
             client = userDataRepository.save(client);
 
-            // Generar token
             String token = jwtUtil.generateToken(client.getEmail());
 
             return ResponseEntity.ok(new AuthResponse(
@@ -90,7 +86,7 @@ public class AuthController {
                     client.getEmail(),
                     client.getName(),
                     client.getSurname(),
-                    client.getRole() // AGREGADO
+                    client.getRole()
             ));
 
         } catch (Exception e) {

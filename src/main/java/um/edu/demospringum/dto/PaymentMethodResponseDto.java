@@ -8,7 +8,7 @@ import lombok.Setter;
 public class PaymentMethodResponseDto {
     private Long idPM;
     private String cardHolderName;
-    private String cardNumber; // Los últimos 4 dígitos
+    private String cardNumber;
     private String expirationDate;
     private String cardBrand;
 }
