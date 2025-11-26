@@ -27,9 +27,10 @@ public class DataInitializer {
                 System.out.println(" ADMINISTRADOR INICIAL CREADO");;
                 System.out.println("Email:      admin@admin.com");
                 System.out.println("Contraseña: adminadmin");
+                System.out.println("ODIAMOS A LOS CONTADOREEEEES");
 
             } else {
-                System.out.println("ℹEl administrador ya existe en la base de datos");
+                System.out.println("El administrador ya existe");
             }
         };
     }
