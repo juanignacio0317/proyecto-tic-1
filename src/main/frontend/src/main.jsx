@@ -29,7 +29,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
-                {/* Otras páginas */}
                 <Route path="/personaliza" element={<PersonalizaPage />} />
                 <Route path="/personalizapizza" element={<PersonalizaPizzaPage />} />
                 <Route path="/carrito" element={<CartPage />} />

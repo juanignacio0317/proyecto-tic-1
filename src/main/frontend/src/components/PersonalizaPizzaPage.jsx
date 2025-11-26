@@ -9,6 +9,12 @@ export default function PersonalizaPizzaPage() {
     const [loading, setLoading] = useState(false);
     const [loadingData, setLoadingData] = useState(true);
 
+    if (authService.isAdmin()) {
+        alert("Debes iniciar sesión como cliente para crear tu propia hamburguesa");
+        navigate("/login");
+        return;
+    }
+
     // Estado para la construcción de la pizza
     const [pizza, setPizza] = useState({
         size: null,
