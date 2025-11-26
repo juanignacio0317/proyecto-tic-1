@@ -110,7 +110,7 @@ export default function PersonalizaPizzaPage() {
     const cargarDatosIniciales = async () => {
         try {
             setLoadingData(true);
-            console.log('🍕 Iniciando carga de ingredientes de pizza...');
+            console.log('Iniciando carga de ingredientes de pizza...');
 
             const [sizes, doughs, sauces, cheeses, toppings] = await Promise.all([
                 pizzaService.getAllSizes(),
@@ -120,7 +120,7 @@ export default function PersonalizaPizzaPage() {
                 pizzaService.getAllToppings()
             ]);
 
-            console.log('✅ Datos cargados:', { sizes, doughs, sauces, cheeses, toppings });
+            console.log('Datos cargados:', { sizes, doughs, sauces, cheeses, toppings });
 
             // Formatear los datos para el frontend
             setOpciones({
@@ -170,10 +170,10 @@ export default function PersonalizaPizzaPage() {
                     })) : []
             });
 
-            console.log('✅ Opciones formateadas correctamente');
+            console.log(' Opciones formateadas correctamente');
 
         } catch (error) {
-            console.error('❌ Error al cargar ingredientes:', error);
+            console.error('Error al cargar ingredientes:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
